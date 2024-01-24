@@ -1,0 +1,154 @@
+/* _____general_____ */
+
+ul {
+    padding: 0;
+    margin: 0;
+}
+
+li {
+    list-style-type: none;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+p {
+    margin: 0;
+}
+
+button {
+    cursor: pointer;
+}
+
+/* _____search games_____ */
+
+.image {
+    max-height: 200px;
+    width: auto;
+}
+
+.game-list li:not(:last-child) {
+    margin-bottom: 10px;
+}
+
+.accordion {
+    background-color: #eee;
+    color: #444;
+    padding: 18px;
+    width: 100%;
+    text-align: left;
+    border: none;
+    outline: none;
+}
+
+.active, 
+.accordion:hover {
+    background-color: #ccc;
+}
+
+.panel {
+    padding: 0 18px;
+    background-color: white;
+    display: none;
+    overflow: hidden;
+}
+
+.thumbnail{
+    display: block;
+    max-height: 100px;
+    width: auto;
+}
+
+.accordion:after {
+    content: '\21E9'; /* Unicode character for "plus" sign (+) */
+    font-size: 13px;
+    color: #777;
+    display: block;
+    /* float: center; */
+    margin-left: 28px;
+}
+  
+.active:after {
+    content: "\21E7"; /* Unicode character for "minus" sign (-) */
+}
+
+.search-form {
+    margin-bottom: 20px;
+}
+
+ /* .game-list-item:nth-child(even) .accordion {
+     background-color: #999;
+ }
+
+ .game-list-item:nth-child(even) .accordion:hover {
+    background-color: #333;
+ } */
+
+
+/* _____common_____ */
+
+.logo {
+    width: 50px;
+}
+
+.menu {
+    display: flex;
+
+}
+
+.menu li:not(:last-child) {
+    margin-right: 25px;
+}
+
+.container {
+    padding: 20px;
+}
+
+header .container {
+    display: flex;
+    justify-content: space-between;
+}
+
+header {
+    background-color: #ccc;
+}
+
+/* _____main_____ */
+
+.played-games li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.played-games div {
+    display: flex;
+    align-items: center;
+}
+
+.played-games li:not(:last-child) {
+    margin-bottom: 10px;
+}
+
+.number-of-plays {
+    margin-right: 5px;
+}
+
+.mini-image {
+    width: 50px;
+    margin-right: 10px;
+}
+
+.add-game {
+    position: fixed;
+    bottom: 30px;
+    right: 80px;
+    /* background: none;
+    border: none; */
+}
+
+.add-game img {
+    width: 30px;
+}
