@@ -1,4 +1,3 @@
-// _____search games_____ 
 const gameListEl = document.querySelector(".game-list");
 const searhFormEl = document.querySelector(".search-form");
 const submitButtonEl = document.querySelector(".submit-button");
@@ -109,7 +108,7 @@ function renderGames(obj) {
     }
 
     gameListItem.setAttribute("data-id", obj.id);
-    gameListItem.innerHTML =`<button class="accordion">${obj.name}<img class="thumbnail" src=${obj.url}></button><div class="panel"><img class="image" src=${obj.url}><p>${obj.year || ""}</p><p>${categories.length > 0 ? categoriesEl.outerHTML : ""}</p><p>${obj.description}</p><button><img src=${addGameImage}></button></div>`
+    gameListItem.innerHTML =`<button class="accordion">${obj.name}<img class="thumbnail" src=${obj.url}></button><div class="panel"><img class="image" src=${obj.url}><p>${obj.year || ""}</p><p>${categories.length > 0 ? categoriesEl.outerHTML : ""}</p><p>${obj.description}</p></div>`
     const accordionButtonEl = gameListItem.querySelector(".accordion");
     accordionButtonEl.addEventListener("click", e => toggleAccordion(e));
     gameListEl.insertAdjacentElement("beforeend", gameListItem);
@@ -183,8 +182,3 @@ function xmlToJson(xml) {
     }
     return obj;
 }
-
-// _____main_____ 
-
-
-

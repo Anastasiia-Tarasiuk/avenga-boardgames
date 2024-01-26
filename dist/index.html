@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Games</title>
+        <link rel="stylesheet" href="/index.b07a87f3.css">
+        <script src="/index.975ef6c8.js" defer=""></script>
+  </head>
+  <body>
+    <header>
+        <div class="container">
+            <a href="/index.html">
+                <img class="logo" src="/logo.c493797d.png" alt="">
+            </a>
+            <ul class="menu hidden">
+                <li>
+                    <a href="/index.html">Games</a>
+                </li>
+                <li>
+                    <a href="#">Players</a>
+                </li>
+                <li>
+                    <a href="#">Settings</a>
+                </li>
+                <li>
+                    <button class="logout-button" href="#">Log out</button>
+                </li>
+            </ul>
+            <ul class="login-menu hidden">
+                <li>
+                    <button class="signin-button">Sing in</button>
+                </li>
+                <li>
+                    <button class="signup-button">Sign up</button>
+                </li>
+            </ul>
+        </div>
+    </header>
+    <main>
+      <div class="container">
+          <ul class="played-games">
+              <!-- <li>
+                  <div>
+                      <img class="mini-image" src="./images/no_image.jpg" alt="">
+                      <p>Крила</p>
+                  </div>
+                  <p><span class="number-of-plays">5</span>plays</p>
+              </li>
+              <li>
+                  <div>
+                      <img class="mini-image" src="./images/no_image.jpg" alt="">
+                      <p>Каркасон</p>
+                  </div>
+                  <p><span class="number-of-plays">3</span>plays</p>
+              </li> -->
+              
+          </ul>
+       </div>
+        <a class="add-game" href="/partials/game_search.html">
+            <img src="/plus.516f8977.png" alt="">
+        </a>
+
+        <div class="login-modal-overlay hidden">
+            <form id="login-form">
+                <label>
+                    <span>Email</span>
+                    <input type="email" name="email" id="login-email-input" required="">
+                </label>
+                <label>
+                    <span>Password</span>
+                    <input type="password" name="password" id="login-password-input" minlength="6" required="">
+                </label>
+                <button type="submit" data-action="login-submit-btn">Log in</button>
+                <button class="google-button" type="button" data-action="login-google-btn"><img class="google-image" src="/google.3bc8aa18.png">Sign in with Google</button>
+                <button type="button" class="close-modal">X</button>
+            </form>
+    
+            <form id="signup-form">
+            <label>
+                <span>Email</span>
+                <input type="email" name="email" id="signup-email-input" required="">
+            </label>
+            <label>
+                <span>Password</span>
+                <input type="password" name="password" id="signup-password-input" minlength="6" required="">
+            </label>
+            <label>
+                <span>Confirm password</span>
+                <input type="password" name="password-confirmation" id="signup-password-confirmation-input" minlength="6" required="">
+            </label>
+            <button type="submit" data-action="signup-submit-btn">Sing up</button>
+            <button class="google-button" type="button" data-action="signup-google-btn"><img class="google-image" src="/google.3bc8aa18.png">Sign up with Google</button>
+            <button type="button" class="close-modal">X</button>
+            </form>
+            <!-- <button class="close-modal">X</button> -->
+        </div>
+    </main>
+    <!-- ❗️❗️❗️ Add partials like so for every page -->
+    <!-- <include src="./partials/example.html"></include> -->
+    </body>
+</html>

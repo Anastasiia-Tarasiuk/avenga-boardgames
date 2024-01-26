@@ -1,0 +1,39 @@
+
+.logo {
+    width: 50px;
+}
+
+.menu,
+.login-menu {
+    display: flex;
+}
+
+.menu li,
+.login-menu li {
+    align-self: center;
+}
+
+.menu li:not(:last-child),
+.login-menu  li:not(:last-child) {
+    margin-right: 25px;
+}
+
+.menu button,
+.login-menu button {
+    border: 0;
+    background-color: transparent;
+    padding: 0;
+}
+
+.container {
+    padding: 20px;
+}
+
+header .container {
+    display: flex;
+    justify-content: space-between;
+}
+
+header {
+    background-color: #ccc;
+}
