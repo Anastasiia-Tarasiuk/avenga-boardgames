@@ -1,0 +1,36 @@
+.image {
+    max-height: 200px;
+    width: auto;
+}
+.game-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+}
+
+.game-list li:nth-child(odd) {
+    background-color: #ccc;
+}
+
+.game-list li:not(:last-child) {
+    margin-bottom: 10px;
+}
+
+.thumbnail{
+    display: block;
+    max-height: 100px;
+    width: auto;
+}
+
+.search-form {
+    margin-bottom: 20px;
+}
+
+.add-game-button {
+    background: none;
+    border: none;
+}
+
+.add-game-button img {
+    width: 30px;
+}

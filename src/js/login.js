@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup} from "firebase/auth";
+import { getFirestore, collection, addDoc, doc, getDoc, setDoc} from "firebase/firestore";
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
 const firebaseConfig = {
@@ -15,6 +16,11 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+// Initialize Cloud Firestore and get a reference to the service
+export const db = getFirestore(app);
+
+
+
 
 const menuContainerEl = document.querySelector(".menu-container");
 const loginMenuEl = document.querySelector(".login-menu");
@@ -24,11 +30,13 @@ const loginButtonEl = document.querySelector(".signin-button");
 const signupButtonEl = document.querySelector(".signup-button");
 const logoutButtonEl = document.querySelector(".logout-button");
 const modalOverlayEl = document.querySelector(".login-modal-overlay");
-const loginFormEl = modalOverlayEl.querySelector("[id='login-form']");
-const signupFormEl = modalOverlayEl.querySelector("[id='signup-form']");
-const googleButtonEls = modalOverlayEl.querySelectorAll(".google-button");
-const closeModalButtonEls = modalOverlayEl.querySelectorAll(".close-modal");
-const submitFormButtonsEl = modalOverlayEl.querySelectorAll("button[type='submit']");
+const loginFormEl = document.querySelector("[id='login-form']");
+const signupFormEl = document.querySelector("[id='signup-form']");
+const googleButtonEls = document.querySelectorAll(".google-button");
+const closeModalButtonEls = document.querySelectorAll(".close-modal");
+const submitFormButtonsEl = document.querySelectorAll("button[type='submit']");
+
+// const userData = {};
 
 loginButtonEl.addEventListener("click", (e) => showModal(e));
 signupButtonEl.addEventListener("click", (e) => showModal(e));
@@ -41,7 +49,8 @@ onAuthStateChanged(auth, (user) => {
     if (user) {
       // User is signed in
       showMenu();
-      const uid = user.uid;
+      // const uid = user.uid;
+
       // ...
     } else {
       // User is signed out
@@ -96,8 +105,13 @@ function submitForm(e) {
             signInWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
                 Notify.success('Successfully signed in');
-                // Signed in 
+                // Signed in
                 const user = userCredential.user;
+                // userData.id = user.uid;
+                // userData.email = user.email;
+                // userData.createdAt = user.metadata.creationTime;
+                // userData.name = "User";
+
                 closeModal();
             })
             .catch((error) => {
@@ -119,6 +133,8 @@ function submitForm(e) {
                 Notify.success('Successfully signed up');
                 // Signed up 
                 const user = userCredential.user;
+                setUserDataToStorage(user);
+
                 closeModal();
             })
             .catch((error) => {
@@ -146,12 +162,14 @@ function loginWithGoogle(e) {
                 Notify.success('Successfully signed in');
             } else {
                 Notify.success('Successfully signed up');
+                setUserDataToStorage(user);
             }
             
             closeModal();
             // IdP data available using getAdditionalUserInfo(result)
             // ...
-        }).catch((error) => {
+        })
+        .catch((error) => {
             // Handle Errors here.
             const errorCode = error.code;
             const errorMessage = error.message;
@@ -163,19 +181,22 @@ function loginWithGoogle(e) {
         });
 }
 
-
-
-
 function showMenu() {
     loginMenuEl.classList.add("hidden");
     menuEl.classList.remove("hidden");
-    addGameButtonEl.classList.remove("hidden")
+
+    if (addGameButtonEl) {
+        addGameButtonEl.classList.remove("hidden");
+    }
 }
 
 function hideMenu() {
     loginMenuEl.classList.remove("hidden");
     menuEl.classList.add("hidden");
-    addGameButtonEl.classList.add("hidden");
+    
+    if (addGameButtonEl) {
+        addGameButtonEl.classList.add("hidden");
+    }
 }
 
 function validation(email, password) {
@@ -206,4 +227,22 @@ function logout() {
             console.error(err);
             Notify.failure('Sorry, something went wrong');
         })
+}
+
+
+async function setUserDataToStorage(user) {
+    try {
+        const usersRef = collection(db, "users");
+
+        await setDoc(doc(usersRef, user.uid), {
+            user: {
+                id: user.uid,
+                email: user.email,
+                name: user.displayName || "User",
+                createdAt: user.metadata.creationTime
+            }
+        })
+    } catch (e) {
+        console.error("Error adding document: ", e);
+    }
 }

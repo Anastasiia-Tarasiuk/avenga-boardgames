@@ -1,3 +1,11 @@
+import addGameImage from "../images/plus.png";
+import defaultImage from "../images/no_image.jpg";
+import convert from "xml-js";
+import {db} from "./login";
+import {getAuth} from "firebase/auth";
+import {collection, doc, getDoc, getDocs, updateDoc} from "firebase/firestore";
+import {Notify} from "notiflix/build/notiflix-notify-aio";
+
 const gameListEl = document.querySelector(".game-list");
 const searhFormEl = document.querySelector(".search-form");
 const submitButtonEl = document.querySelector(".submit-button");
@@ -6,8 +14,6 @@ if (submitButtonEl) {
     submitButtonEl.addEventListener("click", e => submitForm(e));
 }
 
-const defaultImage = "./images/no_image.jpg";
-const addGameImage = "./images/plus.png";
 const gameData = {};
 
 function submitForm(e) {
@@ -32,8 +38,11 @@ async function fetchAPI(url) {
         }
 
         const xmlString = await response.text();
-        var XmlNode = new DOMParser().parseFromString(xmlString, 'text/xml');
-        return xmlToJson(XmlNode)
+
+        return JSON.parse(convert.xml2json(xmlString, {compact: true, spaces: 4}));
+
+        // var XmlNode = new DOMParser().parseFromString(xmlString, 'text/xml');
+        // return xmlToJson(XmlNode)
     } catch (error) {
         gameListEl.innerHTML = `<p>Oops... Something went wrong</p>`
         console.error("There has been a problem with your fetch operation:", error);
@@ -42,13 +51,13 @@ async function fetchAPI(url) {
 
 async function gameSearch(name) {
     const url = `https://boardgamegeek.com/xmlapi/search?search=${name}`;
-
     const data = await fetchAPI(url);
 
     if (!data.boardgames.boardgame) {
         handleWrongSearchRequest(name);
     } else {
         getGameByName(data);
+        searhFormEl.reset();
     }
 }
 
@@ -58,19 +67,19 @@ async function getGameByName(gamesObj) {
 
     if (games.length) { 
         games.forEach(async item => {
-            const name = item.name;
-            const year = item.yearpublished || "";
+            const name = item.name._text;
+            const year = item.yearpublished._text || "";
             const id = item._attributes.objectid;
             const {url, category, description, otherNames} = await getGameById(id);
-            gameData[id] = { id, name, year, url, category, description };
+            gameData[id] = { id, name, year, url, category, description, otherNames };
             renderGames(gameData[id]);
         });
     } else {
-        const name = games.name;
-        const year = games.yearpublished || "";
+        const name = games.name._text;
+        const year = games.yearpublished._text || "";
         const id = games._attributes.objectid;
         const {url, category, description, otherNames} = await getGameById(id);
-        gameData[id] = { id, name, year, url, category, description };
+        gameData[id] = { id, name, year, url, category, description, otherNames };
         renderGames(gameData[id]);
     }
 
@@ -78,107 +87,119 @@ async function getGameByName(gamesObj) {
 
 async function getGameById(id) {
     const url = `https://boardgamegeek.com/xmlapi/boardgame/${id}`;
-
     const data = await fetchAPI(url);
 
     return ({
-        url: data.boardgames.boardgame.image || defaultImage,
+        url: data.boardgames.boardgame.image._text || defaultImage,
         category: data.boardgames.boardgame.boardgamesubdomain || [],
-        description: data.boardgames.boardgame.description,
+        description: data.boardgames.boardgame.description._text,
+        otherNames: data.boardgames.boardgame.name
     })
 } 
 
 function renderGames(obj) {
     const categories = obj.category;
+    const otherNames = obj.otherNames;
+    let originalName = null;
+
     const gameListItem = document.createElement("li");
     gameListItem.classList.add("game-list-item");
 
     const categoriesEl = document.createElement("p");
-    
+    categoriesEl.innerHTML = "Category: ";
+
     if (Array.isArray(categories)) {
-        categories.forEach(el => {
+        if (categories.length === 0) {
+            categoriesEl.innerHTML = "No category";
+        }
+
+        categories.forEach(categoryObj => {
             const span = document.createElement("span");
-            span.innerHTML = el;
+            span.innerHTML = categoryObj._text;
             categoriesEl.insertAdjacentElement("beforeend", span);
         })
     } else {
         const span = document.createElement("span");
-        span.innerHTML = categories;
+        span.innerHTML = categories._text;
         categoriesEl.insertAdjacentElement("beforeend", span);
     }
 
+    if (Array.isArray(otherNames)) {
+        otherNames.forEach(nameObj => {
+            if (nameObj._attributes.primary) {
+                originalName = nameObj._text;
+                return;
+            }
+        })
+    } else {
+        originalName = otherNames._text;
+    }
+
+    obj.originalName = originalName;
+
     gameListItem.setAttribute("data-id", obj.id);
-    gameListItem.innerHTML =`<button class="accordion">${obj.name}<img class="thumbnail" src=${obj.url}></button><div class="panel"><img class="image" src=${obj.url}><p>${obj.year || ""}</p><p>${categories.length > 0 ? categoriesEl.outerHTML : ""}</p><p>${obj.description}</p></div>`
-    const accordionButtonEl = gameListItem.querySelector(".accordion");
-    accordionButtonEl.addEventListener("click", e => toggleAccordion(e));
+    gameListItem.innerHTML =`<div class="thumb"><p>${obj.name}</p><img class="thumbnail" src=${obj.url}><p>Original name: ${originalName}</p></div><button class="add-game-button" type="button"><img src=${addGameImage}></button>`
+    gameListItem.querySelector(".thumb").insertAdjacentElement("beforeend", categoriesEl);
+    const addGameButtonEl = gameListItem.querySelector(".add-game-button");
+    addGameButtonEl.addEventListener("click", e => addGameToGames(e, obj));
     gameListEl.insertAdjacentElement("beforeend", gameListItem);
 }
 
-function toggleAccordion(e) {
-    const item = e.currentTarget.parentElement;
-    const thumbnail = item.querySelector(".thumbnail");
-    const accordion =  item.querySelector(".accordion");
-    const panel = item.querySelector(".panel");
+// function toggleAccordion(e) {
+//     const item = e.currentTarget.parentElement;
+//     const thumbnail = item.querySelector(".thumbnail");
+//     const accordion =  item.querySelector(".accordion");
+//     const panel = item.querySelector(".panel");
 
-    accordion.classList.toggle("active");
+//     accordion.classList.toggle("active");
 
-    if (panel.style.display === "block") {
-        panel.style.display = "none";
-        thumbnail.style.display = "block";
-    } else {
-        panel.style.display = "block";
-        thumbnail.style.display = "none";
-    }
-}
+//     if (panel.style.display === "block") {
+//         panel.style.display = "none";
+//         thumbnail.style.display = "block";
+//     } else {
+//         panel.style.display = "block";
+//         thumbnail.style.display = "none";
+//     }
+// }
 
 function handleWrongSearchRequest(searchValue) {
     gameListEl.innerHTML = `<p>There is no game called <span>"${searchValue}"</span></p>`
 }
 
+async function addGameToGames(_, game) {
+    const gameId = game.id;
+    const currentUser = getAuth().currentUser;
+    const currentUserDocRef = doc(db, "users", currentUser.uid);
+    const currentUserDoc = await getDoc(currentUserDocRef);
+    const docData = currentUserDoc.data();
+    let gameExists = false;
 
-function xmlToJson(xml) {
-    // Create the return object
-    var obj = {};
-  
-    if (xml.nodeType == 1) {
-      // element
-      // do attributes
-      if (xml.attributes.length > 0) {
-        obj["_attributes"] = {};
-        for (var j = 0; j < xml.attributes.length; j++) {
-          var attribute = xml.attributes.item(j);
-          obj["_attributes"][attribute.nodeName] = attribute.nodeValue;
+    if (docData.games) {
+        docData.games.forEach(game => {
+            if (game.id === gameId) {
+                gameExists = true;
+                Notify.failure('The game is already in the list');
+                return;
+            }
+        })
+
+        if (!gameExists) {
+            try {
+                docData.games.push(game);
+                console.log("data", docData)
+                await updateDoc(currentUserDocRef, docData);
+                Notify.success('The game is added successfully');
+            } catch (e) {
+                console.error("Error adding game: ", e);
+            }
         }
-      }
-    } else if (xml.nodeType == 3) {
-      // text
-      obj = xml.nodeValue;
-    }
-  
-    // do children
-    // If all text nodes inside, get concatenated text from them.
-    var textNodes = [].slice.call(xml.childNodes).filter(function(node) {
-      return node.nodeType === 3;
-    });
-    if (xml.hasChildNodes() && xml.childNodes.length === textNodes.length) {
-      obj = [].slice.call(xml.childNodes).reduce(function(text, node) {
-        return text + node.nodeValue;
-      }, "");
-    } else if (xml.hasChildNodes()) {
-      for (var i = 0; i < xml.childNodes.length; i++) {
-        var item = xml.childNodes.item(i);
-        var nodeName = item.nodeName;
-        if (typeof obj[nodeName] == "undefined") {
-          obj[nodeName] = xmlToJson(item);
-        } else {
-          if (typeof obj[nodeName].push == "undefined") {
-            var old = obj[nodeName];
-            obj[nodeName] = [];
-            obj[nodeName].push(old);
-          }
-          obj[nodeName].push(xmlToJson(item));
+    } else {
+        try {
+            docData.games = [game];
+            await updateDoc(currentUserDocRef, docData);
+            Notify.success('The game is added successfully');
+        } catch (e) {
+            console.error("Error adding game: ", e);
         }
-      }
     }
-    return obj;
 }

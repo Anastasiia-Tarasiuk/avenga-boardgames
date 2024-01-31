@@ -13,7 +13,7 @@
             <a href="../index.html">
                 <img class="logo" src="../images/logo.png" alt="">
             </a>
-            <ul class="menu">
+            <ul class="menu hidden">
                 <li>
                     <a href="../index.html">Games</a>
                 </li>
@@ -23,12 +23,23 @@
                 <li>
                     <a href="#">Settings</a>
                 </li>
+                <li>
+                    <button class="logout-button" href="#">Log out</button>
+                </li>
+            </ul>
+            <ul class="login-menu hidden">
+                <li>
+                    <button class="signin-button">Sing in</button>
+                </li>
+                <li>
+                    <button class="signup-button">Sign up</button>
+                </li>
             </ul>
         </div>
     </header>
     <main>
         <div class="container">
-            <form class="search-form" action="">    
+            <form class="search-form">    
                 <label><input class="search-input" type="text" name="search"></label>
                 <button class="submit-button" type="submit">Search</button>
             </form>

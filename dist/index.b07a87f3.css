@@ -174,92 +174,6 @@ header {
   background-color: #ccc;
 }
 
-.image {
-  max-height: 200px;
-  width: auto;
-}
-
-.game-list li:not(:last-child) {
-  margin-bottom: 10px;
-}
-
-.accordion {
-  color: #444;
-  width: 100%;
-  text-align: left;
-  background-color: #eee;
-  border: none;
-  outline: none;
-  padding: 18px;
-}
-
-.active, .accordion:hover {
-  background-color: #ccc;
-}
-
-.panel {
-  background-color: #fff;
-  padding: 0 18px;
-  display: none;
-  overflow: hidden;
-}
-
-.thumbnail {
-  max-height: 100px;
-  width: auto;
-  display: block;
-}
-
-.accordion:after {
-  content: "⇩";
-  color: #777;
-  margin-left: 28px;
-  font-size: 13px;
-  display: block;
-}
-
-.active:after {
-  content: "⇧";
-}
-
-.search-form {
-  margin-bottom: 20px;
-}
-
-.played-games li {
-  justify-content: space-between;
-  align-items: center;
-  display: flex;
-}
-
-.played-games div {
-  align-items: center;
-  display: flex;
-}
-
-.played-games li:not(:last-child) {
-  margin-bottom: 10px;
-}
-
-.number-of-plays {
-  margin-right: 5px;
-}
-
-.mini-image {
-  width: 50px;
-  margin-right: 10px;
-}
-
-.add-game {
-  position: fixed;
-  bottom: 30px;
-  right: 80px;
-}
-
-.add-game img {
-  width: 30px;
-}
-
 .login-modal-overlay form {
   width: 300px;
   height: 400px;
@@ -299,6 +213,78 @@ header {
   width: 20px;
   height: 20px;
   margin-right: 10px;
+}
+
+.image {
+  max-height: 200px;
+  width: auto;
+}
+
+.game-list li {
+  justify-content: space-between;
+  padding: 10px;
+  display: flex;
+}
+
+.game-list li:nth-child(2n+1) {
+  background-color: #ccc;
+}
+
+.game-list li:not(:last-child) {
+  margin-bottom: 10px;
+}
+
+.thumbnail {
+  max-height: 100px;
+  width: auto;
+  display: block;
+}
+
+.search-form {
+  margin-bottom: 20px;
+}
+
+.add-game-button {
+  background: none;
+  border: none;
+}
+
+.add-game-button img {
+  width: 30px;
+}
+
+.played-games li {
+  justify-content: space-between;
+  align-items: center;
+  display: flex;
+}
+
+.played-games div {
+  align-items: center;
+  display: flex;
+}
+
+.played-games li:not(:last-child) {
+  margin-bottom: 10px;
+}
+
+.number-of-plays {
+  margin-right: 5px;
+}
+
+.mini-image {
+  width: 50px;
+  margin-right: 10px;
+}
+
+.add-game {
+  position: fixed;
+  bottom: 30px;
+  right: 80px;
+}
+
+.add-game img {
+  width: 30px;
 }
 
 /*# sourceMappingURL=index.b07a87f3.css.map */
