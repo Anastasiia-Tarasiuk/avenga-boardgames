@@ -32,7 +32,7 @@ function gameItemTemplate(data) {
     data.forEach(game => {
         const gameListItem = document.createElement("li");
         gameListItem.classList.add("game-list-item");
-        gameListItem.innerHTML =`<div><p>${game.name}</p><img class="thumbnail" src=${game.url}></div><a href="../partials/add_plays.html"><span class="number-of-plays ">0</span>plays</a>`
+        gameListItem.innerHTML =`<div><p>${game.name}</p><img class="thumbnail" src=${game.url}></div><a href="../../partials/add_plays.html"><span class="number-of-plays ">0</span>plays</a>`
         playedGamesListEl.insertAdjacentElement("beforeend", gameListItem);
     })
 }
