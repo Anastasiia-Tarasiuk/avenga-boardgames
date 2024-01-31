@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup} from "firebase/auth";
-import { getFirestore, collection, addDoc, doc, getDoc, setDoc} from "firebase/firestore";
+import { getFirestore, collection, doc, setDoc} from "firebase/firestore";
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
 const firebaseConfig = {
@@ -15,12 +15,9 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+export const auth = getAuth(app);
 // Initialize Cloud Firestore and get a reference to the service
 export const db = getFirestore(app);
-
-
-
 
 const menuContainerEl = document.querySelector(".menu-container");
 const loginMenuEl = document.querySelector(".login-menu");

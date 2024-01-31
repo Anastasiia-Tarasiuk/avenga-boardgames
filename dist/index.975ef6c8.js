@@ -520,13 +520,13 @@ var _auth = require("firebase/auth");
 var _firestore = require("firebase/firestore");
 var _notiflixNotifyAio = require("notiflix/build/notiflix-notify-aio");
 const gameListEl = document.querySelector(".game-list");
-const searhFormEl = document.querySelector(".search-form");
+const searchFormEl = document.querySelector(".search-form");
 const submitButtonEl = document.querySelector(".submit-button");
 if (submitButtonEl) submitButtonEl.addEventListener("click", (e)=>submitForm(e));
 const gameData = {};
 function submitForm(e) {
     e.preventDefault();
-    const formData = new FormData(searhFormEl, submitButtonEl);
+    const formData = new FormData(searchFormEl, submitButtonEl);
     for (const [_, value] of formData)if (value) gameSearch(value);
     else gameListEl.innerHTML = `<p>Type something...</p>`;
 }
@@ -552,7 +552,7 @@ async function gameSearch(name) {
     if (!data.boardgames.boardgame) handleWrongSearchRequest(name);
     else {
         getGameByName(data);
-        searhFormEl.reset();
+        searchFormEl.reset();
     }
 }
 async function getGameByName(gamesObj) {
@@ -560,7 +560,7 @@ async function getGameByName(gamesObj) {
     const games = gamesObj.boardgames.boardgame;
     if (games.length) games.forEach(async (item)=>{
         const name = item.name._text;
-        const year = item.yearpublished._text || "";
+        const year = item.yearpublished?._text || "";
         const id = item._attributes.objectid;
         const { url , category , description , otherNames  } = await getGameById(id);
         gameData[id] = {
@@ -595,7 +595,7 @@ async function getGameById(id) {
     const url = `https://boardgamegeek.com/xmlapi/boardgame/${id}`;
     const data = await fetchAPI(url);
     return {
-        url: data.boardgames.boardgame.image._text || (0, _noImageJpgDefault.default),
+        url: data.boardgames.boardgame.image?._text || (0, _noImageJpgDefault.default),
         category: data.boardgames.boardgame.boardgamesubdomain || [],
         description: data.boardgames.boardgame.description._text,
         otherNames: data.boardgames.boardgame.name
@@ -43385,6 +43385,7 @@ var Integer = esm.Integer = T;
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"47T64":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "auth", ()=>auth);
 parcelHelpers.export(exports, "db", ()=>db);
 var _app = require("firebase/app");
 var _auth = require("firebase/auth");
@@ -44067,7 +44068,37 @@ var global = arguments[3];
 });
 
 },{}],"1RWSs":[function(require,module,exports) {
+var _auth = require("firebase/auth");
+var _login = require("./login");
+var _firestore = require("firebase/firestore");
+const playedGamesListEl = document.querySelector(".played-games");
+if (playedGamesListEl) {
+    console.log(playedGamesListEl);
+    renderPlayedGames();
+}
+function renderPlayedGames() {
+    // TODO doesn't work currentUser
+    // const currentUser = getAuth().currentUser;
+    (0, _auth.onAuthStateChanged)((0, _login.auth), async (user)=>{
+        if (user) {
+            const userId = user.uid;
+            const currentUserDocRef = (0, _firestore.doc)((0, _login.db), "users", userId);
+            const currentUserDoc = await (0, _firestore.getDoc)(currentUserDocRef);
+            const docData = currentUserDoc.data();
+            gameItemTemplate(docData.games);
+        }
+    });
+}
+function gameItemTemplate(data) {
+    playedGamesListEl.innerHTML = "";
+    data.forEach((game)=>{
+        const gameListItem = document.createElement("li");
+        gameListItem.classList.add("game-list-item");
+        gameListItem.innerHTML = `<div><p>${game.name}</p><img class="thumbnail" src=${game.url}></div><a href="../partials/add_plays.html"><span class="number-of-plays ">0</span>plays</a>`;
+        playedGamesListEl.insertAdjacentElement("beforeend", gameListItem);
+    });
+}
 
-},{}]},["1RB6v","8lqZg"], "8lqZg", "parcelRequired7c6")
+},{"firebase/firestore":"8A4BC","./login":"47T64","firebase/auth":"79vzg"}]},["1RB6v","8lqZg"], "8lqZg", "parcelRequired7c6")
 
 //# sourceMappingURL=index.975ef6c8.js.map

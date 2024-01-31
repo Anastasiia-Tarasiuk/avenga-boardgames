@@ -215,12 +215,7 @@ header {
   margin-right: 10px;
 }
 
-.image {
-  max-height: 200px;
-  width: auto;
-}
-
-.game-list li {
+.game-list-item {
   justify-content: space-between;
   padding: 10px;
   display: flex;
@@ -253,28 +248,16 @@ header {
   width: 30px;
 }
 
-.played-games li {
-  justify-content: space-between;
-  align-items: center;
-  display: flex;
-}
-
-.played-games div {
-  align-items: center;
-  display: flex;
-}
-
 .played-games li:not(:last-child) {
   margin-bottom: 10px;
 }
 
-.number-of-plays {
-  margin-right: 5px;
+.played-games li:nth-child(2n+1) {
+  background-color: #ccc;
 }
 
-.mini-image {
-  width: 50px;
-  margin-right: 10px;
+.number-of-plays {
+  margin-right: 5px;
 }
 
 .add-game {

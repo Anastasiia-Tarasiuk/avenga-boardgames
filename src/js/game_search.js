@@ -3,11 +3,11 @@ import defaultImage from "../images/no_image.jpg";
 import convert from "xml-js";
 import {db} from "./login";
 import {getAuth} from "firebase/auth";
-import {collection, doc, getDoc, getDocs, updateDoc} from "firebase/firestore";
+import {doc, getDoc, updateDoc} from "firebase/firestore";
 import {Notify} from "notiflix/build/notiflix-notify-aio";
 
 const gameListEl = document.querySelector(".game-list");
-const searhFormEl = document.querySelector(".search-form");
+const searchFormEl = document.querySelector(".search-form");
 const submitButtonEl = document.querySelector(".submit-button");
 
 if (submitButtonEl) {
@@ -18,7 +18,7 @@ const gameData = {};
 
 function submitForm(e) {
     e.preventDefault();
-    const formData = new FormData(searhFormEl, submitButtonEl);
+    const formData = new FormData(searchFormEl, submitButtonEl);
 
     for (const [_, value] of formData) {
         if (value) {
@@ -57,7 +57,7 @@ async function gameSearch(name) {
         handleWrongSearchRequest(name);
     } else {
         getGameByName(data);
-        searhFormEl.reset();
+        searchFormEl.reset();
     }
 }
 
@@ -68,7 +68,7 @@ async function getGameByName(gamesObj) {
     if (games.length) { 
         games.forEach(async item => {
             const name = item.name._text;
-            const year = item.yearpublished._text || "";
+            const year = item.yearpublished?._text || "";
             const id = item._attributes.objectid;
             const {url, category, description, otherNames} = await getGameById(id);
             gameData[id] = { id, name, year, url, category, description, otherNames };
@@ -90,7 +90,7 @@ async function getGameById(id) {
     const data = await fetchAPI(url);
 
     return ({
-        url: data.boardgames.boardgame.image._text || defaultImage,
+        url: data.boardgames.boardgame.image?._text || defaultImage,
         category: data.boardgames.boardgame.boardgamesubdomain || [],
         description: data.boardgames.boardgame.description._text,
         otherNames: data.boardgames.boardgame.name
