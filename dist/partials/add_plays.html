@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add games</title>
+    <link rel="stylesheet" href="/index.b07a87f3.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="/index.975ef6c8.js" defer=""></script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <a href="/index.html">
+                <img class="logo" src="/logo.c493797d.png" alt="">
+            </a>
+            <ul class="menu hidden">
+                <li>
+                    <a href="/index.html">Games</a>
+                </li>
+                <li>
+                    <a href="#">Players</a>
+                </li>
+                <li>
+                    <a href="#">Settings</a>
+                </li>
+                <li>
+                    <button class="logout-button" href="#">Log out</button>
+                </li>
+            </ul>
+            <ul class="login-menu hidden">
+                <li>
+                    <button class="signin-button">Sing in</button>
+                </li>
+                <li>
+                    <button class="signup-button">Sign up</button>
+                </li>
+            </ul>
+        </div>
+    </header>
+    <main>
+        <div class="container">
+            <form class="players-form">
+                <lable>
+                    Choose a date:
+                    <input class="date" name="date" type="text">
+                </lable>
+                <div class="game-to-score"></div>
+                <label for="player-select">Choose a player:</label>
+
+                <select name="players" id="player-select">
+                    <option value="">--Please choose a player--</option>
+                    <option value="new-player">Add a new player</option>
+                </select>
+                <div class="plays"></div>
+            </form>
+        </div>
+        <div class="add-player-modal-overlay hidden">
+            <form id="add-player-form">
+                <label>
+                    <span>Name</span>
+                    <input type="text" name="name" id="player-name-input" required="">
+                </label>
+                <button type="submit" data-action="add-player-submit-btn">Add player</button>
+                <button type="button" class="close-player-modal">X</button>
+            </form>
+        </div>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>flatpickr(".date", {
+    altInput: true,
+    defaultDate: "today"
+});
+
+</script>
+</body>
+</html>

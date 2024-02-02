@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Add games</title>
     <link rel="stylesheet" href="../sass/index.scss" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script type="module" src="../index.js"></script>
 </head>
 <body>
@@ -39,8 +40,38 @@
     </header>
     <main>
         <div class="container">
-            <p>asdksgkdjgkdgfhjhgfkjghkfj</p>
+            <form class="players-form">
+                <lable>
+                    Choose a date:
+                    <input class="date" name="date" type="text">
+                </lable>
+                <div class="game-to-score"></div>
+                <label for="player-select">Choose a player:</label>
+
+                <select name="players" id="player-select">
+                    <option value="">--Please choose a player--</option>
+                    <option value="new-player">Add a new player</option>
+                </select>
+                <div class="plays"></div>
+            </form>
+        </div>
+        <div class="add-player-modal-overlay hidden">
+            <form id="add-player-form">
+                <label>
+                    <span>Name</span>
+                    <input type="text" name="name" id="player-name-input" required />
+                </label>
+                <button type="submit" data-action="add-player-submit-btn">Add player</button>
+                <button type="button" class="close-player-modal">X</button>
+            </form>
         </div>
     </main>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        flatpickr(".date", {
+            altInput: true,
+            defaultDate: "today",
+        });
+    </script>
 </body>
 </html>

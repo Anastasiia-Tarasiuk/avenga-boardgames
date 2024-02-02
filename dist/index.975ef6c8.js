@@ -506,9 +506,12 @@ function hmrAcceptRun(bundle, id) {
 var _gameSearch = require("./js/game_search");
 var _login = require("./js/login");
 var _gameList = require("./js/game_list");
+var _addPlays = require("./js/add_plays");
 
-},{"./js/game_search":"eYq3g","./js/login":"47T64","./js/game_list":"1RWSs"}],"eYq3g":[function(require,module,exports) {
+},{"./js/game_search":"eYq3g","./js/login":"47T64","./js/game_list":"1RWSs","./js/add_plays":"crlNm"}],"eYq3g":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "getCurrentUserDocRef", ()=>getCurrentUserDocRef);
 var _plusPng = require("../images/plus.png");
 var _plusPngDefault = parcelHelpers.interopDefault(_plusPng);
 var _noImageJpg = require("../images/no_image.jpg");
@@ -655,8 +658,7 @@ function handleWrongSearchRequest(searchValue) {
 }
 async function addGameToGames(_, game1) {
     const gameId = game1.id;
-    const currentUser = (0, _auth.getAuth)().currentUser;
-    const currentUserDocRef = (0, _firestore.doc)((0, _login.db), "users", currentUser.uid);
+    const currentUserDocRef = getCurrentUserDocRef();
     const currentUserDoc = await (0, _firestore.getDoc)(currentUserDocRef);
     const docData = currentUserDoc.data();
     let gameExists = false;
@@ -686,8 +688,12 @@ async function addGameToGames(_, game1) {
         console.error("Error adding game: ", e);
     }
 }
+function getCurrentUserDocRef() {
+    const currentUser = (0, _auth.getAuth)().currentUser;
+    return (0, _firestore.doc)((0, _login.db), "users", currentUser.uid);
+}
 
-},{"../images/plus.png":"jWz2v","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","../images/no_image.jpg":"cTiZx","xml-js":"6mugM","firebase/auth":"79vzg","firebase/firestore":"8A4BC","./login":"47T64","notiflix/build/notiflix-notify-aio":"eXQLZ"}],"jWz2v":[function(require,module,exports) {
+},{"../images/plus.png":"jWz2v","../images/no_image.jpg":"cTiZx","xml-js":"6mugM","./login":"47T64","firebase/auth":"79vzg","firebase/firestore":"8A4BC","notiflix/build/notiflix-notify-aio":"eXQLZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"jWz2v":[function(require,module,exports) {
 module.exports = require("./helpers/bundle-url").getBundleURL("bLxZJ") + "plus.516f8977.png" + "?" + Date.now();
 
 },{"./helpers/bundle-url":"lgJ39"}],"lgJ39":[function(require,module,exports) {
@@ -723,36 +729,6 @@ function getOrigin(url) {
 exports.getBundleURL = getBundleURLCached;
 exports.getBaseURL = getBaseURL;
 exports.getOrigin = getOrigin;
-
-},{}],"gkKU3":[function(require,module,exports) {
-exports.interopDefault = function(a) {
-    return a && a.__esModule ? a : {
-        default: a
-    };
-};
-exports.defineInteropFlag = function(a) {
-    Object.defineProperty(a, "__esModule", {
-        value: true
-    });
-};
-exports.exportAll = function(source, dest) {
-    Object.keys(source).forEach(function(key) {
-        if (key === "default" || key === "__esModule" || dest.hasOwnProperty(key)) return;
-        Object.defineProperty(dest, key, {
-            enumerable: true,
-            get: function() {
-                return source[key];
-            }
-        });
-    });
-    return dest;
-};
-exports.export = function(dest, destName, get) {
-    Object.defineProperty(dest, destName, {
-        enumerable: true,
-        get: get
-    });
-};
 
 },{}],"cTiZx":[function(require,module,exports) {
 module.exports = require("./helpers/bundle-url").getBundleURL("bLxZJ") + "no_image.575d13a2.jpg" + "?" + Date.now();
@@ -7859,107 +7835,1410 @@ module.exports = function(json, options) {
     return js2xml(js, options);
 };
 
-},{"buffer":"fCgem","./js2xml.js":"hOB1D"}],"79vzg":[function(require,module,exports) {
+},{"buffer":"fCgem","./js2xml.js":"hOB1D"}],"47T64":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
-var _auth = require("@firebase/auth");
-parcelHelpers.exportAll(_auth, exports);
+parcelHelpers.export(exports, "auth", ()=>auth);
+parcelHelpers.export(exports, "db", ()=>db);
+var _app = require("firebase/app");
+var _auth = require("firebase/auth");
+var _firestore = require("firebase/firestore");
+var _notiflixNotifyAio = require("notiflix/build/notiflix-notify-aio");
+const firebaseConfig = {
+    apiKey: "AIzaSyDfHEoFiYmKRqd8-ktFcO7zg3QLGxAViQc",
+    authDomain: "board-games-saver.firebaseapp.com",
+    projectId: "board-games-saver",
+    storageBucket: "board-games-saver.appspot.com",
+    messagingSenderId: "169567859472",
+    appId: "1:169567859472:web:e0c9f6634ae06726902b95",
+    measurementId: "G-F504L5EW8F"
+};
+// Initialize Firebase
+const app = (0, _app.initializeApp)(firebaseConfig);
+const auth = (0, _auth.getAuth)(app);
+const db = (0, _firestore.getFirestore)(app);
+const loginMenuEl = document.querySelector(".login-menu");
+const menuEl = document.querySelector(".menu");
+const addGameButtonEl = document.querySelector(".add-game");
+const loginButtonEl = document.querySelector(".signin-button");
+const signupButtonEl = document.querySelector(".signup-button");
+const logoutButtonEl = document.querySelector(".logout-button");
+const modalOverlayEl = document.querySelector(".login-modal-overlay");
+const loginFormEl = document.querySelector("[id='login-form']");
+const signupFormEl = document.querySelector("[id='signup-form']");
+const googleButtonEls = document.querySelectorAll(".google-button");
+const closeLoginModalButtonEls = document.querySelectorAll(".close-login-modal");
+if (modalOverlayEl) {
+    const submitFormButtonsEl = modalOverlayEl.querySelectorAll("button[type='submit']");
+    submitFormButtonsEl.forEach((btn)=>btn.addEventListener("click", (e)=>submitLoginForm(e)));
+}
+loginButtonEl.addEventListener("click", (e)=>showModal(e));
+signupButtonEl.addEventListener("click", (e)=>showModal(e));
+logoutButtonEl.addEventListener("click", logout);
+closeLoginModalButtonEls.forEach((btn)=>btn.addEventListener("click", closeLoginModal));
+googleButtonEls.forEach((btn)=>btn.addEventListener("click", (e)=>loginWithGoogle(e)));
+(0, _auth.onAuthStateChanged)(auth, (user)=>{
+    if (user) // User is signed in
+    showMenu();
+    else // User is signed out
+    hideMenu();
+});
+function showModal(e) {
+    const button = e.currentTarget;
+    modalOverlayEl.classList.remove("hidden");
+    if (button.classList.contains("signin-button")) {
+        signupFormEl.style.display = "none";
+        loginFormEl.style.display = "flex";
+    } else {
+        signupFormEl.style.display = "flex";
+        loginFormEl.style.display = "none";
+    }
+}
+function closeLoginModal() {
+    modalOverlayEl.classList.add("hidden");
+}
+function submitLoginForm(e) {
+    e.preventDefault();
+    const submitButton = e.currentTarget;
+    const formData = new FormData(submitButton.parentElement, submitButton);
+    let email = null;
+    let password = null;
+    let passwordConfirmation = null;
+    for (const [key, value] of formData)switch(key){
+        case "email":
+            email = value.trim();
+            break;
+        case "password":
+            password = value.trim();
+            break;
+        case "password-confirmation":
+            passwordConfirmation = value.trim();
+            break;
+    }
+    if (submitButton.dataset.action === "login-submit-btn") {
+        if (validation(email, password)) // Sign in
+        (0, _auth.signInWithEmailAndPassword)(auth, email, password).then((userCredential)=>{
+            (0, _notiflixNotifyAio.Notify).success("Successfully signed in");
+            // Signed in
+            const user = userCredential.user;
+            // userData.id = user.uid;
+            // userData.email = user.email;
+            // userData.createdAt = user.metadata.creationTime;
+            // userData.name = "User";
+            closeLoginModal();
+        }).catch((error)=>{
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            (0, _notiflixNotifyAio.Notify).failure("Sorry, something went wrong");
+        });
+    }
+    if (submitButton.dataset.action === "signup-submit-btn") {
+        if (password !== passwordConfirmation) {
+            (0, _notiflixNotifyAio.Notify).failure("Password doesn't match");
+            return;
+        } else if (validation(email, password)) // Sign up new users
+        (0, _auth.createUserWithEmailAndPassword)(auth, email, password).then((userCredential)=>{
+            (0, _notiflixNotifyAio.Notify).success("Successfully signed up");
+            // Signed up 
+            const user = userCredential.user;
+            setUserDataToStorage(user);
+            closeLoginModal();
+        }).catch((error)=>{
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            (0, _notiflixNotifyAio.Notify).failure("Sorry, something went wrong");
+        });
+    }
+}
+function loginWithGoogle(e) {
+    const button = e.currentTarget;
+    const provider = new (0, _auth.GoogleAuthProvider)();
+    (0, _auth.signInWithPopup)(auth, provider).then((result)=>{
+        // This gives you a Google Access Token. You can use it to access the Google API.
+        const credential = (0, _auth.GoogleAuthProvider).credentialFromResult(result);
+        const token = credential.accessToken;
+        // The signed-in user info.
+        const user = result.user;
+        if (button.dataset.action === "login-google-btn") (0, _notiflixNotifyAio.Notify).success("Successfully signed in");
+        else {
+            (0, _notiflixNotifyAio.Notify).success("Successfully signed up");
+            setUserDataToStorage(user);
+        }
+        closeLoginModal();
+    // IdP data available using getAdditionalUserInfo(result)
+    // ...
+    }).catch((error)=>{
+        // Handle Errors here.
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        // The email of the user's account used.
+        const email = error.customData.email;
+        // The AuthCredential type that was used.
+        const credential = (0, _auth.GoogleAuthProvider).credentialFromError(error);
+        (0, _notiflixNotifyAio.Notify).failure("Sorry, something went wrong");
+    });
+}
+function showMenu() {
+    loginMenuEl.classList.add("hidden");
+    menuEl.classList.remove("hidden");
+    if (addGameButtonEl) addGameButtonEl.classList.remove("hidden");
+}
+function hideMenu() {
+    loginMenuEl.classList.remove("hidden");
+    menuEl.classList.add("hidden");
+    if (addGameButtonEl) addGameButtonEl.classList.add("hidden");
+}
+function validation(email, password) {
+    if (!email || !password) {
+        (0, _notiflixNotifyAio.Notify).failure("Email or password is empty");
+        return;
+    }
+    if (password.length < 6) {
+        (0, _notiflixNotifyAio.Notify).failure("Password length should be at least 6 symbols");
+        return;
+    }
+    if (!email.includes("@")) {
+        (0, _notiflixNotifyAio.Notify).failure("Email is not valid");
+        return;
+    }
+    return true;
+}
+function logout() {
+    (0, _auth.signOut)(auth).then((res)=>{
+        (0, _notiflixNotifyAio.Notify).success("Successfully signed out");
+    }).catch((err)=>{
+        console.error(err);
+        (0, _notiflixNotifyAio.Notify).failure("Sorry, something went wrong");
+    });
+}
+async function setUserDataToStorage(user) {
+    try {
+        const usersRef = (0, _firestore.collection)(db, "users");
+        await (0, _firestore.setDoc)((0, _firestore.doc)(usersRef, user.uid), {
+            user: {
+                id: user.uid,
+                email: user.email,
+                name: user.displayName || "User",
+                createdAt: user.metadata.creationTime
+            },
+            players: [
+                {
+                    id: user.uid,
+                    name: user.displayName || "You"
+                }
+            ],
+            plays: []
+        });
+    } catch (e) {
+        console.error("Error adding document: ", e);
+    }
+}
 
-},{"@firebase/auth":"khbwD","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"khbwD":[function(require,module,exports) {
+},{"firebase/app":"aM3Fo","firebase/auth":"79vzg","firebase/firestore":"8A4BC","notiflix/build/notiflix-notify-aio":"eXQLZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"aM3Fo":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "ActionCodeOperation", ()=>(0, _indexDd468B12Js.A));
-parcelHelpers.export(exports, "ActionCodeURL", ()=>(0, _indexDd468B12Js.ai));
-parcelHelpers.export(exports, "AuthCredential", ()=>(0, _indexDd468B12Js.L));
-parcelHelpers.export(exports, "AuthErrorCodes", ()=>(0, _indexDd468B12Js.I));
-parcelHelpers.export(exports, "EmailAuthCredential", ()=>(0, _indexDd468B12Js.M));
-parcelHelpers.export(exports, "EmailAuthProvider", ()=>(0, _indexDd468B12Js.V));
-parcelHelpers.export(exports, "FacebookAuthProvider", ()=>(0, _indexDd468B12Js.W));
-parcelHelpers.export(exports, "FactorId", ()=>(0, _indexDd468B12Js.F));
-parcelHelpers.export(exports, "GithubAuthProvider", ()=>(0, _indexDd468B12Js.Y));
-parcelHelpers.export(exports, "GoogleAuthProvider", ()=>(0, _indexDd468B12Js.X));
-parcelHelpers.export(exports, "OAuthCredential", ()=>(0, _indexDd468B12Js.N));
-parcelHelpers.export(exports, "OAuthProvider", ()=>(0, _indexDd468B12Js.Z));
-parcelHelpers.export(exports, "OperationType", ()=>(0, _indexDd468B12Js.O));
-parcelHelpers.export(exports, "PhoneAuthCredential", ()=>(0, _indexDd468B12Js.Q));
-parcelHelpers.export(exports, "PhoneAuthProvider", ()=>(0, _indexDd468B12Js.P));
-parcelHelpers.export(exports, "PhoneMultiFactorGenerator", ()=>(0, _indexDd468B12Js.m));
-parcelHelpers.export(exports, "ProviderId", ()=>(0, _indexDd468B12Js.p));
-parcelHelpers.export(exports, "RecaptchaVerifier", ()=>(0, _indexDd468B12Js.R));
-parcelHelpers.export(exports, "SAMLAuthProvider", ()=>(0, _indexDd468B12Js._));
-parcelHelpers.export(exports, "SignInMethod", ()=>(0, _indexDd468B12Js.S));
-parcelHelpers.export(exports, "TotpMultiFactorGenerator", ()=>(0, _indexDd468B12Js.T));
-parcelHelpers.export(exports, "TotpSecret", ()=>(0, _indexDd468B12Js.n));
-parcelHelpers.export(exports, "TwitterAuthProvider", ()=>(0, _indexDd468B12Js.$));
-parcelHelpers.export(exports, "applyActionCode", ()=>(0, _indexDd468B12Js.a7));
-parcelHelpers.export(exports, "beforeAuthStateChanged", ()=>(0, _indexDd468B12Js.x));
-parcelHelpers.export(exports, "browserLocalPersistence", ()=>(0, _indexDd468B12Js.b));
-parcelHelpers.export(exports, "browserPopupRedirectResolver", ()=>(0, _indexDd468B12Js.k));
-parcelHelpers.export(exports, "browserSessionPersistence", ()=>(0, _indexDd468B12Js.a));
-parcelHelpers.export(exports, "checkActionCode", ()=>(0, _indexDd468B12Js.a8));
-parcelHelpers.export(exports, "confirmPasswordReset", ()=>(0, _indexDd468B12Js.a6));
-parcelHelpers.export(exports, "connectAuthEmulator", ()=>(0, _indexDd468B12Js.K));
-parcelHelpers.export(exports, "createUserWithEmailAndPassword", ()=>(0, _indexDd468B12Js.aa));
-parcelHelpers.export(exports, "debugErrorMap", ()=>(0, _indexDd468B12Js.G));
-parcelHelpers.export(exports, "deleteUser", ()=>(0, _indexDd468B12Js.E));
-parcelHelpers.export(exports, "fetchSignInMethodsForEmail", ()=>(0, _indexDd468B12Js.af));
-parcelHelpers.export(exports, "getAdditionalUserInfo", ()=>(0, _indexDd468B12Js.aq));
-parcelHelpers.export(exports, "getAuth", ()=>(0, _indexDd468B12Js.o));
-parcelHelpers.export(exports, "getIdToken", ()=>(0, _indexDd468B12Js.an));
-parcelHelpers.export(exports, "getIdTokenResult", ()=>(0, _indexDd468B12Js.ao));
-parcelHelpers.export(exports, "getMultiFactorResolver", ()=>(0, _indexDd468B12Js.as));
-parcelHelpers.export(exports, "getRedirectResult", ()=>(0, _indexDd468B12Js.j));
-parcelHelpers.export(exports, "inMemoryPersistence", ()=>(0, _indexDd468B12Js.U));
-parcelHelpers.export(exports, "indexedDBLocalPersistence", ()=>(0, _indexDd468B12Js.i));
-parcelHelpers.export(exports, "initializeAuth", ()=>(0, _indexDd468B12Js.J));
-parcelHelpers.export(exports, "initializeRecaptchaConfig", ()=>(0, _indexDd468B12Js.t));
-parcelHelpers.export(exports, "isSignInWithEmailLink", ()=>(0, _indexDd468B12Js.ad));
-parcelHelpers.export(exports, "linkWithCredential", ()=>(0, _indexDd468B12Js.a2));
-parcelHelpers.export(exports, "linkWithPhoneNumber", ()=>(0, _indexDd468B12Js.l));
-parcelHelpers.export(exports, "linkWithPopup", ()=>(0, _indexDd468B12Js.d));
-parcelHelpers.export(exports, "linkWithRedirect", ()=>(0, _indexDd468B12Js.g));
-parcelHelpers.export(exports, "multiFactor", ()=>(0, _indexDd468B12Js.at));
-parcelHelpers.export(exports, "onAuthStateChanged", ()=>(0, _indexDd468B12Js.y));
-parcelHelpers.export(exports, "onIdTokenChanged", ()=>(0, _indexDd468B12Js.w));
-parcelHelpers.export(exports, "parseActionCodeURL", ()=>(0, _indexDd468B12Js.aj));
-parcelHelpers.export(exports, "prodErrorMap", ()=>(0, _indexDd468B12Js.H));
-parcelHelpers.export(exports, "reauthenticateWithCredential", ()=>(0, _indexDd468B12Js.a3));
-parcelHelpers.export(exports, "reauthenticateWithPhoneNumber", ()=>(0, _indexDd468B12Js.r));
-parcelHelpers.export(exports, "reauthenticateWithPopup", ()=>(0, _indexDd468B12Js.e));
-parcelHelpers.export(exports, "reauthenticateWithRedirect", ()=>(0, _indexDd468B12Js.h));
-parcelHelpers.export(exports, "reload", ()=>(0, _indexDd468B12Js.ar));
-parcelHelpers.export(exports, "revokeAccessToken", ()=>(0, _indexDd468B12Js.D));
-parcelHelpers.export(exports, "sendEmailVerification", ()=>(0, _indexDd468B12Js.ag));
-parcelHelpers.export(exports, "sendPasswordResetEmail", ()=>(0, _indexDd468B12Js.a5));
-parcelHelpers.export(exports, "sendSignInLinkToEmail", ()=>(0, _indexDd468B12Js.ac));
-parcelHelpers.export(exports, "setPersistence", ()=>(0, _indexDd468B12Js.q));
-parcelHelpers.export(exports, "signInAnonymously", ()=>(0, _indexDd468B12Js.a0));
-parcelHelpers.export(exports, "signInWithCredential", ()=>(0, _indexDd468B12Js.a1));
-parcelHelpers.export(exports, "signInWithCustomToken", ()=>(0, _indexDd468B12Js.a4));
-parcelHelpers.export(exports, "signInWithEmailAndPassword", ()=>(0, _indexDd468B12Js.ab));
-parcelHelpers.export(exports, "signInWithEmailLink", ()=>(0, _indexDd468B12Js.ae));
-parcelHelpers.export(exports, "signInWithPhoneNumber", ()=>(0, _indexDd468B12Js.s));
-parcelHelpers.export(exports, "signInWithPopup", ()=>(0, _indexDd468B12Js.c));
-parcelHelpers.export(exports, "signInWithRedirect", ()=>(0, _indexDd468B12Js.f));
-parcelHelpers.export(exports, "signOut", ()=>(0, _indexDd468B12Js.C));
-parcelHelpers.export(exports, "unlink", ()=>(0, _indexDd468B12Js.ap));
-parcelHelpers.export(exports, "updateCurrentUser", ()=>(0, _indexDd468B12Js.B));
-parcelHelpers.export(exports, "updateEmail", ()=>(0, _indexDd468B12Js.al));
-parcelHelpers.export(exports, "updatePassword", ()=>(0, _indexDd468B12Js.am));
-parcelHelpers.export(exports, "updatePhoneNumber", ()=>(0, _indexDd468B12Js.u));
-parcelHelpers.export(exports, "updateProfile", ()=>(0, _indexDd468B12Js.ak));
-parcelHelpers.export(exports, "useDeviceLanguage", ()=>(0, _indexDd468B12Js.z));
-parcelHelpers.export(exports, "validatePassword", ()=>(0, _indexDd468B12Js.v));
-parcelHelpers.export(exports, "verifyBeforeUpdateEmail", ()=>(0, _indexDd468B12Js.ah));
-parcelHelpers.export(exports, "verifyPasswordResetCode", ()=>(0, _indexDd468B12Js.a9));
-var _util = require("@firebase/util");
 var _app = require("@firebase/app");
-var _logger = require("@firebase/logger");
-var _tslib = require("tslib");
-var _component = require("@firebase/component");
-var _indexDd468B12Js = require("./index-dd468b12.js");
+parcelHelpers.exportAll(_app, exports);
+var name = "firebase";
+var version = "10.7.2";
+/**
+ * @license
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ (0, _app.registerVersion)(name, version, "app");
 
-},{"@firebase/util":"ePiK6","@firebase/app":"3AcPV","@firebase/logger":"fZmft","tslib":"lRdW5","@firebase/component":"bi1VB","./index-dd468b12.js":"du6lR","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"ePiK6":[function(require,module,exports) {
+},{"@firebase/app":"3AcPV","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"3AcPV":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "FirebaseError", ()=>(0, _util.FirebaseError));
+parcelHelpers.export(exports, "SDK_VERSION", ()=>SDK_VERSION);
+parcelHelpers.export(exports, "_DEFAULT_ENTRY_NAME", ()=>DEFAULT_ENTRY_NAME);
+parcelHelpers.export(exports, "_addComponent", ()=>_addComponent);
+parcelHelpers.export(exports, "_addOrOverwriteComponent", ()=>_addOrOverwriteComponent);
+parcelHelpers.export(exports, "_apps", ()=>_apps);
+parcelHelpers.export(exports, "_clearComponents", ()=>_clearComponents);
+parcelHelpers.export(exports, "_components", ()=>_components);
+parcelHelpers.export(exports, "_getProvider", ()=>_getProvider);
+parcelHelpers.export(exports, "_registerComponent", ()=>_registerComponent);
+parcelHelpers.export(exports, "_removeServiceInstance", ()=>_removeServiceInstance);
+parcelHelpers.export(exports, "deleteApp", ()=>deleteApp);
+parcelHelpers.export(exports, "getApp", ()=>getApp);
+parcelHelpers.export(exports, "getApps", ()=>getApps);
+parcelHelpers.export(exports, "initializeApp", ()=>initializeApp);
+parcelHelpers.export(exports, "onLog", ()=>onLog);
+parcelHelpers.export(exports, "registerVersion", ()=>registerVersion);
+parcelHelpers.export(exports, "setLogLevel", ()=>setLogLevel);
+var _component = require("@firebase/component");
+var _logger = require("@firebase/logger");
+var _util = require("@firebase/util");
+var _idb = require("idb");
+/**
+ * @license
+ * Copyright 2019 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ class PlatformLoggerServiceImpl {
+    constructor(container){
+        this.container = container;
+    }
+    // In initial implementation, this will be called by installations on
+    // auth token refresh, and installations will send this string.
+    getPlatformInfoString() {
+        const providers = this.container.getProviders();
+        // Loop through providers and get library/version pairs from any that are
+        // version components.
+        return providers.map((provider)=>{
+            if (isVersionServiceProvider(provider)) {
+                const service = provider.getImmediate();
+                return `${service.library}/${service.version}`;
+            } else return null;
+        }).filter((logString)=>logString).join(" ");
+    }
+}
+/**
+ *
+ * @param provider check if this provider provides a VersionService
+ *
+ * NOTE: Using Provider<'app-version'> is a hack to indicate that the provider
+ * provides VersionService. The provider is not necessarily a 'app-version'
+ * provider.
+ */ function isVersionServiceProvider(provider) {
+    const component = provider.getComponent();
+    return (component === null || component === void 0 ? void 0 : component.type) === "VERSION" /* ComponentType.VERSION */ ;
+}
+const name$o = "@firebase/app";
+const version$1 = "0.9.26";
+/**
+ * @license
+ * Copyright 2019 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ const logger = new (0, _logger.Logger)("@firebase/app");
+const name$n = "@firebase/app-compat";
+const name$m = "@firebase/analytics-compat";
+const name$l = "@firebase/analytics";
+const name$k = "@firebase/app-check-compat";
+const name$j = "@firebase/app-check";
+const name$i = "@firebase/auth";
+const name$h = "@firebase/auth-compat";
+const name$g = "@firebase/database";
+const name$f = "@firebase/database-compat";
+const name$e = "@firebase/functions";
+const name$d = "@firebase/functions-compat";
+const name$c = "@firebase/installations";
+const name$b = "@firebase/installations-compat";
+const name$a = "@firebase/messaging";
+const name$9 = "@firebase/messaging-compat";
+const name$8 = "@firebase/performance";
+const name$7 = "@firebase/performance-compat";
+const name$6 = "@firebase/remote-config";
+const name$5 = "@firebase/remote-config-compat";
+const name$4 = "@firebase/storage";
+const name$3 = "@firebase/storage-compat";
+const name$2 = "@firebase/firestore";
+const name$1 = "@firebase/firestore-compat";
+const name = "firebase";
+const version = "10.7.2";
+/**
+ * @license
+ * Copyright 2019 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ /**
+ * The default app name
+ *
+ * @internal
+ */ const DEFAULT_ENTRY_NAME = "[DEFAULT]";
+const PLATFORM_LOG_STRING = {
+    [name$o]: "fire-core",
+    [name$n]: "fire-core-compat",
+    [name$l]: "fire-analytics",
+    [name$m]: "fire-analytics-compat",
+    [name$j]: "fire-app-check",
+    [name$k]: "fire-app-check-compat",
+    [name$i]: "fire-auth",
+    [name$h]: "fire-auth-compat",
+    [name$g]: "fire-rtdb",
+    [name$f]: "fire-rtdb-compat",
+    [name$e]: "fire-fn",
+    [name$d]: "fire-fn-compat",
+    [name$c]: "fire-iid",
+    [name$b]: "fire-iid-compat",
+    [name$a]: "fire-fcm",
+    [name$9]: "fire-fcm-compat",
+    [name$8]: "fire-perf",
+    [name$7]: "fire-perf-compat",
+    [name$6]: "fire-rc",
+    [name$5]: "fire-rc-compat",
+    [name$4]: "fire-gcs",
+    [name$3]: "fire-gcs-compat",
+    [name$2]: "fire-fst",
+    [name$1]: "fire-fst-compat",
+    "fire-js": "fire-js",
+    [name]: "fire-js-all"
+};
+/**
+ * @license
+ * Copyright 2019 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ /**
+ * @internal
+ */ const _apps = new Map();
+/**
+ * Registered components.
+ *
+ * @internal
+ */ // eslint-disable-next-line @typescript-eslint/no-explicit-any
+const _components = new Map();
+/**
+ * @param component - the component being added to this app's container
+ *
+ * @internal
+ */ function _addComponent(app, component) {
+    try {
+        app.container.addComponent(component);
+    } catch (e) {
+        logger.debug(`Component ${component.name} failed to register with FirebaseApp ${app.name}`, e);
+    }
+}
+/**
+ *
+ * @internal
+ */ function _addOrOverwriteComponent(app, component) {
+    app.container.addOrOverwriteComponent(component);
+}
+/**
+ *
+ * @param component - the component to register
+ * @returns whether or not the component is registered successfully
+ *
+ * @internal
+ */ function _registerComponent(component) {
+    const componentName = component.name;
+    if (_components.has(componentName)) {
+        logger.debug(`There were multiple attempts to register component ${componentName}.`);
+        return false;
+    }
+    _components.set(componentName, component);
+    // add the component to existing app instances
+    for (const app of _apps.values())_addComponent(app, component);
+    return true;
+}
+/**
+ *
+ * @param app - FirebaseApp instance
+ * @param name - service name
+ *
+ * @returns the provider for the service with the matching name
+ *
+ * @internal
+ */ function _getProvider(app, name1) {
+    const heartbeatController = app.container.getProvider("heartbeat").getImmediate({
+        optional: true
+    });
+    if (heartbeatController) heartbeatController.triggerHeartbeat();
+    return app.container.getProvider(name1);
+}
+/**
+ *
+ * @param app - FirebaseApp instance
+ * @param name - service name
+ * @param instanceIdentifier - service instance identifier in case the service supports multiple instances
+ *
+ * @internal
+ */ function _removeServiceInstance(app, name2, instanceIdentifier = DEFAULT_ENTRY_NAME) {
+    _getProvider(app, name2).clearInstance(instanceIdentifier);
+}
+/**
+ * Test only
+ *
+ * @internal
+ */ function _clearComponents() {
+    _components.clear();
+}
+/**
+ * @license
+ * Copyright 2019 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ const ERRORS = {
+    ["no-app" /* AppError.NO_APP */ ]: "No Firebase App '{$appName}' has been created - call initializeApp() first",
+    ["bad-app-name" /* AppError.BAD_APP_NAME */ ]: "Illegal App name: '{$appName}",
+    ["duplicate-app" /* AppError.DUPLICATE_APP */ ]: "Firebase App named '{$appName}' already exists with different options or config",
+    ["app-deleted" /* AppError.APP_DELETED */ ]: "Firebase App named '{$appName}' already deleted",
+    ["no-options" /* AppError.NO_OPTIONS */ ]: "Need to provide options, when not being deployed to hosting via source.",
+    ["invalid-app-argument" /* AppError.INVALID_APP_ARGUMENT */ ]: "firebase.{$appName}() takes either no argument or a Firebase App instance.",
+    ["invalid-log-argument" /* AppError.INVALID_LOG_ARGUMENT */ ]: "First argument to `onLog` must be null or a function.",
+    ["idb-open" /* AppError.IDB_OPEN */ ]: "Error thrown when opening IndexedDB. Original error: {$originalErrorMessage}.",
+    ["idb-get" /* AppError.IDB_GET */ ]: "Error thrown when reading from IndexedDB. Original error: {$originalErrorMessage}.",
+    ["idb-set" /* AppError.IDB_WRITE */ ]: "Error thrown when writing to IndexedDB. Original error: {$originalErrorMessage}.",
+    ["idb-delete" /* AppError.IDB_DELETE */ ]: "Error thrown when deleting from IndexedDB. Original error: {$originalErrorMessage}."
+};
+const ERROR_FACTORY = new (0, _util.ErrorFactory)("app", "Firebase", ERRORS);
+/**
+ * @license
+ * Copyright 2019 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ class FirebaseAppImpl {
+    constructor(options, config, container){
+        this._isDeleted = false;
+        this._options = Object.assign({}, options);
+        this._config = Object.assign({}, config);
+        this._name = config.name;
+        this._automaticDataCollectionEnabled = config.automaticDataCollectionEnabled;
+        this._container = container;
+        this.container.addComponent(new (0, _component.Component)("app", ()=>this, "PUBLIC" /* ComponentType.PUBLIC */ ));
+    }
+    get automaticDataCollectionEnabled() {
+        this.checkDestroyed();
+        return this._automaticDataCollectionEnabled;
+    }
+    set automaticDataCollectionEnabled(val) {
+        this.checkDestroyed();
+        this._automaticDataCollectionEnabled = val;
+    }
+    get name() {
+        this.checkDestroyed();
+        return this._name;
+    }
+    get options() {
+        this.checkDestroyed();
+        return this._options;
+    }
+    get config() {
+        this.checkDestroyed();
+        return this._config;
+    }
+    get container() {
+        return this._container;
+    }
+    get isDeleted() {
+        return this._isDeleted;
+    }
+    set isDeleted(val) {
+        this._isDeleted = val;
+    }
+    /**
+     * This function will throw an Error if the App has already been deleted -
+     * use before performing API actions on the App.
+     */ checkDestroyed() {
+        if (this.isDeleted) throw ERROR_FACTORY.create("app-deleted" /* AppError.APP_DELETED */ , {
+            appName: this._name
+        });
+    }
+}
+/**
+ * @license
+ * Copyright 2019 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ /**
+ * The current SDK version.
+ *
+ * @public
+ */ const SDK_VERSION = version;
+function initializeApp(_options, rawConfig = {}) {
+    let options = _options;
+    if (typeof rawConfig !== "object") {
+        const name3 = rawConfig;
+        rawConfig = {
+            name: name3
+        };
+    }
+    const config = Object.assign({
+        name: DEFAULT_ENTRY_NAME,
+        automaticDataCollectionEnabled: false
+    }, rawConfig);
+    const name4 = config.name;
+    if (typeof name4 !== "string" || !name4) throw ERROR_FACTORY.create("bad-app-name" /* AppError.BAD_APP_NAME */ , {
+        appName: String(name4)
+    });
+    options || (options = (0, _util.getDefaultAppConfig)());
+    if (!options) throw ERROR_FACTORY.create("no-options" /* AppError.NO_OPTIONS */ );
+    const existingApp = _apps.get(name4);
+    if (existingApp) {
+        // return the existing app if options and config deep equal the ones in the existing app.
+        if ((0, _util.deepEqual)(options, existingApp.options) && (0, _util.deepEqual)(config, existingApp.config)) return existingApp;
+        else throw ERROR_FACTORY.create("duplicate-app" /* AppError.DUPLICATE_APP */ , {
+            appName: name4
+        });
+    }
+    const container = new (0, _component.ComponentContainer)(name4);
+    for (const component of _components.values())container.addComponent(component);
+    const newApp = new FirebaseAppImpl(options, config, container);
+    _apps.set(name4, newApp);
+    return newApp;
+}
+/**
+ * Retrieves a {@link @firebase/app#FirebaseApp} instance.
+ *
+ * When called with no arguments, the default app is returned. When an app name
+ * is provided, the app corresponding to that name is returned.
+ *
+ * An exception is thrown if the app being retrieved has not yet been
+ * initialized.
+ *
+ * @example
+ * ```javascript
+ * // Return the default app
+ * const app = getApp();
+ * ```
+ *
+ * @example
+ * ```javascript
+ * // Return a named app
+ * const otherApp = getApp("otherApp");
+ * ```
+ *
+ * @param name - Optional name of the app to return. If no name is
+ *   provided, the default is `"[DEFAULT]"`.
+ *
+ * @returns The app corresponding to the provided app name.
+ *   If no app name is provided, the default app is returned.
+ *
+ * @public
+ */ function getApp(name5 = DEFAULT_ENTRY_NAME) {
+    const app = _apps.get(name5);
+    if (!app && name5 === DEFAULT_ENTRY_NAME && (0, _util.getDefaultAppConfig)()) return initializeApp();
+    if (!app) throw ERROR_FACTORY.create("no-app" /* AppError.NO_APP */ , {
+        appName: name5
+    });
+    return app;
+}
+/**
+ * A (read-only) array of all initialized apps.
+ * @public
+ */ function getApps() {
+    return Array.from(_apps.values());
+}
+/**
+ * Renders this app unusable and frees the resources of all associated
+ * services.
+ *
+ * @example
+ * ```javascript
+ * deleteApp(app)
+ *   .then(function() {
+ *     console.log("App deleted successfully");
+ *   })
+ *   .catch(function(error) {
+ *     console.log("Error deleting app:", error);
+ *   });
+ * ```
+ *
+ * @public
+ */ async function deleteApp(app) {
+    const name6 = app.name;
+    if (_apps.has(name6)) {
+        _apps.delete(name6);
+        await Promise.all(app.container.getProviders().map((provider)=>provider.delete()));
+        app.isDeleted = true;
+    }
+}
+/**
+ * Registers a library's name and version for platform logging purposes.
+ * @param library - Name of 1p or 3p library (e.g. firestore, angularfire)
+ * @param version - Current version of that library.
+ * @param variant - Bundle variant, e.g., node, rn, etc.
+ *
+ * @public
+ */ function registerVersion(libraryKeyOrName, version1, variant) {
+    var _a;
+    // TODO: We can use this check to whitelist strings when/if we set up
+    // a good whitelist system.
+    let library = (_a = PLATFORM_LOG_STRING[libraryKeyOrName]) !== null && _a !== void 0 ? _a : libraryKeyOrName;
+    if (variant) library += `-${variant}`;
+    const libraryMismatch = library.match(/\s|\//);
+    const versionMismatch = version1.match(/\s|\//);
+    if (libraryMismatch || versionMismatch) {
+        const warning = [
+            `Unable to register library "${library}" with version "${version1}":`
+        ];
+        if (libraryMismatch) warning.push(`library name "${library}" contains illegal characters (whitespace or "/")`);
+        if (libraryMismatch && versionMismatch) warning.push("and");
+        if (versionMismatch) warning.push(`version name "${version1}" contains illegal characters (whitespace or "/")`);
+        logger.warn(warning.join(" "));
+        return;
+    }
+    _registerComponent(new (0, _component.Component)(`${library}-version`, ()=>({
+            library,
+            version: version1
+        }), "VERSION" /* ComponentType.VERSION */ ));
+}
+/**
+ * Sets log handler for all Firebase SDKs.
+ * @param logCallback - An optional custom log handler that executes user code whenever
+ * the Firebase SDK makes a logging call.
+ *
+ * @public
+ */ function onLog(logCallback, options) {
+    if (logCallback !== null && typeof logCallback !== "function") throw ERROR_FACTORY.create("invalid-log-argument" /* AppError.INVALID_LOG_ARGUMENT */ );
+    (0, _logger.setUserLogHandler)(logCallback, options);
+}
+/**
+ * Sets log level for all Firebase SDKs.
+ *
+ * All of the log types above the current log level are captured (i.e. if
+ * you set the log level to `info`, errors are logged, but `debug` and
+ * `verbose` logs are not).
+ *
+ * @public
+ */ function setLogLevel(logLevel) {
+    (0, _logger.setLogLevel)(logLevel);
+}
+/**
+ * @license
+ * Copyright 2021 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ const DB_NAME = "firebase-heartbeat-database";
+const DB_VERSION = 1;
+const STORE_NAME = "firebase-heartbeat-store";
+let dbPromise = null;
+function getDbPromise() {
+    if (!dbPromise) dbPromise = (0, _idb.openDB)(DB_NAME, DB_VERSION, {
+        upgrade: (db, oldVersion)=>{
+            // We don't use 'break' in this switch statement, the fall-through
+            // behavior is what we want, because if there are multiple versions between
+            // the old version and the current version, we want ALL the migrations
+            // that correspond to those versions to run, not only the last one.
+            // eslint-disable-next-line default-case
+            switch(oldVersion){
+                case 0:
+                    try {
+                        db.createObjectStore(STORE_NAME);
+                    } catch (e) {
+                        // Safari/iOS browsers throw occasional exceptions on
+                        // db.createObjectStore() that may be a bug. Avoid blocking
+                        // the rest of the app functionality.
+                        console.warn(e);
+                    }
+            }
+        }
+    }).catch((e)=>{
+        throw ERROR_FACTORY.create("idb-open" /* AppError.IDB_OPEN */ , {
+            originalErrorMessage: e.message
+        });
+    });
+    return dbPromise;
+}
+async function readHeartbeatsFromIndexedDB(app) {
+    try {
+        const db = await getDbPromise();
+        const result = await db.transaction(STORE_NAME).objectStore(STORE_NAME).get(computeKey(app));
+        return result;
+    } catch (e) {
+        if (e instanceof (0, _util.FirebaseError)) logger.warn(e.message);
+        else {
+            const idbGetError = ERROR_FACTORY.create("idb-get" /* AppError.IDB_GET */ , {
+                originalErrorMessage: e === null || e === void 0 ? void 0 : e.message
+            });
+            logger.warn(idbGetError.message);
+        }
+    }
+}
+async function writeHeartbeatsToIndexedDB(app, heartbeatObject) {
+    try {
+        const db = await getDbPromise();
+        const tx = db.transaction(STORE_NAME, "readwrite");
+        const objectStore = tx.objectStore(STORE_NAME);
+        await objectStore.put(heartbeatObject, computeKey(app));
+        await tx.done;
+    } catch (e) {
+        if (e instanceof (0, _util.FirebaseError)) logger.warn(e.message);
+        else {
+            const idbGetError = ERROR_FACTORY.create("idb-set" /* AppError.IDB_WRITE */ , {
+                originalErrorMessage: e === null || e === void 0 ? void 0 : e.message
+            });
+            logger.warn(idbGetError.message);
+        }
+    }
+}
+function computeKey(app) {
+    return `${app.name}!${app.options.appId}`;
+}
+/**
+ * @license
+ * Copyright 2021 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ const MAX_HEADER_BYTES = 1024;
+// 30 days
+const STORED_HEARTBEAT_RETENTION_MAX_MILLIS = 2592000000;
+class HeartbeatServiceImpl {
+    constructor(container){
+        this.container = container;
+        /**
+         * In-memory cache for heartbeats, used by getHeartbeatsHeader() to generate
+         * the header string.
+         * Stores one record per date. This will be consolidated into the standard
+         * format of one record per user agent string before being sent as a header.
+         * Populated from indexedDB when the controller is instantiated and should
+         * be kept in sync with indexedDB.
+         * Leave public for easier testing.
+         */ this._heartbeatsCache = null;
+        const app = this.container.getProvider("app").getImmediate();
+        this._storage = new HeartbeatStorageImpl(app);
+        this._heartbeatsCachePromise = this._storage.read().then((result)=>{
+            this._heartbeatsCache = result;
+            return result;
+        });
+    }
+    /**
+     * Called to report a heartbeat. The function will generate
+     * a HeartbeatsByUserAgent object, update heartbeatsCache, and persist it
+     * to IndexedDB.
+     * Note that we only store one heartbeat per day. So if a heartbeat for today is
+     * already logged, subsequent calls to this function in the same day will be ignored.
+     */ async triggerHeartbeat() {
+        var _a, _b;
+        const platformLogger = this.container.getProvider("platform-logger").getImmediate();
+        // This is the "Firebase user agent" string from the platform logger
+        // service, not the browser user agent.
+        const agent = platformLogger.getPlatformInfoString();
+        const date = getUTCDateString();
+        if (((_a = this._heartbeatsCache) === null || _a === void 0 ? void 0 : _a.heartbeats) == null) {
+            this._heartbeatsCache = await this._heartbeatsCachePromise;
+            // If we failed to construct a heartbeats cache, then return immediately.
+            if (((_b = this._heartbeatsCache) === null || _b === void 0 ? void 0 : _b.heartbeats) == null) return;
+        }
+        // Do not store a heartbeat if one is already stored for this day
+        // or if a header has already been sent today.
+        if (this._heartbeatsCache.lastSentHeartbeatDate === date || this._heartbeatsCache.heartbeats.some((singleDateHeartbeat)=>singleDateHeartbeat.date === date)) return;
+        else // There is no entry for this date. Create one.
+        this._heartbeatsCache.heartbeats.push({
+            date,
+            agent
+        });
+        // Remove entries older than 30 days.
+        this._heartbeatsCache.heartbeats = this._heartbeatsCache.heartbeats.filter((singleDateHeartbeat)=>{
+            const hbTimestamp = new Date(singleDateHeartbeat.date).valueOf();
+            const now = Date.now();
+            return now - hbTimestamp <= STORED_HEARTBEAT_RETENTION_MAX_MILLIS;
+        });
+        return this._storage.overwrite(this._heartbeatsCache);
+    }
+    /**
+     * Returns a base64 encoded string which can be attached to the heartbeat-specific header directly.
+     * It also clears all heartbeats from memory as well as in IndexedDB.
+     *
+     * NOTE: Consuming product SDKs should not send the header if this method
+     * returns an empty string.
+     */ async getHeartbeatsHeader() {
+        var _a;
+        if (this._heartbeatsCache === null) await this._heartbeatsCachePromise;
+        // If it's still null or the array is empty, there is no data to send.
+        if (((_a = this._heartbeatsCache) === null || _a === void 0 ? void 0 : _a.heartbeats) == null || this._heartbeatsCache.heartbeats.length === 0) return "";
+        const date = getUTCDateString();
+        // Extract as many heartbeats from the cache as will fit under the size limit.
+        const { heartbeatsToSend , unsentEntries  } = extractHeartbeatsForHeader(this._heartbeatsCache.heartbeats);
+        const headerString = (0, _util.base64urlEncodeWithoutPadding)(JSON.stringify({
+            version: 2,
+            heartbeats: heartbeatsToSend
+        }));
+        // Store last sent date to prevent another being logged/sent for the same day.
+        this._heartbeatsCache.lastSentHeartbeatDate = date;
+        if (unsentEntries.length > 0) {
+            // Store any unsent entries if they exist.
+            this._heartbeatsCache.heartbeats = unsentEntries;
+            // This seems more likely than emptying the array (below) to lead to some odd state
+            // since the cache isn't empty and this will be called again on the next request,
+            // and is probably safest if we await it.
+            await this._storage.overwrite(this._heartbeatsCache);
+        } else {
+            this._heartbeatsCache.heartbeats = [];
+            this._storage.overwrite(this._heartbeatsCache);
+        }
+        return headerString;
+    }
+}
+function getUTCDateString() {
+    const today = new Date();
+    // Returns date format 'YYYY-MM-DD'
+    return today.toISOString().substring(0, 10);
+}
+function extractHeartbeatsForHeader(heartbeatsCache, maxSize = MAX_HEADER_BYTES) {
+    // Heartbeats grouped by user agent in the standard format to be sent in
+    // the header.
+    const heartbeatsToSend = [];
+    // Single date format heartbeats that are not sent.
+    let unsentEntries = heartbeatsCache.slice();
+    for (const singleDateHeartbeat of heartbeatsCache){
+        // Look for an existing entry with the same user agent.
+        const heartbeatEntry = heartbeatsToSend.find((hb)=>hb.agent === singleDateHeartbeat.agent);
+        if (!heartbeatEntry) {
+            // If no entry for this user agent exists, create one.
+            heartbeatsToSend.push({
+                agent: singleDateHeartbeat.agent,
+                dates: [
+                    singleDateHeartbeat.date
+                ]
+            });
+            if (countBytes(heartbeatsToSend) > maxSize) {
+                // If the header would exceed max size, remove the added heartbeat
+                // entry and stop adding to the header.
+                heartbeatsToSend.pop();
+                break;
+            }
+        } else {
+            heartbeatEntry.dates.push(singleDateHeartbeat.date);
+            // If the header would exceed max size, remove the added date
+            // and stop adding to the header.
+            if (countBytes(heartbeatsToSend) > maxSize) {
+                heartbeatEntry.dates.pop();
+                break;
+            }
+        }
+        // Pop unsent entry from queue. (Skipped if adding the entry exceeded
+        // quota and the loop breaks early.)
+        unsentEntries = unsentEntries.slice(1);
+    }
+    return {
+        heartbeatsToSend,
+        unsentEntries
+    };
+}
+class HeartbeatStorageImpl {
+    constructor(app){
+        this.app = app;
+        this._canUseIndexedDBPromise = this.runIndexedDBEnvironmentCheck();
+    }
+    async runIndexedDBEnvironmentCheck() {
+        if (!(0, _util.isIndexedDBAvailable)()) return false;
+        else return (0, _util.validateIndexedDBOpenable)().then(()=>true).catch(()=>false);
+    }
+    /**
+     * Read all heartbeats.
+     */ async read() {
+        const canUseIndexedDB = await this._canUseIndexedDBPromise;
+        if (!canUseIndexedDB) return {
+            heartbeats: []
+        };
+        else {
+            const idbHeartbeatObject = await readHeartbeatsFromIndexedDB(this.app);
+            if (idbHeartbeatObject === null || idbHeartbeatObject === void 0 ? void 0 : idbHeartbeatObject.heartbeats) return idbHeartbeatObject;
+            else return {
+                heartbeats: []
+            };
+        }
+    }
+    // overwrite the storage with the provided heartbeats
+    async overwrite(heartbeatsObject) {
+        var _a;
+        const canUseIndexedDB = await this._canUseIndexedDBPromise;
+        if (!canUseIndexedDB) return;
+        else {
+            const existingHeartbeatsObject = await this.read();
+            return writeHeartbeatsToIndexedDB(this.app, {
+                lastSentHeartbeatDate: (_a = heartbeatsObject.lastSentHeartbeatDate) !== null && _a !== void 0 ? _a : existingHeartbeatsObject.lastSentHeartbeatDate,
+                heartbeats: heartbeatsObject.heartbeats
+            });
+        }
+    }
+    // add heartbeats
+    async add(heartbeatsObject) {
+        var _a;
+        const canUseIndexedDB = await this._canUseIndexedDBPromise;
+        if (!canUseIndexedDB) return;
+        else {
+            const existingHeartbeatsObject = await this.read();
+            return writeHeartbeatsToIndexedDB(this.app, {
+                lastSentHeartbeatDate: (_a = heartbeatsObject.lastSentHeartbeatDate) !== null && _a !== void 0 ? _a : existingHeartbeatsObject.lastSentHeartbeatDate,
+                heartbeats: [
+                    ...existingHeartbeatsObject.heartbeats,
+                    ...heartbeatsObject.heartbeats
+                ]
+            });
+        }
+    }
+}
+/**
+ * Calculate bytes of a HeartbeatsByUserAgent array after being wrapped
+ * in a platform logging header JSON object, stringified, and converted
+ * to base 64.
+ */ function countBytes(heartbeatsCache) {
+    // base64 has a restricted set of characters, all of which should be 1 byte.
+    return (0, _util.base64urlEncodeWithoutPadding)(// heartbeatsCache wrapper properties
+    JSON.stringify({
+        version: 2,
+        heartbeats: heartbeatsCache
+    })).length;
+}
+/**
+ * @license
+ * Copyright 2019 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ function registerCoreComponents(variant) {
+    _registerComponent(new (0, _component.Component)("platform-logger", (container)=>new PlatformLoggerServiceImpl(container), "PRIVATE" /* ComponentType.PRIVATE */ ));
+    _registerComponent(new (0, _component.Component)("heartbeat", (container)=>new HeartbeatServiceImpl(container), "PRIVATE" /* ComponentType.PRIVATE */ ));
+    // Register `app` package.
+    registerVersion(name$o, version$1, variant);
+    // BUILD_TARGET will be replaced by values like esm5, esm2017, cjs5, etc during the compilation
+    registerVersion(name$o, version$1, "esm2017");
+    // Register platform SDK identifier (no version).
+    registerVersion("fire-js", "");
+}
+/**
+ * Firebase App
+ *
+ * @remarks This package coordinates the communication between the different Firebase components
+ * @packageDocumentation
+ */ registerCoreComponents("");
+
+},{"@firebase/component":"bi1VB","@firebase/logger":"fZmft","@firebase/util":"ePiK6","idb":"kozAz","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"bi1VB":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "Component", ()=>Component);
+parcelHelpers.export(exports, "ComponentContainer", ()=>ComponentContainer);
+parcelHelpers.export(exports, "Provider", ()=>Provider);
+var _util = require("@firebase/util");
+/**
+ * Component for service name T, e.g. `auth`, `auth-internal`
+ */ class Component {
+    /**
+     *
+     * @param name The public service name, e.g. app, auth, firestore, database
+     * @param instanceFactory Service factory responsible for creating the public interface
+     * @param type whether the service provided by the component is public or private
+     */ constructor(name, instanceFactory, type){
+        this.name = name;
+        this.instanceFactory = instanceFactory;
+        this.type = type;
+        this.multipleInstances = false;
+        /**
+         * Properties to be added to the service namespace
+         */ this.serviceProps = {};
+        this.instantiationMode = "LAZY" /* InstantiationMode.LAZY */ ;
+        this.onInstanceCreated = null;
+    }
+    setInstantiationMode(mode) {
+        this.instantiationMode = mode;
+        return this;
+    }
+    setMultipleInstances(multipleInstances) {
+        this.multipleInstances = multipleInstances;
+        return this;
+    }
+    setServiceProps(props) {
+        this.serviceProps = props;
+        return this;
+    }
+    setInstanceCreatedCallback(callback) {
+        this.onInstanceCreated = callback;
+        return this;
+    }
+}
+/**
+ * @license
+ * Copyright 2019 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ const DEFAULT_ENTRY_NAME = "[DEFAULT]";
+/**
+ * @license
+ * Copyright 2019 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ /**
+ * Provider for instance for service name T, e.g. 'auth', 'auth-internal'
+ * NameServiceMapping[T] is an alias for the type of the instance
+ */ class Provider {
+    constructor(name, container){
+        this.name = name;
+        this.container = container;
+        this.component = null;
+        this.instances = new Map();
+        this.instancesDeferred = new Map();
+        this.instancesOptions = new Map();
+        this.onInitCallbacks = new Map();
+    }
+    /**
+     * @param identifier A provider can provide mulitple instances of a service
+     * if this.component.multipleInstances is true.
+     */ get(identifier) {
+        // if multipleInstances is not supported, use the default name
+        const normalizedIdentifier = this.normalizeInstanceIdentifier(identifier);
+        if (!this.instancesDeferred.has(normalizedIdentifier)) {
+            const deferred = new (0, _util.Deferred)();
+            this.instancesDeferred.set(normalizedIdentifier, deferred);
+            if (this.isInitialized(normalizedIdentifier) || this.shouldAutoInitialize()) // initialize the service if it can be auto-initialized
+            try {
+                const instance = this.getOrInitializeService({
+                    instanceIdentifier: normalizedIdentifier
+                });
+                if (instance) deferred.resolve(instance);
+            } catch (e) {
+            // when the instance factory throws an exception during get(), it should not cause
+            // a fatal error. We just return the unresolved promise in this case.
+            }
+        }
+        return this.instancesDeferred.get(normalizedIdentifier).promise;
+    }
+    getImmediate(options) {
+        var _a;
+        // if multipleInstances is not supported, use the default name
+        const normalizedIdentifier = this.normalizeInstanceIdentifier(options === null || options === void 0 ? void 0 : options.identifier);
+        const optional = (_a = options === null || options === void 0 ? void 0 : options.optional) !== null && _a !== void 0 ? _a : false;
+        if (this.isInitialized(normalizedIdentifier) || this.shouldAutoInitialize()) try {
+            return this.getOrInitializeService({
+                instanceIdentifier: normalizedIdentifier
+            });
+        } catch (e) {
+            if (optional) return null;
+            else throw e;
+        }
+        else {
+            // In case a component is not initialized and should/can not be auto-initialized at the moment, return null if the optional flag is set, or throw
+            if (optional) return null;
+            else throw Error(`Service ${this.name} is not available`);
+        }
+    }
+    getComponent() {
+        return this.component;
+    }
+    setComponent(component) {
+        if (component.name !== this.name) throw Error(`Mismatching Component ${component.name} for Provider ${this.name}.`);
+        if (this.component) throw Error(`Component for ${this.name} has already been provided`);
+        this.component = component;
+        // return early without attempting to initialize the component if the component requires explicit initialization (calling `Provider.initialize()`)
+        if (!this.shouldAutoInitialize()) return;
+        // if the service is eager, initialize the default instance
+        if (isComponentEager(component)) try {
+            this.getOrInitializeService({
+                instanceIdentifier: DEFAULT_ENTRY_NAME
+            });
+        } catch (e) {
+        // when the instance factory for an eager Component throws an exception during the eager
+        // initialization, it should not cause a fatal error.
+        // TODO: Investigate if we need to make it configurable, because some component may want to cause
+        // a fatal error in this case?
+        }
+        // Create service instances for the pending promises and resolve them
+        // NOTE: if this.multipleInstances is false, only the default instance will be created
+        // and all promises with resolve with it regardless of the identifier.
+        for (const [instanceIdentifier, instanceDeferred] of this.instancesDeferred.entries()){
+            const normalizedIdentifier = this.normalizeInstanceIdentifier(instanceIdentifier);
+            try {
+                // `getOrInitializeService()` should always return a valid instance since a component is guaranteed. use ! to make typescript happy.
+                const instance = this.getOrInitializeService({
+                    instanceIdentifier: normalizedIdentifier
+                });
+                instanceDeferred.resolve(instance);
+            } catch (e) {
+            // when the instance factory throws an exception, it should not cause
+            // a fatal error. We just leave the promise unresolved.
+            }
+        }
+    }
+    clearInstance(identifier = DEFAULT_ENTRY_NAME) {
+        this.instancesDeferred.delete(identifier);
+        this.instancesOptions.delete(identifier);
+        this.instances.delete(identifier);
+    }
+    // app.delete() will call this method on every provider to delete the services
+    // TODO: should we mark the provider as deleted?
+    async delete() {
+        const services = Array.from(this.instances.values());
+        await Promise.all([
+            ...services.filter((service)=>"INTERNAL" in service) // legacy services
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .map((service)=>service.INTERNAL.delete()),
+            ...services.filter((service)=>"_delete" in service) // modularized services
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .map((service)=>service._delete())
+        ]);
+    }
+    isComponentSet() {
+        return this.component != null;
+    }
+    isInitialized(identifier = DEFAULT_ENTRY_NAME) {
+        return this.instances.has(identifier);
+    }
+    getOptions(identifier = DEFAULT_ENTRY_NAME) {
+        return this.instancesOptions.get(identifier) || {};
+    }
+    initialize(opts = {}) {
+        const { options ={}  } = opts;
+        const normalizedIdentifier = this.normalizeInstanceIdentifier(opts.instanceIdentifier);
+        if (this.isInitialized(normalizedIdentifier)) throw Error(`${this.name}(${normalizedIdentifier}) has already been initialized`);
+        if (!this.isComponentSet()) throw Error(`Component ${this.name} has not been registered yet`);
+        const instance = this.getOrInitializeService({
+            instanceIdentifier: normalizedIdentifier,
+            options
+        });
+        // resolve any pending promise waiting for the service instance
+        for (const [instanceIdentifier, instanceDeferred] of this.instancesDeferred.entries()){
+            const normalizedDeferredIdentifier = this.normalizeInstanceIdentifier(instanceIdentifier);
+            if (normalizedIdentifier === normalizedDeferredIdentifier) instanceDeferred.resolve(instance);
+        }
+        return instance;
+    }
+    /**
+     *
+     * @param callback - a function that will be invoked  after the provider has been initialized by calling provider.initialize().
+     * The function is invoked SYNCHRONOUSLY, so it should not execute any longrunning tasks in order to not block the program.
+     *
+     * @param identifier An optional instance identifier
+     * @returns a function to unregister the callback
+     */ onInit(callback, identifier) {
+        var _a;
+        const normalizedIdentifier = this.normalizeInstanceIdentifier(identifier);
+        const existingCallbacks = (_a = this.onInitCallbacks.get(normalizedIdentifier)) !== null && _a !== void 0 ? _a : new Set();
+        existingCallbacks.add(callback);
+        this.onInitCallbacks.set(normalizedIdentifier, existingCallbacks);
+        const existingInstance = this.instances.get(normalizedIdentifier);
+        if (existingInstance) callback(existingInstance, normalizedIdentifier);
+        return ()=>{
+            existingCallbacks.delete(callback);
+        };
+    }
+    /**
+     * Invoke onInit callbacks synchronously
+     * @param instance the service instance`
+     */ invokeOnInitCallbacks(instance, identifier) {
+        const callbacks = this.onInitCallbacks.get(identifier);
+        if (!callbacks) return;
+        for (const callback of callbacks)try {
+            callback(instance, identifier);
+        } catch (_a) {
+        // ignore errors in the onInit callback
+        }
+    }
+    getOrInitializeService({ instanceIdentifier , options ={}  }) {
+        let instance = this.instances.get(instanceIdentifier);
+        if (!instance && this.component) {
+            instance = this.component.instanceFactory(this.container, {
+                instanceIdentifier: normalizeIdentifierForFactory(instanceIdentifier),
+                options
+            });
+            this.instances.set(instanceIdentifier, instance);
+            this.instancesOptions.set(instanceIdentifier, options);
+            /**
+             * Invoke onInit listeners.
+             * Note this.component.onInstanceCreated is different, which is used by the component creator,
+             * while onInit listeners are registered by consumers of the provider.
+             */ this.invokeOnInitCallbacks(instance, instanceIdentifier);
+            /**
+             * Order is important
+             * onInstanceCreated() should be called after this.instances.set(instanceIdentifier, instance); which
+             * makes `isInitialized()` return true.
+             */ if (this.component.onInstanceCreated) try {
+                this.component.onInstanceCreated(this.container, instanceIdentifier, instance);
+            } catch (_a) {
+            // ignore errors in the onInstanceCreatedCallback
+            }
+        }
+        return instance || null;
+    }
+    normalizeInstanceIdentifier(identifier = DEFAULT_ENTRY_NAME) {
+        if (this.component) return this.component.multipleInstances ? identifier : DEFAULT_ENTRY_NAME;
+        else return identifier; // assume multiple instances are supported before the component is provided.
+    }
+    shouldAutoInitialize() {
+        return !!this.component && this.component.instantiationMode !== "EXPLICIT" /* InstantiationMode.EXPLICIT */ ;
+    }
+}
+// undefined should be passed to the service factory for the default instance
+function normalizeIdentifierForFactory(identifier) {
+    return identifier === DEFAULT_ENTRY_NAME ? undefined : identifier;
+}
+function isComponentEager(component) {
+    return component.instantiationMode === "EAGER" /* InstantiationMode.EAGER */ ;
+}
+/**
+ * @license
+ * Copyright 2019 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ /**
+ * ComponentContainer that provides Providers for service name T, e.g. `auth`, `auth-internal`
+ */ class ComponentContainer {
+    constructor(name){
+        this.name = name;
+        this.providers = new Map();
+    }
+    /**
+     *
+     * @param component Component being added
+     * @param overwrite When a component with the same name has already been registered,
+     * if overwrite is true: overwrite the existing component with the new component and create a new
+     * provider with the new component. It can be useful in tests where you want to use different mocks
+     * for different tests.
+     * if overwrite is false: throw an exception
+     */ addComponent(component) {
+        const provider = this.getProvider(component.name);
+        if (provider.isComponentSet()) throw new Error(`Component ${component.name} has already been registered with ${this.name}`);
+        provider.setComponent(component);
+    }
+    addOrOverwriteComponent(component) {
+        const provider = this.getProvider(component.name);
+        if (provider.isComponentSet()) // delete the existing provider from the container, so we can register the new component
+        this.providers.delete(component.name);
+        this.addComponent(component);
+    }
+    /**
+     * getProvider provides a type safe interface where it can only be called with a field name
+     * present in NameServiceMapping interface.
+     *
+     * Firebase SDKs providing services should extend NameServiceMapping interface to register
+     * themselves.
+     */ getProvider(name) {
+        if (this.providers.has(name)) return this.providers.get(name);
+        // create a Provider for a service that hasn't registered with Firebase
+        const provider = new Provider(name, this);
+        this.providers.set(name, provider);
+        return provider;
+    }
+    getProviders() {
+        return Array.from(this.providers.values());
+    }
+}
+
+},{"@firebase/util":"ePiK6","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"ePiK6":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "CONSTANTS", ()=>CONSTANTS);
@@ -8028,8 +9307,8 @@ parcelHelpers.export(exports, "validateCallback", ()=>validateCallback);
 parcelHelpers.export(exports, "validateContextObject", ()=>validateContextObject);
 parcelHelpers.export(exports, "validateIndexedDBOpenable", ()=>validateIndexedDBOpenable);
 parcelHelpers.export(exports, "validateNamespace", ()=>validateNamespace);
-var process = require("process");
 var global = arguments[3];
+var process = require("process");
 /**
  * @license
  * Copyright 2017 Google LLC
@@ -9741,1187 +11020,37 @@ function indicator(i) {
     else return service;
 }
 
-},{"process":"d5jf4","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"3AcPV":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "FirebaseError", ()=>(0, _util.FirebaseError));
-parcelHelpers.export(exports, "SDK_VERSION", ()=>SDK_VERSION);
-parcelHelpers.export(exports, "_DEFAULT_ENTRY_NAME", ()=>DEFAULT_ENTRY_NAME);
-parcelHelpers.export(exports, "_addComponent", ()=>_addComponent);
-parcelHelpers.export(exports, "_addOrOverwriteComponent", ()=>_addOrOverwriteComponent);
-parcelHelpers.export(exports, "_apps", ()=>_apps);
-parcelHelpers.export(exports, "_clearComponents", ()=>_clearComponents);
-parcelHelpers.export(exports, "_components", ()=>_components);
-parcelHelpers.export(exports, "_getProvider", ()=>_getProvider);
-parcelHelpers.export(exports, "_registerComponent", ()=>_registerComponent);
-parcelHelpers.export(exports, "_removeServiceInstance", ()=>_removeServiceInstance);
-parcelHelpers.export(exports, "deleteApp", ()=>deleteApp);
-parcelHelpers.export(exports, "getApp", ()=>getApp);
-parcelHelpers.export(exports, "getApps", ()=>getApps);
-parcelHelpers.export(exports, "initializeApp", ()=>initializeApp);
-parcelHelpers.export(exports, "onLog", ()=>onLog);
-parcelHelpers.export(exports, "registerVersion", ()=>registerVersion);
-parcelHelpers.export(exports, "setLogLevel", ()=>setLogLevel);
-var _component = require("@firebase/component");
-var _logger = require("@firebase/logger");
-var _util = require("@firebase/util");
-var _idb = require("idb");
-/**
- * @license
- * Copyright 2019 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */ class PlatformLoggerServiceImpl {
-    constructor(container){
-        this.container = container;
-    }
-    // In initial implementation, this will be called by installations on
-    // auth token refresh, and installations will send this string.
-    getPlatformInfoString() {
-        const providers = this.container.getProviders();
-        // Loop through providers and get library/version pairs from any that are
-        // version components.
-        return providers.map((provider)=>{
-            if (isVersionServiceProvider(provider)) {
-                const service = provider.getImmediate();
-                return `${service.library}/${service.version}`;
-            } else return null;
-        }).filter((logString)=>logString).join(" ");
-    }
-}
-/**
- *
- * @param provider check if this provider provides a VersionService
- *
- * NOTE: Using Provider<'app-version'> is a hack to indicate that the provider
- * provides VersionService. The provider is not necessarily a 'app-version'
- * provider.
- */ function isVersionServiceProvider(provider) {
-    const component = provider.getComponent();
-    return (component === null || component === void 0 ? void 0 : component.type) === "VERSION" /* ComponentType.VERSION */ ;
-}
-const name$o = "@firebase/app";
-const version$1 = "0.9.26";
-/**
- * @license
- * Copyright 2019 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */ const logger = new (0, _logger.Logger)("@firebase/app");
-const name$n = "@firebase/app-compat";
-const name$m = "@firebase/analytics-compat";
-const name$l = "@firebase/analytics";
-const name$k = "@firebase/app-check-compat";
-const name$j = "@firebase/app-check";
-const name$i = "@firebase/auth";
-const name$h = "@firebase/auth-compat";
-const name$g = "@firebase/database";
-const name$f = "@firebase/database-compat";
-const name$e = "@firebase/functions";
-const name$d = "@firebase/functions-compat";
-const name$c = "@firebase/installations";
-const name$b = "@firebase/installations-compat";
-const name$a = "@firebase/messaging";
-const name$9 = "@firebase/messaging-compat";
-const name$8 = "@firebase/performance";
-const name$7 = "@firebase/performance-compat";
-const name$6 = "@firebase/remote-config";
-const name$5 = "@firebase/remote-config-compat";
-const name$4 = "@firebase/storage";
-const name$3 = "@firebase/storage-compat";
-const name$2 = "@firebase/firestore";
-const name$1 = "@firebase/firestore-compat";
-const name = "firebase";
-const version = "10.7.2";
-/**
- * @license
- * Copyright 2019 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */ /**
- * The default app name
- *
- * @internal
- */ const DEFAULT_ENTRY_NAME = "[DEFAULT]";
-const PLATFORM_LOG_STRING = {
-    [name$o]: "fire-core",
-    [name$n]: "fire-core-compat",
-    [name$l]: "fire-analytics",
-    [name$m]: "fire-analytics-compat",
-    [name$j]: "fire-app-check",
-    [name$k]: "fire-app-check-compat",
-    [name$i]: "fire-auth",
-    [name$h]: "fire-auth-compat",
-    [name$g]: "fire-rtdb",
-    [name$f]: "fire-rtdb-compat",
-    [name$e]: "fire-fn",
-    [name$d]: "fire-fn-compat",
-    [name$c]: "fire-iid",
-    [name$b]: "fire-iid-compat",
-    [name$a]: "fire-fcm",
-    [name$9]: "fire-fcm-compat",
-    [name$8]: "fire-perf",
-    [name$7]: "fire-perf-compat",
-    [name$6]: "fire-rc",
-    [name$5]: "fire-rc-compat",
-    [name$4]: "fire-gcs",
-    [name$3]: "fire-gcs-compat",
-    [name$2]: "fire-fst",
-    [name$1]: "fire-fst-compat",
-    "fire-js": "fire-js",
-    [name]: "fire-js-all"
-};
-/**
- * @license
- * Copyright 2019 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */ /**
- * @internal
- */ const _apps = new Map();
-/**
- * Registered components.
- *
- * @internal
- */ // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const _components = new Map();
-/**
- * @param component - the component being added to this app's container
- *
- * @internal
- */ function _addComponent(app, component) {
-    try {
-        app.container.addComponent(component);
-    } catch (e) {
-        logger.debug(`Component ${component.name} failed to register with FirebaseApp ${app.name}`, e);
-    }
-}
-/**
- *
- * @internal
- */ function _addOrOverwriteComponent(app, component) {
-    app.container.addOrOverwriteComponent(component);
-}
-/**
- *
- * @param component - the component to register
- * @returns whether or not the component is registered successfully
- *
- * @internal
- */ function _registerComponent(component) {
-    const componentName = component.name;
-    if (_components.has(componentName)) {
-        logger.debug(`There were multiple attempts to register component ${componentName}.`);
-        return false;
-    }
-    _components.set(componentName, component);
-    // add the component to existing app instances
-    for (const app of _apps.values())_addComponent(app, component);
-    return true;
-}
-/**
- *
- * @param app - FirebaseApp instance
- * @param name - service name
- *
- * @returns the provider for the service with the matching name
- *
- * @internal
- */ function _getProvider(app, name1) {
-    const heartbeatController = app.container.getProvider("heartbeat").getImmediate({
-        optional: true
-    });
-    if (heartbeatController) heartbeatController.triggerHeartbeat();
-    return app.container.getProvider(name1);
-}
-/**
- *
- * @param app - FirebaseApp instance
- * @param name - service name
- * @param instanceIdentifier - service instance identifier in case the service supports multiple instances
- *
- * @internal
- */ function _removeServiceInstance(app, name2, instanceIdentifier = DEFAULT_ENTRY_NAME) {
-    _getProvider(app, name2).clearInstance(instanceIdentifier);
-}
-/**
- * Test only
- *
- * @internal
- */ function _clearComponents() {
-    _components.clear();
-}
-/**
- * @license
- * Copyright 2019 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */ const ERRORS = {
-    ["no-app" /* AppError.NO_APP */ ]: "No Firebase App '{$appName}' has been created - call initializeApp() first",
-    ["bad-app-name" /* AppError.BAD_APP_NAME */ ]: "Illegal App name: '{$appName}",
-    ["duplicate-app" /* AppError.DUPLICATE_APP */ ]: "Firebase App named '{$appName}' already exists with different options or config",
-    ["app-deleted" /* AppError.APP_DELETED */ ]: "Firebase App named '{$appName}' already deleted",
-    ["no-options" /* AppError.NO_OPTIONS */ ]: "Need to provide options, when not being deployed to hosting via source.",
-    ["invalid-app-argument" /* AppError.INVALID_APP_ARGUMENT */ ]: "firebase.{$appName}() takes either no argument or a Firebase App instance.",
-    ["invalid-log-argument" /* AppError.INVALID_LOG_ARGUMENT */ ]: "First argument to `onLog` must be null or a function.",
-    ["idb-open" /* AppError.IDB_OPEN */ ]: "Error thrown when opening IndexedDB. Original error: {$originalErrorMessage}.",
-    ["idb-get" /* AppError.IDB_GET */ ]: "Error thrown when reading from IndexedDB. Original error: {$originalErrorMessage}.",
-    ["idb-set" /* AppError.IDB_WRITE */ ]: "Error thrown when writing to IndexedDB. Original error: {$originalErrorMessage}.",
-    ["idb-delete" /* AppError.IDB_DELETE */ ]: "Error thrown when deleting from IndexedDB. Original error: {$originalErrorMessage}."
-};
-const ERROR_FACTORY = new (0, _util.ErrorFactory)("app", "Firebase", ERRORS);
-/**
- * @license
- * Copyright 2019 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */ class FirebaseAppImpl {
-    constructor(options, config, container){
-        this._isDeleted = false;
-        this._options = Object.assign({}, options);
-        this._config = Object.assign({}, config);
-        this._name = config.name;
-        this._automaticDataCollectionEnabled = config.automaticDataCollectionEnabled;
-        this._container = container;
-        this.container.addComponent(new (0, _component.Component)("app", ()=>this, "PUBLIC" /* ComponentType.PUBLIC */ ));
-    }
-    get automaticDataCollectionEnabled() {
-        this.checkDestroyed();
-        return this._automaticDataCollectionEnabled;
-    }
-    set automaticDataCollectionEnabled(val) {
-        this.checkDestroyed();
-        this._automaticDataCollectionEnabled = val;
-    }
-    get name() {
-        this.checkDestroyed();
-        return this._name;
-    }
-    get options() {
-        this.checkDestroyed();
-        return this._options;
-    }
-    get config() {
-        this.checkDestroyed();
-        return this._config;
-    }
-    get container() {
-        return this._container;
-    }
-    get isDeleted() {
-        return this._isDeleted;
-    }
-    set isDeleted(val) {
-        this._isDeleted = val;
-    }
-    /**
-     * This function will throw an Error if the App has already been deleted -
-     * use before performing API actions on the App.
-     */ checkDestroyed() {
-        if (this.isDeleted) throw ERROR_FACTORY.create("app-deleted" /* AppError.APP_DELETED */ , {
-            appName: this._name
-        });
-    }
-}
-/**
- * @license
- * Copyright 2019 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */ /**
- * The current SDK version.
- *
- * @public
- */ const SDK_VERSION = version;
-function initializeApp(_options, rawConfig = {}) {
-    let options = _options;
-    if (typeof rawConfig !== "object") {
-        const name3 = rawConfig;
-        rawConfig = {
-            name: name3
-        };
-    }
-    const config = Object.assign({
-        name: DEFAULT_ENTRY_NAME,
-        automaticDataCollectionEnabled: false
-    }, rawConfig);
-    const name4 = config.name;
-    if (typeof name4 !== "string" || !name4) throw ERROR_FACTORY.create("bad-app-name" /* AppError.BAD_APP_NAME */ , {
-        appName: String(name4)
-    });
-    options || (options = (0, _util.getDefaultAppConfig)());
-    if (!options) throw ERROR_FACTORY.create("no-options" /* AppError.NO_OPTIONS */ );
-    const existingApp = _apps.get(name4);
-    if (existingApp) {
-        // return the existing app if options and config deep equal the ones in the existing app.
-        if ((0, _util.deepEqual)(options, existingApp.options) && (0, _util.deepEqual)(config, existingApp.config)) return existingApp;
-        else throw ERROR_FACTORY.create("duplicate-app" /* AppError.DUPLICATE_APP */ , {
-            appName: name4
-        });
-    }
-    const container = new (0, _component.ComponentContainer)(name4);
-    for (const component of _components.values())container.addComponent(component);
-    const newApp = new FirebaseAppImpl(options, config, container);
-    _apps.set(name4, newApp);
-    return newApp;
-}
-/**
- * Retrieves a {@link @firebase/app#FirebaseApp} instance.
- *
- * When called with no arguments, the default app is returned. When an app name
- * is provided, the app corresponding to that name is returned.
- *
- * An exception is thrown if the app being retrieved has not yet been
- * initialized.
- *
- * @example
- * ```javascript
- * // Return the default app
- * const app = getApp();
- * ```
- *
- * @example
- * ```javascript
- * // Return a named app
- * const otherApp = getApp("otherApp");
- * ```
- *
- * @param name - Optional name of the app to return. If no name is
- *   provided, the default is `"[DEFAULT]"`.
- *
- * @returns The app corresponding to the provided app name.
- *   If no app name is provided, the default app is returned.
- *
- * @public
- */ function getApp(name5 = DEFAULT_ENTRY_NAME) {
-    const app = _apps.get(name5);
-    if (!app && name5 === DEFAULT_ENTRY_NAME && (0, _util.getDefaultAppConfig)()) return initializeApp();
-    if (!app) throw ERROR_FACTORY.create("no-app" /* AppError.NO_APP */ , {
-        appName: name5
-    });
-    return app;
-}
-/**
- * A (read-only) array of all initialized apps.
- * @public
- */ function getApps() {
-    return Array.from(_apps.values());
-}
-/**
- * Renders this app unusable and frees the resources of all associated
- * services.
- *
- * @example
- * ```javascript
- * deleteApp(app)
- *   .then(function() {
- *     console.log("App deleted successfully");
- *   })
- *   .catch(function(error) {
- *     console.log("Error deleting app:", error);
- *   });
- * ```
- *
- * @public
- */ async function deleteApp(app) {
-    const name6 = app.name;
-    if (_apps.has(name6)) {
-        _apps.delete(name6);
-        await Promise.all(app.container.getProviders().map((provider)=>provider.delete()));
-        app.isDeleted = true;
-    }
-}
-/**
- * Registers a library's name and version for platform logging purposes.
- * @param library - Name of 1p or 3p library (e.g. firestore, angularfire)
- * @param version - Current version of that library.
- * @param variant - Bundle variant, e.g., node, rn, etc.
- *
- * @public
- */ function registerVersion(libraryKeyOrName, version1, variant) {
-    var _a;
-    // TODO: We can use this check to whitelist strings when/if we set up
-    // a good whitelist system.
-    let library = (_a = PLATFORM_LOG_STRING[libraryKeyOrName]) !== null && _a !== void 0 ? _a : libraryKeyOrName;
-    if (variant) library += `-${variant}`;
-    const libraryMismatch = library.match(/\s|\//);
-    const versionMismatch = version1.match(/\s|\//);
-    if (libraryMismatch || versionMismatch) {
-        const warning = [
-            `Unable to register library "${library}" with version "${version1}":`
-        ];
-        if (libraryMismatch) warning.push(`library name "${library}" contains illegal characters (whitespace or "/")`);
-        if (libraryMismatch && versionMismatch) warning.push("and");
-        if (versionMismatch) warning.push(`version name "${version1}" contains illegal characters (whitespace or "/")`);
-        logger.warn(warning.join(" "));
-        return;
-    }
-    _registerComponent(new (0, _component.Component)(`${library}-version`, ()=>({
-            library,
-            version: version1
-        }), "VERSION" /* ComponentType.VERSION */ ));
-}
-/**
- * Sets log handler for all Firebase SDKs.
- * @param logCallback - An optional custom log handler that executes user code whenever
- * the Firebase SDK makes a logging call.
- *
- * @public
- */ function onLog(logCallback, options) {
-    if (logCallback !== null && typeof logCallback !== "function") throw ERROR_FACTORY.create("invalid-log-argument" /* AppError.INVALID_LOG_ARGUMENT */ );
-    (0, _logger.setUserLogHandler)(logCallback, options);
-}
-/**
- * Sets log level for all Firebase SDKs.
- *
- * All of the log types above the current log level are captured (i.e. if
- * you set the log level to `info`, errors are logged, but `debug` and
- * `verbose` logs are not).
- *
- * @public
- */ function setLogLevel(logLevel) {
-    (0, _logger.setLogLevel)(logLevel);
-}
-/**
- * @license
- * Copyright 2021 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */ const DB_NAME = "firebase-heartbeat-database";
-const DB_VERSION = 1;
-const STORE_NAME = "firebase-heartbeat-store";
-let dbPromise = null;
-function getDbPromise() {
-    if (!dbPromise) dbPromise = (0, _idb.openDB)(DB_NAME, DB_VERSION, {
-        upgrade: (db, oldVersion)=>{
-            // We don't use 'break' in this switch statement, the fall-through
-            // behavior is what we want, because if there are multiple versions between
-            // the old version and the current version, we want ALL the migrations
-            // that correspond to those versions to run, not only the last one.
-            // eslint-disable-next-line default-case
-            switch(oldVersion){
-                case 0:
-                    try {
-                        db.createObjectStore(STORE_NAME);
-                    } catch (e) {
-                        // Safari/iOS browsers throw occasional exceptions on
-                        // db.createObjectStore() that may be a bug. Avoid blocking
-                        // the rest of the app functionality.
-                        console.warn(e);
-                    }
-            }
-        }
-    }).catch((e)=>{
-        throw ERROR_FACTORY.create("idb-open" /* AppError.IDB_OPEN */ , {
-            originalErrorMessage: e.message
-        });
-    });
-    return dbPromise;
-}
-async function readHeartbeatsFromIndexedDB(app) {
-    try {
-        const db = await getDbPromise();
-        const result = await db.transaction(STORE_NAME).objectStore(STORE_NAME).get(computeKey(app));
-        return result;
-    } catch (e) {
-        if (e instanceof (0, _util.FirebaseError)) logger.warn(e.message);
-        else {
-            const idbGetError = ERROR_FACTORY.create("idb-get" /* AppError.IDB_GET */ , {
-                originalErrorMessage: e === null || e === void 0 ? void 0 : e.message
-            });
-            logger.warn(idbGetError.message);
-        }
-    }
-}
-async function writeHeartbeatsToIndexedDB(app, heartbeatObject) {
-    try {
-        const db = await getDbPromise();
-        const tx = db.transaction(STORE_NAME, "readwrite");
-        const objectStore = tx.objectStore(STORE_NAME);
-        await objectStore.put(heartbeatObject, computeKey(app));
-        await tx.done;
-    } catch (e) {
-        if (e instanceof (0, _util.FirebaseError)) logger.warn(e.message);
-        else {
-            const idbGetError = ERROR_FACTORY.create("idb-set" /* AppError.IDB_WRITE */ , {
-                originalErrorMessage: e === null || e === void 0 ? void 0 : e.message
-            });
-            logger.warn(idbGetError.message);
-        }
-    }
-}
-function computeKey(app) {
-    return `${app.name}!${app.options.appId}`;
-}
-/**
- * @license
- * Copyright 2021 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */ const MAX_HEADER_BYTES = 1024;
-// 30 days
-const STORED_HEARTBEAT_RETENTION_MAX_MILLIS = 2592000000;
-class HeartbeatServiceImpl {
-    constructor(container){
-        this.container = container;
-        /**
-         * In-memory cache for heartbeats, used by getHeartbeatsHeader() to generate
-         * the header string.
-         * Stores one record per date. This will be consolidated into the standard
-         * format of one record per user agent string before being sent as a header.
-         * Populated from indexedDB when the controller is instantiated and should
-         * be kept in sync with indexedDB.
-         * Leave public for easier testing.
-         */ this._heartbeatsCache = null;
-        const app = this.container.getProvider("app").getImmediate();
-        this._storage = new HeartbeatStorageImpl(app);
-        this._heartbeatsCachePromise = this._storage.read().then((result)=>{
-            this._heartbeatsCache = result;
-            return result;
-        });
-    }
-    /**
-     * Called to report a heartbeat. The function will generate
-     * a HeartbeatsByUserAgent object, update heartbeatsCache, and persist it
-     * to IndexedDB.
-     * Note that we only store one heartbeat per day. So if a heartbeat for today is
-     * already logged, subsequent calls to this function in the same day will be ignored.
-     */ async triggerHeartbeat() {
-        var _a, _b;
-        const platformLogger = this.container.getProvider("platform-logger").getImmediate();
-        // This is the "Firebase user agent" string from the platform logger
-        // service, not the browser user agent.
-        const agent = platformLogger.getPlatformInfoString();
-        const date = getUTCDateString();
-        if (((_a = this._heartbeatsCache) === null || _a === void 0 ? void 0 : _a.heartbeats) == null) {
-            this._heartbeatsCache = await this._heartbeatsCachePromise;
-            // If we failed to construct a heartbeats cache, then return immediately.
-            if (((_b = this._heartbeatsCache) === null || _b === void 0 ? void 0 : _b.heartbeats) == null) return;
-        }
-        // Do not store a heartbeat if one is already stored for this day
-        // or if a header has already been sent today.
-        if (this._heartbeatsCache.lastSentHeartbeatDate === date || this._heartbeatsCache.heartbeats.some((singleDateHeartbeat)=>singleDateHeartbeat.date === date)) return;
-        else // There is no entry for this date. Create one.
-        this._heartbeatsCache.heartbeats.push({
-            date,
-            agent
-        });
-        // Remove entries older than 30 days.
-        this._heartbeatsCache.heartbeats = this._heartbeatsCache.heartbeats.filter((singleDateHeartbeat)=>{
-            const hbTimestamp = new Date(singleDateHeartbeat.date).valueOf();
-            const now = Date.now();
-            return now - hbTimestamp <= STORED_HEARTBEAT_RETENTION_MAX_MILLIS;
-        });
-        return this._storage.overwrite(this._heartbeatsCache);
-    }
-    /**
-     * Returns a base64 encoded string which can be attached to the heartbeat-specific header directly.
-     * It also clears all heartbeats from memory as well as in IndexedDB.
-     *
-     * NOTE: Consuming product SDKs should not send the header if this method
-     * returns an empty string.
-     */ async getHeartbeatsHeader() {
-        var _a;
-        if (this._heartbeatsCache === null) await this._heartbeatsCachePromise;
-        // If it's still null or the array is empty, there is no data to send.
-        if (((_a = this._heartbeatsCache) === null || _a === void 0 ? void 0 : _a.heartbeats) == null || this._heartbeatsCache.heartbeats.length === 0) return "";
-        const date = getUTCDateString();
-        // Extract as many heartbeats from the cache as will fit under the size limit.
-        const { heartbeatsToSend , unsentEntries  } = extractHeartbeatsForHeader(this._heartbeatsCache.heartbeats);
-        const headerString = (0, _util.base64urlEncodeWithoutPadding)(JSON.stringify({
-            version: 2,
-            heartbeats: heartbeatsToSend
-        }));
-        // Store last sent date to prevent another being logged/sent for the same day.
-        this._heartbeatsCache.lastSentHeartbeatDate = date;
-        if (unsentEntries.length > 0) {
-            // Store any unsent entries if they exist.
-            this._heartbeatsCache.heartbeats = unsentEntries;
-            // This seems more likely than emptying the array (below) to lead to some odd state
-            // since the cache isn't empty and this will be called again on the next request,
-            // and is probably safest if we await it.
-            await this._storage.overwrite(this._heartbeatsCache);
-        } else {
-            this._heartbeatsCache.heartbeats = [];
-            this._storage.overwrite(this._heartbeatsCache);
-        }
-        return headerString;
-    }
-}
-function getUTCDateString() {
-    const today = new Date();
-    // Returns date format 'YYYY-MM-DD'
-    return today.toISOString().substring(0, 10);
-}
-function extractHeartbeatsForHeader(heartbeatsCache, maxSize = MAX_HEADER_BYTES) {
-    // Heartbeats grouped by user agent in the standard format to be sent in
-    // the header.
-    const heartbeatsToSend = [];
-    // Single date format heartbeats that are not sent.
-    let unsentEntries = heartbeatsCache.slice();
-    for (const singleDateHeartbeat of heartbeatsCache){
-        // Look for an existing entry with the same user agent.
-        const heartbeatEntry = heartbeatsToSend.find((hb)=>hb.agent === singleDateHeartbeat.agent);
-        if (!heartbeatEntry) {
-            // If no entry for this user agent exists, create one.
-            heartbeatsToSend.push({
-                agent: singleDateHeartbeat.agent,
-                dates: [
-                    singleDateHeartbeat.date
-                ]
-            });
-            if (countBytes(heartbeatsToSend) > maxSize) {
-                // If the header would exceed max size, remove the added heartbeat
-                // entry and stop adding to the header.
-                heartbeatsToSend.pop();
-                break;
-            }
-        } else {
-            heartbeatEntry.dates.push(singleDateHeartbeat.date);
-            // If the header would exceed max size, remove the added date
-            // and stop adding to the header.
-            if (countBytes(heartbeatsToSend) > maxSize) {
-                heartbeatEntry.dates.pop();
-                break;
-            }
-        }
-        // Pop unsent entry from queue. (Skipped if adding the entry exceeded
-        // quota and the loop breaks early.)
-        unsentEntries = unsentEntries.slice(1);
-    }
-    return {
-        heartbeatsToSend,
-        unsentEntries
+},{"process":"d5jf4","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"gkKU3":[function(require,module,exports) {
+exports.interopDefault = function(a) {
+    return a && a.__esModule ? a : {
+        default: a
     };
-}
-class HeartbeatStorageImpl {
-    constructor(app){
-        this.app = app;
-        this._canUseIndexedDBPromise = this.runIndexedDBEnvironmentCheck();
-    }
-    async runIndexedDBEnvironmentCheck() {
-        if (!(0, _util.isIndexedDBAvailable)()) return false;
-        else return (0, _util.validateIndexedDBOpenable)().then(()=>true).catch(()=>false);
-    }
-    /**
-     * Read all heartbeats.
-     */ async read() {
-        const canUseIndexedDB = await this._canUseIndexedDBPromise;
-        if (!canUseIndexedDB) return {
-            heartbeats: []
-        };
-        else {
-            const idbHeartbeatObject = await readHeartbeatsFromIndexedDB(this.app);
-            if (idbHeartbeatObject === null || idbHeartbeatObject === void 0 ? void 0 : idbHeartbeatObject.heartbeats) return idbHeartbeatObject;
-            else return {
-                heartbeats: []
-            };
-        }
-    }
-    // overwrite the storage with the provided heartbeats
-    async overwrite(heartbeatsObject) {
-        var _a;
-        const canUseIndexedDB = await this._canUseIndexedDBPromise;
-        if (!canUseIndexedDB) return;
-        else {
-            const existingHeartbeatsObject = await this.read();
-            return writeHeartbeatsToIndexedDB(this.app, {
-                lastSentHeartbeatDate: (_a = heartbeatsObject.lastSentHeartbeatDate) !== null && _a !== void 0 ? _a : existingHeartbeatsObject.lastSentHeartbeatDate,
-                heartbeats: heartbeatsObject.heartbeats
-            });
-        }
-    }
-    // add heartbeats
-    async add(heartbeatsObject) {
-        var _a;
-        const canUseIndexedDB = await this._canUseIndexedDBPromise;
-        if (!canUseIndexedDB) return;
-        else {
-            const existingHeartbeatsObject = await this.read();
-            return writeHeartbeatsToIndexedDB(this.app, {
-                lastSentHeartbeatDate: (_a = heartbeatsObject.lastSentHeartbeatDate) !== null && _a !== void 0 ? _a : existingHeartbeatsObject.lastSentHeartbeatDate,
-                heartbeats: [
-                    ...existingHeartbeatsObject.heartbeats,
-                    ...heartbeatsObject.heartbeats
-                ]
-            });
-        }
-    }
-}
-/**
- * Calculate bytes of a HeartbeatsByUserAgent array after being wrapped
- * in a platform logging header JSON object, stringified, and converted
- * to base 64.
- */ function countBytes(heartbeatsCache) {
-    // base64 has a restricted set of characters, all of which should be 1 byte.
-    return (0, _util.base64urlEncodeWithoutPadding)(// heartbeatsCache wrapper properties
-    JSON.stringify({
-        version: 2,
-        heartbeats: heartbeatsCache
-    })).length;
-}
-/**
- * @license
- * Copyright 2019 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */ function registerCoreComponents(variant) {
-    _registerComponent(new (0, _component.Component)("platform-logger", (container)=>new PlatformLoggerServiceImpl(container), "PRIVATE" /* ComponentType.PRIVATE */ ));
-    _registerComponent(new (0, _component.Component)("heartbeat", (container)=>new HeartbeatServiceImpl(container), "PRIVATE" /* ComponentType.PRIVATE */ ));
-    // Register `app` package.
-    registerVersion(name$o, version$1, variant);
-    // BUILD_TARGET will be replaced by values like esm5, esm2017, cjs5, etc during the compilation
-    registerVersion(name$o, version$1, "esm2017");
-    // Register platform SDK identifier (no version).
-    registerVersion("fire-js", "");
-}
-/**
- * Firebase App
- *
- * @remarks This package coordinates the communication between the different Firebase components
- * @packageDocumentation
- */ registerCoreComponents("");
-
-},{"@firebase/component":"bi1VB","@firebase/logger":"fZmft","@firebase/util":"ePiK6","idb":"kozAz","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"bi1VB":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "Component", ()=>Component);
-parcelHelpers.export(exports, "ComponentContainer", ()=>ComponentContainer);
-parcelHelpers.export(exports, "Provider", ()=>Provider);
-var _util = require("@firebase/util");
-/**
- * Component for service name T, e.g. `auth`, `auth-internal`
- */ class Component {
-    /**
-     *
-     * @param name The public service name, e.g. app, auth, firestore, database
-     * @param instanceFactory Service factory responsible for creating the public interface
-     * @param type whether the service provided by the component is public or private
-     */ constructor(name, instanceFactory, type){
-        this.name = name;
-        this.instanceFactory = instanceFactory;
-        this.type = type;
-        this.multipleInstances = false;
-        /**
-         * Properties to be added to the service namespace
-         */ this.serviceProps = {};
-        this.instantiationMode = "LAZY" /* InstantiationMode.LAZY */ ;
-        this.onInstanceCreated = null;
-    }
-    setInstantiationMode(mode) {
-        this.instantiationMode = mode;
-        return this;
-    }
-    setMultipleInstances(multipleInstances) {
-        this.multipleInstances = multipleInstances;
-        return this;
-    }
-    setServiceProps(props) {
-        this.serviceProps = props;
-        return this;
-    }
-    setInstanceCreatedCallback(callback) {
-        this.onInstanceCreated = callback;
-        return this;
-    }
-}
-/**
- * @license
- * Copyright 2019 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */ const DEFAULT_ENTRY_NAME = "[DEFAULT]";
-/**
- * @license
- * Copyright 2019 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */ /**
- * Provider for instance for service name T, e.g. 'auth', 'auth-internal'
- * NameServiceMapping[T] is an alias for the type of the instance
- */ class Provider {
-    constructor(name, container){
-        this.name = name;
-        this.container = container;
-        this.component = null;
-        this.instances = new Map();
-        this.instancesDeferred = new Map();
-        this.instancesOptions = new Map();
-        this.onInitCallbacks = new Map();
-    }
-    /**
-     * @param identifier A provider can provide mulitple instances of a service
-     * if this.component.multipleInstances is true.
-     */ get(identifier) {
-        // if multipleInstances is not supported, use the default name
-        const normalizedIdentifier = this.normalizeInstanceIdentifier(identifier);
-        if (!this.instancesDeferred.has(normalizedIdentifier)) {
-            const deferred = new (0, _util.Deferred)();
-            this.instancesDeferred.set(normalizedIdentifier, deferred);
-            if (this.isInitialized(normalizedIdentifier) || this.shouldAutoInitialize()) // initialize the service if it can be auto-initialized
-            try {
-                const instance = this.getOrInitializeService({
-                    instanceIdentifier: normalizedIdentifier
-                });
-                if (instance) deferred.resolve(instance);
-            } catch (e) {
-            // when the instance factory throws an exception during get(), it should not cause
-            // a fatal error. We just return the unresolved promise in this case.
+};
+exports.defineInteropFlag = function(a) {
+    Object.defineProperty(a, "__esModule", {
+        value: true
+    });
+};
+exports.exportAll = function(source, dest) {
+    Object.keys(source).forEach(function(key) {
+        if (key === "default" || key === "__esModule" || dest.hasOwnProperty(key)) return;
+        Object.defineProperty(dest, key, {
+            enumerable: true,
+            get: function() {
+                return source[key];
             }
-        }
-        return this.instancesDeferred.get(normalizedIdentifier).promise;
-    }
-    getImmediate(options) {
-        var _a;
-        // if multipleInstances is not supported, use the default name
-        const normalizedIdentifier = this.normalizeInstanceIdentifier(options === null || options === void 0 ? void 0 : options.identifier);
-        const optional = (_a = options === null || options === void 0 ? void 0 : options.optional) !== null && _a !== void 0 ? _a : false;
-        if (this.isInitialized(normalizedIdentifier) || this.shouldAutoInitialize()) try {
-            return this.getOrInitializeService({
-                instanceIdentifier: normalizedIdentifier
-            });
-        } catch (e) {
-            if (optional) return null;
-            else throw e;
-        }
-        else {
-            // In case a component is not initialized and should/can not be auto-initialized at the moment, return null if the optional flag is set, or throw
-            if (optional) return null;
-            else throw Error(`Service ${this.name} is not available`);
-        }
-    }
-    getComponent() {
-        return this.component;
-    }
-    setComponent(component) {
-        if (component.name !== this.name) throw Error(`Mismatching Component ${component.name} for Provider ${this.name}.`);
-        if (this.component) throw Error(`Component for ${this.name} has already been provided`);
-        this.component = component;
-        // return early without attempting to initialize the component if the component requires explicit initialization (calling `Provider.initialize()`)
-        if (!this.shouldAutoInitialize()) return;
-        // if the service is eager, initialize the default instance
-        if (isComponentEager(component)) try {
-            this.getOrInitializeService({
-                instanceIdentifier: DEFAULT_ENTRY_NAME
-            });
-        } catch (e) {
-        // when the instance factory for an eager Component throws an exception during the eager
-        // initialization, it should not cause a fatal error.
-        // TODO: Investigate if we need to make it configurable, because some component may want to cause
-        // a fatal error in this case?
-        }
-        // Create service instances for the pending promises and resolve them
-        // NOTE: if this.multipleInstances is false, only the default instance will be created
-        // and all promises with resolve with it regardless of the identifier.
-        for (const [instanceIdentifier, instanceDeferred] of this.instancesDeferred.entries()){
-            const normalizedIdentifier = this.normalizeInstanceIdentifier(instanceIdentifier);
-            try {
-                // `getOrInitializeService()` should always return a valid instance since a component is guaranteed. use ! to make typescript happy.
-                const instance = this.getOrInitializeService({
-                    instanceIdentifier: normalizedIdentifier
-                });
-                instanceDeferred.resolve(instance);
-            } catch (e) {
-            // when the instance factory throws an exception, it should not cause
-            // a fatal error. We just leave the promise unresolved.
-            }
-        }
-    }
-    clearInstance(identifier = DEFAULT_ENTRY_NAME) {
-        this.instancesDeferred.delete(identifier);
-        this.instancesOptions.delete(identifier);
-        this.instances.delete(identifier);
-    }
-    // app.delete() will call this method on every provider to delete the services
-    // TODO: should we mark the provider as deleted?
-    async delete() {
-        const services = Array.from(this.instances.values());
-        await Promise.all([
-            ...services.filter((service)=>"INTERNAL" in service) // legacy services
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            .map((service)=>service.INTERNAL.delete()),
-            ...services.filter((service)=>"_delete" in service) // modularized services
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            .map((service)=>service._delete())
-        ]);
-    }
-    isComponentSet() {
-        return this.component != null;
-    }
-    isInitialized(identifier = DEFAULT_ENTRY_NAME) {
-        return this.instances.has(identifier);
-    }
-    getOptions(identifier = DEFAULT_ENTRY_NAME) {
-        return this.instancesOptions.get(identifier) || {};
-    }
-    initialize(opts = {}) {
-        const { options ={}  } = opts;
-        const normalizedIdentifier = this.normalizeInstanceIdentifier(opts.instanceIdentifier);
-        if (this.isInitialized(normalizedIdentifier)) throw Error(`${this.name}(${normalizedIdentifier}) has already been initialized`);
-        if (!this.isComponentSet()) throw Error(`Component ${this.name} has not been registered yet`);
-        const instance = this.getOrInitializeService({
-            instanceIdentifier: normalizedIdentifier,
-            options
         });
-        // resolve any pending promise waiting for the service instance
-        for (const [instanceIdentifier, instanceDeferred] of this.instancesDeferred.entries()){
-            const normalizedDeferredIdentifier = this.normalizeInstanceIdentifier(instanceIdentifier);
-            if (normalizedIdentifier === normalizedDeferredIdentifier) instanceDeferred.resolve(instance);
-        }
-        return instance;
-    }
-    /**
-     *
-     * @param callback - a function that will be invoked  after the provider has been initialized by calling provider.initialize().
-     * The function is invoked SYNCHRONOUSLY, so it should not execute any longrunning tasks in order to not block the program.
-     *
-     * @param identifier An optional instance identifier
-     * @returns a function to unregister the callback
-     */ onInit(callback, identifier) {
-        var _a;
-        const normalizedIdentifier = this.normalizeInstanceIdentifier(identifier);
-        const existingCallbacks = (_a = this.onInitCallbacks.get(normalizedIdentifier)) !== null && _a !== void 0 ? _a : new Set();
-        existingCallbacks.add(callback);
-        this.onInitCallbacks.set(normalizedIdentifier, existingCallbacks);
-        const existingInstance = this.instances.get(normalizedIdentifier);
-        if (existingInstance) callback(existingInstance, normalizedIdentifier);
-        return ()=>{
-            existingCallbacks.delete(callback);
-        };
-    }
-    /**
-     * Invoke onInit callbacks synchronously
-     * @param instance the service instance`
-     */ invokeOnInitCallbacks(instance, identifier) {
-        const callbacks = this.onInitCallbacks.get(identifier);
-        if (!callbacks) return;
-        for (const callback of callbacks)try {
-            callback(instance, identifier);
-        } catch (_a) {
-        // ignore errors in the onInit callback
-        }
-    }
-    getOrInitializeService({ instanceIdentifier , options ={}  }) {
-        let instance = this.instances.get(instanceIdentifier);
-        if (!instance && this.component) {
-            instance = this.component.instanceFactory(this.container, {
-                instanceIdentifier: normalizeIdentifierForFactory(instanceIdentifier),
-                options
-            });
-            this.instances.set(instanceIdentifier, instance);
-            this.instancesOptions.set(instanceIdentifier, options);
-            /**
-             * Invoke onInit listeners.
-             * Note this.component.onInstanceCreated is different, which is used by the component creator,
-             * while onInit listeners are registered by consumers of the provider.
-             */ this.invokeOnInitCallbacks(instance, instanceIdentifier);
-            /**
-             * Order is important
-             * onInstanceCreated() should be called after this.instances.set(instanceIdentifier, instance); which
-             * makes `isInitialized()` return true.
-             */ if (this.component.onInstanceCreated) try {
-                this.component.onInstanceCreated(this.container, instanceIdentifier, instance);
-            } catch (_a) {
-            // ignore errors in the onInstanceCreatedCallback
-            }
-        }
-        return instance || null;
-    }
-    normalizeInstanceIdentifier(identifier = DEFAULT_ENTRY_NAME) {
-        if (this.component) return this.component.multipleInstances ? identifier : DEFAULT_ENTRY_NAME;
-        else return identifier; // assume multiple instances are supported before the component is provided.
-    }
-    shouldAutoInitialize() {
-        return !!this.component && this.component.instantiationMode !== "EXPLICIT" /* InstantiationMode.EXPLICIT */ ;
-    }
-}
-// undefined should be passed to the service factory for the default instance
-function normalizeIdentifierForFactory(identifier) {
-    return identifier === DEFAULT_ENTRY_NAME ? undefined : identifier;
-}
-function isComponentEager(component) {
-    return component.instantiationMode === "EAGER" /* InstantiationMode.EAGER */ ;
-}
-/**
- * @license
- * Copyright 2019 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */ /**
- * ComponentContainer that provides Providers for service name T, e.g. `auth`, `auth-internal`
- */ class ComponentContainer {
-    constructor(name){
-        this.name = name;
-        this.providers = new Map();
-    }
-    /**
-     *
-     * @param component Component being added
-     * @param overwrite When a component with the same name has already been registered,
-     * if overwrite is true: overwrite the existing component with the new component and create a new
-     * provider with the new component. It can be useful in tests where you want to use different mocks
-     * for different tests.
-     * if overwrite is false: throw an exception
-     */ addComponent(component) {
-        const provider = this.getProvider(component.name);
-        if (provider.isComponentSet()) throw new Error(`Component ${component.name} has already been registered with ${this.name}`);
-        provider.setComponent(component);
-    }
-    addOrOverwriteComponent(component) {
-        const provider = this.getProvider(component.name);
-        if (provider.isComponentSet()) // delete the existing provider from the container, so we can register the new component
-        this.providers.delete(component.name);
-        this.addComponent(component);
-    }
-    /**
-     * getProvider provides a type safe interface where it can only be called with a field name
-     * present in NameServiceMapping interface.
-     *
-     * Firebase SDKs providing services should extend NameServiceMapping interface to register
-     * themselves.
-     */ getProvider(name) {
-        if (this.providers.has(name)) return this.providers.get(name);
-        // create a Provider for a service that hasn't registered with Firebase
-        const provider = new Provider(name, this);
-        this.providers.set(name, provider);
-        return provider;
-    }
-    getProviders() {
-        return Array.from(this.providers.values());
-    }
-}
+    });
+    return dest;
+};
+exports.export = function(dest, destName, get) {
+    Object.defineProperty(dest, destName, {
+        enumerable: true,
+        get: get
+    });
+};
 
-},{"@firebase/util":"ePiK6","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"fZmft":[function(require,module,exports) {
+},{}],"fZmft":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "LogLevel", ()=>LogLevel);
@@ -11350,7 +11479,107 @@ function wrap(value) {
 }
 const unwrap = (value)=>reverseTransformCache.get(value);
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"lRdW5":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"79vzg":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+var _auth = require("@firebase/auth");
+parcelHelpers.exportAll(_auth, exports);
+
+},{"@firebase/auth":"khbwD","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"khbwD":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "ActionCodeOperation", ()=>(0, _indexDd468B12Js.A));
+parcelHelpers.export(exports, "ActionCodeURL", ()=>(0, _indexDd468B12Js.ai));
+parcelHelpers.export(exports, "AuthCredential", ()=>(0, _indexDd468B12Js.L));
+parcelHelpers.export(exports, "AuthErrorCodes", ()=>(0, _indexDd468B12Js.I));
+parcelHelpers.export(exports, "EmailAuthCredential", ()=>(0, _indexDd468B12Js.M));
+parcelHelpers.export(exports, "EmailAuthProvider", ()=>(0, _indexDd468B12Js.V));
+parcelHelpers.export(exports, "FacebookAuthProvider", ()=>(0, _indexDd468B12Js.W));
+parcelHelpers.export(exports, "FactorId", ()=>(0, _indexDd468B12Js.F));
+parcelHelpers.export(exports, "GithubAuthProvider", ()=>(0, _indexDd468B12Js.Y));
+parcelHelpers.export(exports, "GoogleAuthProvider", ()=>(0, _indexDd468B12Js.X));
+parcelHelpers.export(exports, "OAuthCredential", ()=>(0, _indexDd468B12Js.N));
+parcelHelpers.export(exports, "OAuthProvider", ()=>(0, _indexDd468B12Js.Z));
+parcelHelpers.export(exports, "OperationType", ()=>(0, _indexDd468B12Js.O));
+parcelHelpers.export(exports, "PhoneAuthCredential", ()=>(0, _indexDd468B12Js.Q));
+parcelHelpers.export(exports, "PhoneAuthProvider", ()=>(0, _indexDd468B12Js.P));
+parcelHelpers.export(exports, "PhoneMultiFactorGenerator", ()=>(0, _indexDd468B12Js.m));
+parcelHelpers.export(exports, "ProviderId", ()=>(0, _indexDd468B12Js.p));
+parcelHelpers.export(exports, "RecaptchaVerifier", ()=>(0, _indexDd468B12Js.R));
+parcelHelpers.export(exports, "SAMLAuthProvider", ()=>(0, _indexDd468B12Js._));
+parcelHelpers.export(exports, "SignInMethod", ()=>(0, _indexDd468B12Js.S));
+parcelHelpers.export(exports, "TotpMultiFactorGenerator", ()=>(0, _indexDd468B12Js.T));
+parcelHelpers.export(exports, "TotpSecret", ()=>(0, _indexDd468B12Js.n));
+parcelHelpers.export(exports, "TwitterAuthProvider", ()=>(0, _indexDd468B12Js.$));
+parcelHelpers.export(exports, "applyActionCode", ()=>(0, _indexDd468B12Js.a7));
+parcelHelpers.export(exports, "beforeAuthStateChanged", ()=>(0, _indexDd468B12Js.x));
+parcelHelpers.export(exports, "browserLocalPersistence", ()=>(0, _indexDd468B12Js.b));
+parcelHelpers.export(exports, "browserPopupRedirectResolver", ()=>(0, _indexDd468B12Js.k));
+parcelHelpers.export(exports, "browserSessionPersistence", ()=>(0, _indexDd468B12Js.a));
+parcelHelpers.export(exports, "checkActionCode", ()=>(0, _indexDd468B12Js.a8));
+parcelHelpers.export(exports, "confirmPasswordReset", ()=>(0, _indexDd468B12Js.a6));
+parcelHelpers.export(exports, "connectAuthEmulator", ()=>(0, _indexDd468B12Js.K));
+parcelHelpers.export(exports, "createUserWithEmailAndPassword", ()=>(0, _indexDd468B12Js.aa));
+parcelHelpers.export(exports, "debugErrorMap", ()=>(0, _indexDd468B12Js.G));
+parcelHelpers.export(exports, "deleteUser", ()=>(0, _indexDd468B12Js.E));
+parcelHelpers.export(exports, "fetchSignInMethodsForEmail", ()=>(0, _indexDd468B12Js.af));
+parcelHelpers.export(exports, "getAdditionalUserInfo", ()=>(0, _indexDd468B12Js.aq));
+parcelHelpers.export(exports, "getAuth", ()=>(0, _indexDd468B12Js.o));
+parcelHelpers.export(exports, "getIdToken", ()=>(0, _indexDd468B12Js.an));
+parcelHelpers.export(exports, "getIdTokenResult", ()=>(0, _indexDd468B12Js.ao));
+parcelHelpers.export(exports, "getMultiFactorResolver", ()=>(0, _indexDd468B12Js.as));
+parcelHelpers.export(exports, "getRedirectResult", ()=>(0, _indexDd468B12Js.j));
+parcelHelpers.export(exports, "inMemoryPersistence", ()=>(0, _indexDd468B12Js.U));
+parcelHelpers.export(exports, "indexedDBLocalPersistence", ()=>(0, _indexDd468B12Js.i));
+parcelHelpers.export(exports, "initializeAuth", ()=>(0, _indexDd468B12Js.J));
+parcelHelpers.export(exports, "initializeRecaptchaConfig", ()=>(0, _indexDd468B12Js.t));
+parcelHelpers.export(exports, "isSignInWithEmailLink", ()=>(0, _indexDd468B12Js.ad));
+parcelHelpers.export(exports, "linkWithCredential", ()=>(0, _indexDd468B12Js.a2));
+parcelHelpers.export(exports, "linkWithPhoneNumber", ()=>(0, _indexDd468B12Js.l));
+parcelHelpers.export(exports, "linkWithPopup", ()=>(0, _indexDd468B12Js.d));
+parcelHelpers.export(exports, "linkWithRedirect", ()=>(0, _indexDd468B12Js.g));
+parcelHelpers.export(exports, "multiFactor", ()=>(0, _indexDd468B12Js.at));
+parcelHelpers.export(exports, "onAuthStateChanged", ()=>(0, _indexDd468B12Js.y));
+parcelHelpers.export(exports, "onIdTokenChanged", ()=>(0, _indexDd468B12Js.w));
+parcelHelpers.export(exports, "parseActionCodeURL", ()=>(0, _indexDd468B12Js.aj));
+parcelHelpers.export(exports, "prodErrorMap", ()=>(0, _indexDd468B12Js.H));
+parcelHelpers.export(exports, "reauthenticateWithCredential", ()=>(0, _indexDd468B12Js.a3));
+parcelHelpers.export(exports, "reauthenticateWithPhoneNumber", ()=>(0, _indexDd468B12Js.r));
+parcelHelpers.export(exports, "reauthenticateWithPopup", ()=>(0, _indexDd468B12Js.e));
+parcelHelpers.export(exports, "reauthenticateWithRedirect", ()=>(0, _indexDd468B12Js.h));
+parcelHelpers.export(exports, "reload", ()=>(0, _indexDd468B12Js.ar));
+parcelHelpers.export(exports, "revokeAccessToken", ()=>(0, _indexDd468B12Js.D));
+parcelHelpers.export(exports, "sendEmailVerification", ()=>(0, _indexDd468B12Js.ag));
+parcelHelpers.export(exports, "sendPasswordResetEmail", ()=>(0, _indexDd468B12Js.a5));
+parcelHelpers.export(exports, "sendSignInLinkToEmail", ()=>(0, _indexDd468B12Js.ac));
+parcelHelpers.export(exports, "setPersistence", ()=>(0, _indexDd468B12Js.q));
+parcelHelpers.export(exports, "signInAnonymously", ()=>(0, _indexDd468B12Js.a0));
+parcelHelpers.export(exports, "signInWithCredential", ()=>(0, _indexDd468B12Js.a1));
+parcelHelpers.export(exports, "signInWithCustomToken", ()=>(0, _indexDd468B12Js.a4));
+parcelHelpers.export(exports, "signInWithEmailAndPassword", ()=>(0, _indexDd468B12Js.ab));
+parcelHelpers.export(exports, "signInWithEmailLink", ()=>(0, _indexDd468B12Js.ae));
+parcelHelpers.export(exports, "signInWithPhoneNumber", ()=>(0, _indexDd468B12Js.s));
+parcelHelpers.export(exports, "signInWithPopup", ()=>(0, _indexDd468B12Js.c));
+parcelHelpers.export(exports, "signInWithRedirect", ()=>(0, _indexDd468B12Js.f));
+parcelHelpers.export(exports, "signOut", ()=>(0, _indexDd468B12Js.C));
+parcelHelpers.export(exports, "unlink", ()=>(0, _indexDd468B12Js.ap));
+parcelHelpers.export(exports, "updateCurrentUser", ()=>(0, _indexDd468B12Js.B));
+parcelHelpers.export(exports, "updateEmail", ()=>(0, _indexDd468B12Js.al));
+parcelHelpers.export(exports, "updatePassword", ()=>(0, _indexDd468B12Js.am));
+parcelHelpers.export(exports, "updatePhoneNumber", ()=>(0, _indexDd468B12Js.u));
+parcelHelpers.export(exports, "updateProfile", ()=>(0, _indexDd468B12Js.ak));
+parcelHelpers.export(exports, "useDeviceLanguage", ()=>(0, _indexDd468B12Js.z));
+parcelHelpers.export(exports, "validatePassword", ()=>(0, _indexDd468B12Js.v));
+parcelHelpers.export(exports, "verifyBeforeUpdateEmail", ()=>(0, _indexDd468B12Js.ah));
+parcelHelpers.export(exports, "verifyPasswordResetCode", ()=>(0, _indexDd468B12Js.a9));
+var _util = require("@firebase/util");
+var _app = require("@firebase/app");
+var _logger = require("@firebase/logger");
+var _tslib = require("tslib");
+var _component = require("@firebase/component");
+var _indexDd468B12Js = require("./index-dd468b12.js");
+
+},{"@firebase/util":"ePiK6","@firebase/app":"3AcPV","@firebase/logger":"fZmft","tslib":"lRdW5","@firebase/component":"bi1VB","./index-dd468b12.js":"du6lR","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"lRdW5":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "__extends", ()=>__extends);
@@ -43382,223 +43611,7 @@ var XhrIo = esm.XhrIo = P;
 var Md5 = esm.Md5 = S;
 var Integer = esm.Integer = T;
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"47T64":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "auth", ()=>auth);
-parcelHelpers.export(exports, "db", ()=>db);
-var _app = require("firebase/app");
-var _auth = require("firebase/auth");
-var _firestore = require("firebase/firestore");
-var _notiflixNotifyAio = require("notiflix/build/notiflix-notify-aio");
-const firebaseConfig = {
-    apiKey: "AIzaSyDfHEoFiYmKRqd8-ktFcO7zg3QLGxAViQc",
-    authDomain: "board-games-saver.firebaseapp.com",
-    projectId: "board-games-saver",
-    storageBucket: "board-games-saver.appspot.com",
-    messagingSenderId: "169567859472",
-    appId: "1:169567859472:web:e0c9f6634ae06726902b95",
-    measurementId: "G-F504L5EW8F"
-};
-// Initialize Firebase
-const app = (0, _app.initializeApp)(firebaseConfig);
-const auth = (0, _auth.getAuth)(app);
-const db = (0, _firestore.getFirestore)(app);
-const menuContainerEl = document.querySelector(".menu-container");
-const loginMenuEl = document.querySelector(".login-menu");
-const menuEl = document.querySelector(".menu");
-const addGameButtonEl = document.querySelector(".add-game");
-const loginButtonEl = document.querySelector(".signin-button");
-const signupButtonEl = document.querySelector(".signup-button");
-const logoutButtonEl = document.querySelector(".logout-button");
-const modalOverlayEl = document.querySelector(".login-modal-overlay");
-const loginFormEl = document.querySelector("[id='login-form']");
-const signupFormEl = document.querySelector("[id='signup-form']");
-const googleButtonEls = document.querySelectorAll(".google-button");
-const closeModalButtonEls = document.querySelectorAll(".close-modal");
-const submitFormButtonsEl = document.querySelectorAll("button[type='submit']");
-// const userData = {};
-loginButtonEl.addEventListener("click", (e)=>showModal(e));
-signupButtonEl.addEventListener("click", (e)=>showModal(e));
-logoutButtonEl.addEventListener("click", logout);
-closeModalButtonEls.forEach((btn)=>btn.addEventListener("click", closeModal));
-submitFormButtonsEl.forEach((btn)=>btn.addEventListener("click", (e)=>submitForm(e)));
-googleButtonEls.forEach((btn)=>btn.addEventListener("click", (e)=>loginWithGoogle(e)));
-(0, _auth.onAuthStateChanged)(auth, (user)=>{
-    if (user) // User is signed in
-    showMenu();
-    else // User is signed out
-    hideMenu();
-});
-function showModal(e) {
-    const button = e.currentTarget;
-    modalOverlayEl.classList.remove("hidden");
-    if (button.classList.contains("signin-button")) {
-        signupFormEl.style.display = "none";
-        loginFormEl.style.display = "flex";
-    } else {
-        signupFormEl.style.display = "flex";
-        loginFormEl.style.display = "none";
-    }
-}
-function closeModal() {
-    modalOverlayEl.classList.add("hidden");
-}
-function submitForm(e) {
-    e.preventDefault();
-    const submitButton = e.currentTarget;
-    const formData = new FormData(submitButton.parentElement, submitButton);
-    let email = null;
-    let password = null;
-    let passwordConfirmation = null;
-    for (const [key, value] of formData)switch(key){
-        case "email":
-            email = value.trim();
-            break;
-        case "password":
-            password = value.trim();
-            break;
-        case "password-confirmation":
-            passwordConfirmation = value.trim();
-            break;
-    }
-    if (submitButton.dataset.action === "login-submit-btn") {
-        if (validation(email, password)) // Sign in
-        (0, _auth.signInWithEmailAndPassword)(auth, email, password).then((userCredential)=>{
-            (0, _notiflixNotifyAio.Notify).success("Successfully signed in");
-            // Signed in
-            const user = userCredential.user;
-            // userData.id = user.uid;
-            // userData.email = user.email;
-            // userData.createdAt = user.metadata.creationTime;
-            // userData.name = "User";
-            closeModal();
-        }).catch((error)=>{
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            (0, _notiflixNotifyAio.Notify).failure("Sorry, something went wrong");
-        });
-    }
-    if (submitButton.dataset.action === "signup-submit-btn") {
-        if (password !== passwordConfirmation) {
-            (0, _notiflixNotifyAio.Notify).failure("Password doesn't match");
-            return;
-        } else if (validation(email, password)) // Sign up new users
-        (0, _auth.createUserWithEmailAndPassword)(auth, email, password).then((userCredential)=>{
-            (0, _notiflixNotifyAio.Notify).success("Successfully signed up");
-            // Signed up 
-            const user = userCredential.user;
-            setUserDataToStorage(user);
-            closeModal();
-        }).catch((error)=>{
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            (0, _notiflixNotifyAio.Notify).failure("Sorry, something went wrong");
-        });
-    }
-}
-function loginWithGoogle(e) {
-    const button = e.currentTarget;
-    const provider = new (0, _auth.GoogleAuthProvider)();
-    (0, _auth.signInWithPopup)(auth, provider).then((result)=>{
-        // This gives you a Google Access Token. You can use it to access the Google API.
-        const credential = (0, _auth.GoogleAuthProvider).credentialFromResult(result);
-        const token = credential.accessToken;
-        // The signed-in user info.
-        const user = result.user;
-        if (button.dataset.action === "login-google-btn") (0, _notiflixNotifyAio.Notify).success("Successfully signed in");
-        else {
-            (0, _notiflixNotifyAio.Notify).success("Successfully signed up");
-            setUserDataToStorage(user);
-        }
-        closeModal();
-    // IdP data available using getAdditionalUserInfo(result)
-    // ...
-    }).catch((error)=>{
-        // Handle Errors here.
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        // The email of the user's account used.
-        const email = error.customData.email;
-        // The AuthCredential type that was used.
-        const credential = (0, _auth.GoogleAuthProvider).credentialFromError(error);
-        (0, _notiflixNotifyAio.Notify).failure("Sorry, something went wrong");
-    });
-}
-function showMenu() {
-    loginMenuEl.classList.add("hidden");
-    menuEl.classList.remove("hidden");
-    if (addGameButtonEl) addGameButtonEl.classList.remove("hidden");
-}
-function hideMenu() {
-    loginMenuEl.classList.remove("hidden");
-    menuEl.classList.add("hidden");
-    if (addGameButtonEl) addGameButtonEl.classList.add("hidden");
-}
-function validation(email, password) {
-    if (!email || !password) {
-        (0, _notiflixNotifyAio.Notify).failure("Email or password is empty");
-        return;
-    }
-    if (password.length < 6) {
-        (0, _notiflixNotifyAio.Notify).failure("Password length should be at least 6 symbols");
-        return;
-    }
-    if (!email.includes("@")) {
-        (0, _notiflixNotifyAio.Notify).failure("Email is not valid");
-        return;
-    }
-    return true;
-}
-function logout() {
-    (0, _auth.signOut)(auth).then((res)=>{
-        (0, _notiflixNotifyAio.Notify).success("Successfully signed out");
-    }).catch((err)=>{
-        console.error(err);
-        (0, _notiflixNotifyAio.Notify).failure("Sorry, something went wrong");
-    });
-}
-async function setUserDataToStorage(user) {
-    try {
-        const usersRef = (0, _firestore.collection)(db, "users");
-        await (0, _firestore.setDoc)((0, _firestore.doc)(usersRef, user.uid), {
-            user: {
-                id: user.uid,
-                email: user.email,
-                name: user.displayName || "User",
-                createdAt: user.metadata.creationTime
-            }
-        });
-    } catch (e) {
-        console.error("Error adding document: ", e);
-    }
-}
-
-},{"firebase/app":"aM3Fo","firebase/auth":"79vzg","notiflix/build/notiflix-notify-aio":"eXQLZ","firebase/firestore":"8A4BC","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"aM3Fo":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-var _app = require("@firebase/app");
-parcelHelpers.exportAll(_app, exports);
-var name = "firebase";
-var version = "10.7.2";
-/**
- * @license
- * Copyright 2020 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */ (0, _app.registerVersion)(name, version, "app");
-
-},{"@firebase/app":"3AcPV","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"eXQLZ":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"eXQLZ":[function(require,module,exports) {
 var global = arguments[3];
 /*
 * Notiflix Notify AIO (https://notiflix.github.io)
@@ -44068,6 +44081,9 @@ var global = arguments[3];
 });
 
 },{}],"1RWSs":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "getCurrentUserData", ()=>getCurrentUserData);
 var _auth = require("firebase/auth");
 var _login = require("./login");
 var _firestore = require("firebase/firestore");
@@ -44081,24 +44097,465 @@ function renderPlayedGames() {
     // const currentUser = getAuth().currentUser;
     (0, _auth.onAuthStateChanged)((0, _login.auth), async (user)=>{
         if (user) {
-            const userId = user.uid;
-            const currentUserDocRef = (0, _firestore.doc)((0, _login.db), "users", userId);
-            const currentUserDoc = await (0, _firestore.getDoc)(currentUserDocRef);
-            const docData = currentUserDoc.data();
+            const docData = await getCurrentUserData(user);
             gameItemTemplate(docData.games);
         }
     });
 }
 function gameItemTemplate(data) {
     playedGamesListEl.innerHTML = "";
+    if (!data) return;
     data.forEach((game)=>{
         const gameListItem = document.createElement("li");
         gameListItem.classList.add("game-list-item");
-        gameListItem.innerHTML = `<div><p>${game.name}</p><img class="thumbnail" src=${game.url}></div><a href="../partials/add_plays.html"><span class="number-of-plays ">0</span>plays</a>`;
+        gameListItem.innerHTML = `<div><p>${game.name}</p><img class="thumbnail" src=${game.url}></div><a href="../../partials/add_plays.html?id=${game.id}"><span class="number-of-plays ">0</span>plays</a>`;
         playedGamesListEl.insertAdjacentElement("beforeend", gameListItem);
     });
 }
+async function getCurrentUserData(user) {
+    const userId = user.uid;
+    const currentUserDocRef = (0, _firestore.doc)((0, _login.db), "users", userId);
+    const currentUserDoc = await (0, _firestore.getDoc)(currentUserDocRef);
+    return currentUserDoc.data();
+}
 
-},{"firebase/firestore":"8A4BC","./login":"47T64","firebase/auth":"79vzg"}]},["1RB6v","8lqZg"], "8lqZg", "parcelRequired7c6")
+},{"firebase/auth":"79vzg","./login":"47T64","firebase/firestore":"8A4BC","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"crlNm":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+var _gameList = require("./game_list");
+var _auth = require("firebase/auth");
+var _login = require("./login");
+var _notiflixNotifyAio = require("notiflix/build/notiflix-notify-aio");
+var _firestore = require("firebase/firestore");
+var _gameSearch = require("./game_search");
+var _lodashDebounce = require("lodash.debounce");
+var _lodashDebounceDefault = parcelHelpers.interopDefault(_lodashDebounce);
+const gameToScoreEl = document.querySelector(".game-to-score");
+const addPlayerModalOverlay = document.querySelector(".add-player-modal-overlay");
+const searchParams = new URLSearchParams(window.location.search);
+const playerSelectEl = document.querySelector("#player-select");
+const closePlayerModalButtonEl = document.querySelector(".close-player-modal");
+const playsEl = document.querySelector(".plays");
+const dateEl = document.querySelector(".date");
+const playersFormEl = document.querySelector(".players-form");
+if (playerSelectEl) {
+    playerSelectEl.addEventListener("change", (e)=>addNewPlayer(e));
+    closePlayerModalButtonEl.addEventListener("click", closePlayerModal);
+    const submitFormButtonEl = document.querySelector("button[type='submit']");
+    submitFormButtonEl.addEventListener("click", (e)=>submitPlayerForm(e));
+}
+let id = null;
+let docData = null;
+if (searchParams) {
+    id = searchParams.get("id");
+    if (id) renderGameToScore();
+}
+async function renderGameToScore() {
+    (0, _auth.onAuthStateChanged)((0, _login.auth), async (user)=>{
+        if (user) {
+            docData = await (0, _gameList.getCurrentUserData)(user);
+            gameTemplate(docData.games);
+            renderPlayers();
+        }
+    });
+}
+function gameTemplate(games) {
+    for (const game of games)if (game.id === id) {
+        gameToScoreEl.innerHTML = `<div><p>${game.name}</p><img class="thumbnail" src=${game.url}></div>`;
+        return;
+    }
+}
+function renderPlayers() {
+    [
+        ...playerSelectEl.children
+    ].forEach((child)=>{
+        if (child.value !== "") {
+            if (child.value !== "new-player") child.remove();
+        }
+    });
+    docData.players.forEach((player)=>{
+        const option = document.createElement("option");
+        option.innerHTML = player.name;
+        option.setAttribute("value", player.name);
+        option.dataset.id = player.id;
+        playerSelectEl.firstElementChild.after(option);
+    });
+}
+function addNewPlayer(e1) {
+    const select = e1.target;
+    const value = select.value;
+    if (value === "new-player") addPlayerModalOverlay.classList.remove("hidden");
+    else if (value !== "") {
+        [
+            ...select.children
+        ].forEach((option)=>{
+            if (option.selected) select.dataset.id = option.dataset.id;
+        });
+        let shouldBeRendered = true;
+        const playsLabel = document.createElement("label");
+        playsLabel.setAttribute("player-name", value);
+        playsLabel.innerHTML = `${value}<input type="number" id=${select.dataset.id} name=${value} value="0">`;
+        if (playsEl.children.length > 0) {
+            for (const label of [
+                ...playsEl.children
+            ])if (label.getAttribute("player-name") === value) {
+                shouldBeRendered = false;
+                (0, _notiflixNotifyAio.Notify).failure(`Player ${name} was already added`);
+                return;
+            }
+            if (shouldBeRendered) {
+                playsEl.insertAdjacentElement("beforeend", playsLabel);
+                const playsInputEls = playsEl.querySelectorAll("input");
+                playsInputEls.forEach((input)=>input.addEventListener("keydown", (0, _lodashDebounceDefault.default)((e)=>setScore(e), 500)));
+            }
+        } else {
+            playsEl.insertAdjacentElement("beforeend", playsLabel);
+            const playsInputEls = playsEl.querySelectorAll("input");
+            playsInputEls.forEach((input)=>input.addEventListener("keydown", (0, _lodashDebounceDefault.default)((e)=>setScore(e), 500)));
+        }
+    }
+}
+function submitPlayerForm(e) {
+    e.preventDefault();
+    const submitButton = e.currentTarget;
+    const form = submitButton.parentElement;
+    const formData = new FormData(submitButton.parentElement, submitButton);
+    let name = null;
+    let validate = true;
+    for (const [key, value] of formData)if (key === "name") name = value.trim();
+    if (name.length > 0) {
+        docData.players.forEach((player)=>{
+            if (player.name.toLowerCase() === name.toLowerCase()) {
+                (0, _notiflixNotifyAio.Notify).failure(`Player with name ${name} already exists`);
+                validate = false;
+            }
+        });
+        if (validate) {
+            const player = {
+                name,
+                id: Date.now()
+            };
+            addPlayerToPlayers(player);
+            renderPlayers();
+            form.reset();
+            closePlayerModal();
+        }
+    } else (0, _notiflixNotifyAio.Notify).failure(`Name field shouldn't be empty`);
+}
+function closePlayerModal() {
+    addPlayerModalOverlay.classList.add("hidden");
+}
+async function addPlayerToPlayers(player) {
+    if (docData) try {
+        docData.players.push(player);
+        console.log("data", docData);
+        await (0, _firestore.updateDoc)((0, _gameSearch.getCurrentUserDocRef)(), docData);
+        (0, _notiflixNotifyAio.Notify).success("The player is added successfully");
+    } catch (e) {
+        console.error("Error adding player: ", e);
+    }
+}
+async function setScore(e) {
+    const option = e.target;
+    const play = {
+        date: dateEl.value,
+        playerId: option.id,
+        score: option.value
+    };
+    if (docData) try {
+        docData.plays.push(play);
+        console.log("data", docData);
+        await (0, _firestore.updateDoc)((0, _gameSearch.getCurrentUserDocRef)(), docData);
+        (0, _notiflixNotifyAio.Notify).success("The score is added successfully");
+    } catch (e2) {
+        console.error("Error adding score: ", e2);
+    }
+}
+
+},{"./game_list":"1RWSs","firebase/auth":"79vzg","./login":"47T64","notiflix/build/notiflix-notify-aio":"eXQLZ","firebase/firestore":"8A4BC","./game_search":"eYq3g","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","lodash.debounce":"3JP5n"}],"3JP5n":[function(require,module,exports) {
+var global = arguments[3];
+/**
+ * lodash (Custom Build) <https://lodash.com/>
+ * Build: `lodash modularize exports="npm" -o ./`
+ * Copyright jQuery Foundation and other contributors <https://jquery.org/>
+ * Released under MIT license <https://lodash.com/license>
+ * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+ * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ */ /** Used as the `TypeError` message for "Functions" methods. */ var FUNC_ERROR_TEXT = "Expected a function";
+/** Used as references for various `Number` constants. */ var NAN = 0 / 0;
+/** `Object#toString` result references. */ var symbolTag = "[object Symbol]";
+/** Used to match leading and trailing whitespace. */ var reTrim = /^\s+|\s+$/g;
+/** Used to detect bad signed hexadecimal string values. */ var reIsBadHex = /^[-+]0x[0-9a-f]+$/i;
+/** Used to detect binary string values. */ var reIsBinary = /^0b[01]+$/i;
+/** Used to detect octal string values. */ var reIsOctal = /^0o[0-7]+$/i;
+/** Built-in method references without a dependency on `root`. */ var freeParseInt = parseInt;
+/** Detect free variable `global` from Node.js. */ var freeGlobal = typeof global == "object" && global && global.Object === Object && global;
+/** Detect free variable `self`. */ var freeSelf = typeof self == "object" && self && self.Object === Object && self;
+/** Used as a reference to the global object. */ var root = freeGlobal || freeSelf || Function("return this")();
+/** Used for built-in method references. */ var objectProto = Object.prototype;
+/**
+ * Used to resolve the
+ * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+ * of values.
+ */ var objectToString = objectProto.toString;
+/* Built-in method references for those with the same name as other `lodash` methods. */ var nativeMax = Math.max, nativeMin = Math.min;
+/**
+ * Gets the timestamp of the number of milliseconds that have elapsed since
+ * the Unix epoch (1 January 1970 00:00:00 UTC).
+ *
+ * @static
+ * @memberOf _
+ * @since 2.4.0
+ * @category Date
+ * @returns {number} Returns the timestamp.
+ * @example
+ *
+ * _.defer(function(stamp) {
+ *   console.log(_.now() - stamp);
+ * }, _.now());
+ * // => Logs the number of milliseconds it took for the deferred invocation.
+ */ var now = function() {
+    return root.Date.now();
+};
+/**
+ * Creates a debounced function that delays invoking `func` until after `wait`
+ * milliseconds have elapsed since the last time the debounced function was
+ * invoked. The debounced function comes with a `cancel` method to cancel
+ * delayed `func` invocations and a `flush` method to immediately invoke them.
+ * Provide `options` to indicate whether `func` should be invoked on the
+ * leading and/or trailing edge of the `wait` timeout. The `func` is invoked
+ * with the last arguments provided to the debounced function. Subsequent
+ * calls to the debounced function return the result of the last `func`
+ * invocation.
+ *
+ * **Note:** If `leading` and `trailing` options are `true`, `func` is
+ * invoked on the trailing edge of the timeout only if the debounced function
+ * is invoked more than once during the `wait` timeout.
+ *
+ * If `wait` is `0` and `leading` is `false`, `func` invocation is deferred
+ * until to the next tick, similar to `setTimeout` with a timeout of `0`.
+ *
+ * See [David Corbacho's article](https://css-tricks.com/debouncing-throttling-explained-examples/)
+ * for details over the differences between `_.debounce` and `_.throttle`.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Function
+ * @param {Function} func The function to debounce.
+ * @param {number} [wait=0] The number of milliseconds to delay.
+ * @param {Object} [options={}] The options object.
+ * @param {boolean} [options.leading=false]
+ *  Specify invoking on the leading edge of the timeout.
+ * @param {number} [options.maxWait]
+ *  The maximum time `func` is allowed to be delayed before it's invoked.
+ * @param {boolean} [options.trailing=true]
+ *  Specify invoking on the trailing edge of the timeout.
+ * @returns {Function} Returns the new debounced function.
+ * @example
+ *
+ * // Avoid costly calculations while the window size is in flux.
+ * jQuery(window).on('resize', _.debounce(calculateLayout, 150));
+ *
+ * // Invoke `sendMail` when clicked, debouncing subsequent calls.
+ * jQuery(element).on('click', _.debounce(sendMail, 300, {
+ *   'leading': true,
+ *   'trailing': false
+ * }));
+ *
+ * // Ensure `batchLog` is invoked once after 1 second of debounced calls.
+ * var debounced = _.debounce(batchLog, 250, { 'maxWait': 1000 });
+ * var source = new EventSource('/stream');
+ * jQuery(source).on('message', debounced);
+ *
+ * // Cancel the trailing debounced invocation.
+ * jQuery(window).on('popstate', debounced.cancel);
+ */ function debounce(func, wait, options) {
+    var lastArgs, lastThis, maxWait, result1, timerId, lastCallTime, lastInvokeTime = 0, leading = false, maxing = false, trailing = true;
+    if (typeof func != "function") throw new TypeError(FUNC_ERROR_TEXT);
+    wait = toNumber(wait) || 0;
+    if (isObject(options)) {
+        leading = !!options.leading;
+        maxing = "maxWait" in options;
+        maxWait = maxing ? nativeMax(toNumber(options.maxWait) || 0, wait) : maxWait;
+        trailing = "trailing" in options ? !!options.trailing : trailing;
+    }
+    function invokeFunc(time) {
+        var args = lastArgs, thisArg = lastThis;
+        lastArgs = lastThis = undefined;
+        lastInvokeTime = time;
+        result1 = func.apply(thisArg, args);
+        return result1;
+    }
+    function leadingEdge(time) {
+        // Reset any `maxWait` timer.
+        lastInvokeTime = time;
+        // Start the timer for the trailing edge.
+        timerId = setTimeout(timerExpired, wait);
+        // Invoke the leading edge.
+        return leading ? invokeFunc(time) : result1;
+    }
+    function remainingWait(time) {
+        var timeSinceLastCall = time - lastCallTime, timeSinceLastInvoke = time - lastInvokeTime, result = wait - timeSinceLastCall;
+        return maxing ? nativeMin(result, maxWait - timeSinceLastInvoke) : result;
+    }
+    function shouldInvoke(time) {
+        var timeSinceLastCall = time - lastCallTime, timeSinceLastInvoke = time - lastInvokeTime;
+        // Either this is the first call, activity has stopped and we're at the
+        // trailing edge, the system time has gone backwards and we're treating
+        // it as the trailing edge, or we've hit the `maxWait` limit.
+        return lastCallTime === undefined || timeSinceLastCall >= wait || timeSinceLastCall < 0 || maxing && timeSinceLastInvoke >= maxWait;
+    }
+    function timerExpired() {
+        var time = now();
+        if (shouldInvoke(time)) return trailingEdge(time);
+        // Restart the timer.
+        timerId = setTimeout(timerExpired, remainingWait(time));
+    }
+    function trailingEdge(time) {
+        timerId = undefined;
+        // Only invoke if we have `lastArgs` which means `func` has been
+        // debounced at least once.
+        if (trailing && lastArgs) return invokeFunc(time);
+        lastArgs = lastThis = undefined;
+        return result1;
+    }
+    function cancel() {
+        if (timerId !== undefined) clearTimeout(timerId);
+        lastInvokeTime = 0;
+        lastArgs = lastCallTime = lastThis = timerId = undefined;
+    }
+    function flush() {
+        return timerId === undefined ? result1 : trailingEdge(now());
+    }
+    function debounced() {
+        var time = now(), isInvoking = shouldInvoke(time);
+        lastArgs = arguments;
+        lastThis = this;
+        lastCallTime = time;
+        if (isInvoking) {
+            if (timerId === undefined) return leadingEdge(lastCallTime);
+            if (maxing) {
+                // Handle invocations in a tight loop.
+                timerId = setTimeout(timerExpired, wait);
+                return invokeFunc(lastCallTime);
+            }
+        }
+        if (timerId === undefined) timerId = setTimeout(timerExpired, wait);
+        return result1;
+    }
+    debounced.cancel = cancel;
+    debounced.flush = flush;
+    return debounced;
+}
+/**
+ * Checks if `value` is the
+ * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
+ * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+ * @example
+ *
+ * _.isObject({});
+ * // => true
+ *
+ * _.isObject([1, 2, 3]);
+ * // => true
+ *
+ * _.isObject(_.noop);
+ * // => true
+ *
+ * _.isObject(null);
+ * // => false
+ */ function isObject(value) {
+    var type = typeof value;
+    return !!value && (type == "object" || type == "function");
+}
+/**
+ * Checks if `value` is object-like. A value is object-like if it's not `null`
+ * and has a `typeof` result of "object".
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ * @example
+ *
+ * _.isObjectLike({});
+ * // => true
+ *
+ * _.isObjectLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isObjectLike(_.noop);
+ * // => false
+ *
+ * _.isObjectLike(null);
+ * // => false
+ */ function isObjectLike(value) {
+    return !!value && typeof value == "object";
+}
+/**
+ * Checks if `value` is classified as a `Symbol` primitive or object.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
+ * @example
+ *
+ * _.isSymbol(Symbol.iterator);
+ * // => true
+ *
+ * _.isSymbol('abc');
+ * // => false
+ */ function isSymbol(value) {
+    return typeof value == "symbol" || isObjectLike(value) && objectToString.call(value) == symbolTag;
+}
+/**
+ * Converts `value` to a number.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to process.
+ * @returns {number} Returns the number.
+ * @example
+ *
+ * _.toNumber(3.2);
+ * // => 3.2
+ *
+ * _.toNumber(Number.MIN_VALUE);
+ * // => 5e-324
+ *
+ * _.toNumber(Infinity);
+ * // => Infinity
+ *
+ * _.toNumber('3.2');
+ * // => 3.2
+ */ function toNumber(value) {
+    if (typeof value == "number") return value;
+    if (isSymbol(value)) return NAN;
+    if (isObject(value)) {
+        var other = typeof value.valueOf == "function" ? value.valueOf() : value;
+        value = isObject(other) ? other + "" : other;
+    }
+    if (typeof value != "string") return value === 0 ? value : +value;
+    value = value.replace(reTrim, "");
+    var isBinary = reIsBinary.test(value);
+    return isBinary || reIsOctal.test(value) ? freeParseInt(value.slice(2), isBinary ? 2 : 8) : reIsBadHex.test(value) ? NAN : +value;
+}
+module.exports = debounce;
+
+},{}]},["1RB6v","8lqZg"], "8lqZg", "parcelRequired7c6")
 
 //# sourceMappingURL=index.975ef6c8.js.map

@@ -1,4 +1,4 @@
-import {getAuth, onAuthStateChanged} from "firebase/auth";
+import {onAuthStateChanged} from "firebase/auth";
 import {auth} from "./login";
 import {doc, getDoc} from "firebase/firestore";
 import {db} from "./login";
@@ -16,11 +16,7 @@ function renderPlayedGames() {
 
     onAuthStateChanged(auth, async user => {
         if (user) {
-            const userId = user.uid;
-
-            const currentUserDocRef = doc(db, "users", userId);
-            const currentUserDoc = await getDoc(currentUserDocRef);
-            const docData = currentUserDoc.data();
+            const docData = await getCurrentUserData(user);
             gameItemTemplate(docData.games)
 
         }
@@ -29,11 +25,23 @@ function renderPlayedGames() {
 
 function gameItemTemplate(data) {
     playedGamesListEl.innerHTML = "";
+
+    if (!data) {
+        return;
+    }
+
     data.forEach(game => {
         const gameListItem = document.createElement("li");
         gameListItem.classList.add("game-list-item");
-        gameListItem.innerHTML =`<div><p>${game.name}</p><img class="thumbnail" src=${game.url}></div><a href="../../partials/add_plays.html"><span class="number-of-plays ">0</span>plays</a>`
+        gameListItem.innerHTML =`<div><p>${game.name}</p><img class="thumbnail" src=${game.url}></div><a href="../../partials/add_plays.html?id=${game.id}"><span class="number-of-plays ">0</span>plays</a>`
         playedGamesListEl.insertAdjacentElement("beforeend", gameListItem);
     })
 }
 
+export async function getCurrentUserData(user) {
+    const userId = user.uid;
+
+    const currentUserDocRef = doc(db, "users", userId);
+    const currentUserDoc = await getDoc(currentUserDocRef);
+    return currentUserDoc.data();
+}

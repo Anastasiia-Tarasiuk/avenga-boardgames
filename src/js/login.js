@@ -19,7 +19,6 @@ export const auth = getAuth(app);
 // Initialize Cloud Firestore and get a reference to the service
 export const db = getFirestore(app);
 
-const menuContainerEl = document.querySelector(".menu-container");
 const loginMenuEl = document.querySelector(".login-menu");
 const menuEl = document.querySelector(".menu");
 const addGameButtonEl = document.querySelector(".add-game");
@@ -30,16 +29,19 @@ const modalOverlayEl = document.querySelector(".login-modal-overlay");
 const loginFormEl = document.querySelector("[id='login-form']");
 const signupFormEl = document.querySelector("[id='signup-form']");
 const googleButtonEls = document.querySelectorAll(".google-button");
-const closeModalButtonEls = document.querySelectorAll(".close-modal");
-const submitFormButtonsEl = document.querySelectorAll("button[type='submit']");
+const closeLoginModalButtonEls = document.querySelectorAll(".close-login-modal");
 
-// const userData = {};
+if (modalOverlayEl) {
+    const submitFormButtonsEl = modalOverlayEl.querySelectorAll("button[type='submit']");
+    submitFormButtonsEl.forEach(btn => btn.addEventListener("click", (e) => submitLoginForm(e)));
+}
+
 
 loginButtonEl.addEventListener("click", (e) => showModal(e));
 signupButtonEl.addEventListener("click", (e) => showModal(e));
 logoutButtonEl.addEventListener("click", logout)
-closeModalButtonEls.forEach(btn => btn.addEventListener("click", closeModal));
-submitFormButtonsEl.forEach(btn => btn.addEventListener("click", (e) => submitForm(e)));
+closeLoginModalButtonEls.forEach(btn => btn.addEventListener("click", closeLoginModal));
+
 googleButtonEls.forEach(btn => btn.addEventListener("click", (e) => loginWithGoogle(e)));
 
 onAuthStateChanged(auth, (user) => {
@@ -68,11 +70,11 @@ function showModal(e) {
     }
 }
 
-function closeModal() {
+function closeLoginModal() {
     modalOverlayEl.classList.add('hidden');
 }
 
-function submitForm(e) {
+function submitLoginForm(e) {
     e.preventDefault();
     const submitButton = e.currentTarget;
    
@@ -109,7 +111,7 @@ function submitForm(e) {
                 // userData.createdAt = user.metadata.creationTime;
                 // userData.name = "User";
 
-                closeModal();
+                closeLoginModal();
             })
             .catch((error) => {
                 const errorCode = error.code;
@@ -132,7 +134,7 @@ function submitForm(e) {
                 const user = userCredential.user;
                 setUserDataToStorage(user);
 
-                closeModal();
+                closeLoginModal();
             })
             .catch((error) => {
                 const errorCode = error.code;
@@ -161,8 +163,8 @@ function loginWithGoogle(e) {
                 Notify.success('Successfully signed up');
                 setUserDataToStorage(user);
             }
-            
-            closeModal();
+
+            closeLoginModal();
             // IdP data available using getAdditionalUserInfo(result)
             // ...
         })
@@ -237,7 +239,14 @@ async function setUserDataToStorage(user) {
                 email: user.email,
                 name: user.displayName || "User",
                 createdAt: user.metadata.creationTime
-            }
+            },
+            players: [
+                {
+                    id: user.uid,
+                    name: user.displayName || "You"
+                }
+            ],
+            plays: []
         })
     } catch (e) {
         console.error("Error adding document: ", e);

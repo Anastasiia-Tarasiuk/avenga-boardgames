@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "firebase": "^10.7.2",
+    "lodash.debounce": "^4.0.8",
     "modern-normalize": "^1.1.0",
     "notiflix": "^3.2.7",
     "xml-js": "^1.6.11"

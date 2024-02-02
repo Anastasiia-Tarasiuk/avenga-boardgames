@@ -168,8 +168,7 @@ function handleWrongSearchRequest(searchValue) {
 
 async function addGameToGames(_, game) {
     const gameId = game.id;
-    const currentUser = getAuth().currentUser;
-    const currentUserDocRef = doc(db, "users", currentUser.uid);
+    const currentUserDocRef = getCurrentUserDocRef();
     const currentUserDoc = await getDoc(currentUserDocRef);
     const docData = currentUserDoc.data();
     let gameExists = false;
@@ -202,4 +201,9 @@ async function addGameToGames(_, game) {
             console.error("Error adding game: ", e);
         }
     }
+}
+
+export function getCurrentUserDocRef() {
+    const currentUser = getAuth().currentUser;
+    return doc(db, "users", currentUser.uid);
 }
