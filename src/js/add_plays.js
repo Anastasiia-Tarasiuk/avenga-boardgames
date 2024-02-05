@@ -13,7 +13,7 @@ const playerSelectEl = document.querySelector("#player-select");
 const closePlayerModalButtonEl = document.querySelector(".close-player-modal");
 const playsEl = document.querySelector(".plays");
 const dateEl = document.querySelector(".date");
-const playersFormEl = document.querySelector(".players-form");
+// const playersFormEl = document.querySelector(".players-form");
 
 
 
@@ -26,6 +26,7 @@ if (playerSelectEl) {
 
 let id = null;
 let docData = null;
+const sessionId = Date.now();
 
 if (searchParams) {
     id = searchParams.get('id');
@@ -43,7 +44,6 @@ async function renderGameToScore() {
             renderPlayers();
         }
     });
-
 }
 
 function gameTemplate(games) {
@@ -102,13 +102,11 @@ function addNewPlayer(e) {
 
                 if (shouldBeRendered) {
                     playsEl.insertAdjacentElement("beforeend", playsLabel);
-                    const playsInputEls = playsEl.querySelectorAll("input");
-                    playsInputEls.forEach(input => input.addEventListener("keydown", debounce(e => setScore(e), 500)));
+                    playsLabel.querySelector("input").addEventListener("keydown", debounce(e => setScore(e), 1000));
                 }
             } else {
                 playsEl.insertAdjacentElement("beforeend", playsLabel);
-                const playsInputEls = playsEl.querySelectorAll("input");
-                playsInputEls.forEach(input => input.addEventListener("keydown", debounce(e => setScore(e), 500)));
+                playsLabel.querySelector("input").addEventListener("keydown", debounce(e => setScore(e), 1000));
             }
         }
     }
@@ -160,7 +158,6 @@ async function addPlayerToPlayers(player) {
     if (docData) {
         try {
             docData.players.push(player);
-            console.log("data", docData)
             await updateDoc(getCurrentUserDocRef(), docData);
             Notify.success('The player is added successfully');
         } catch (e) {
@@ -174,18 +171,37 @@ async function setScore(e) {
     const play = {
         date: dateEl.value,
         playerId: option.id,
-        score: option.value
+        score: option.value,
+        gameId: id,
+        sessionId: sessionId
     }
 
     if (docData) {
         try {
-            docData.plays.push(play);
-            console.log("data", docData)
+            if (docData.plays.length > 0) {
+                let isNewPlay = true;
+
+                for (const savedPlay of docData.plays) {
+                    if (savedPlay.sessionId === sessionId) {
+                        if (savedPlay.playerId === option.id) {
+                            savedPlay.score = option.value;
+                            isNewPlay = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (isNewPlay) {
+                    docData.plays.push(play);
+                }
+            } else {
+                docData.plays.push(play);
+            }
+
             await updateDoc(getCurrentUserDocRef(), docData);
             Notify.success('The score is added successfully');
         } catch (e) {
             console.error("Error adding score: ", e);
         }
     }
-
 }

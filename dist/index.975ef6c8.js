@@ -6011,8 +6011,8 @@ Object.defineProperty(Duplex.prototype, "destroyed", {
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
 "use strict";
-var global = arguments[3];
 var process = require("process");
+var global = arguments[3];
 module.exports = Writable;
 /* <replacement> */ function WriteReq(chunk, encoding, cb) {
     this.chunk = chunk;
@@ -44136,7 +44136,7 @@ const playerSelectEl = document.querySelector("#player-select");
 const closePlayerModalButtonEl = document.querySelector(".close-player-modal");
 const playsEl = document.querySelector(".plays");
 const dateEl = document.querySelector(".date");
-const playersFormEl = document.querySelector(".players-form");
+// const playersFormEl = document.querySelector(".players-form");
 if (playerSelectEl) {
     playerSelectEl.addEventListener("change", (e)=>addNewPlayer(e));
     closePlayerModalButtonEl.addEventListener("click", closePlayerModal);
@@ -44145,6 +44145,7 @@ if (playerSelectEl) {
 }
 let id = null;
 let docData = null;
+const sessionId = Date.now();
 if (searchParams) {
     id = searchParams.get("id");
     if (id) renderGameToScore();
@@ -44204,13 +44205,11 @@ function addNewPlayer(e1) {
             }
             if (shouldBeRendered) {
                 playsEl.insertAdjacentElement("beforeend", playsLabel);
-                const playsInputEls = playsEl.querySelectorAll("input");
-                playsInputEls.forEach((input)=>input.addEventListener("keydown", (0, _lodashDebounceDefault.default)((e)=>setScore(e), 500)));
+                playsLabel.querySelector("input").addEventListener("keydown", (0, _lodashDebounceDefault.default)((e)=>setScore(e), 1000));
             }
         } else {
             playsEl.insertAdjacentElement("beforeend", playsLabel);
-            const playsInputEls = playsEl.querySelectorAll("input");
-            playsInputEls.forEach((input)=>input.addEventListener("keydown", (0, _lodashDebounceDefault.default)((e)=>setScore(e), 500)));
+            playsLabel.querySelector("input").addEventListener("keydown", (0, _lodashDebounceDefault.default)((e)=>setScore(e), 1000));
         }
     }
 }
@@ -44247,7 +44246,6 @@ function closePlayerModal() {
 async function addPlayerToPlayers(player) {
     if (docData) try {
         docData.players.push(player);
-        console.log("data", docData);
         await (0, _firestore.updateDoc)((0, _gameSearch.getCurrentUserDocRef)(), docData);
         (0, _notiflixNotifyAio.Notify).success("The player is added successfully");
     } catch (e) {
@@ -44259,11 +44257,24 @@ async function setScore(e) {
     const play = {
         date: dateEl.value,
         playerId: option.id,
-        score: option.value
+        score: option.value,
+        gameId: id,
+        sessionId: sessionId
     };
     if (docData) try {
-        docData.plays.push(play);
-        console.log("data", docData);
+        if (docData.plays.length > 0) {
+            let isNewPlay = true;
+            for (const savedPlay of docData.plays){
+                if (savedPlay.sessionId === sessionId) {
+                    if (savedPlay.playerId === option.id) {
+                        savedPlay.score = option.value;
+                        isNewPlay = false;
+                        break;
+                    }
+                }
+            }
+            if (isNewPlay) docData.plays.push(play);
+        } else docData.plays.push(play);
         await (0, _firestore.updateDoc)((0, _gameSearch.getCurrentUserDocRef)(), docData);
         (0, _notiflixNotifyAio.Notify).success("The score is added successfully");
     } catch (e2) {
@@ -44271,7 +44282,7 @@ async function setScore(e) {
     }
 }
 
-},{"./game_list":"1RWSs","firebase/auth":"79vzg","./login":"47T64","notiflix/build/notiflix-notify-aio":"eXQLZ","firebase/firestore":"8A4BC","./game_search":"eYq3g","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","lodash.debounce":"3JP5n"}],"3JP5n":[function(require,module,exports) {
+},{"./game_list":"1RWSs","firebase/auth":"79vzg","./login":"47T64","notiflix/build/notiflix-notify-aio":"eXQLZ","firebase/firestore":"8A4BC","./game_search":"eYq3g","lodash.debounce":"3JP5n","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"3JP5n":[function(require,module,exports) {
 var global = arguments[3];
 /**
  * lodash (Custom Build) <https://lodash.com/>
