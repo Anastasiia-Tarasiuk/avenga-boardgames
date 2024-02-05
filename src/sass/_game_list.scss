@@ -1,9 +1,14 @@
-.played-games li:not(:last-child) {
+.played-games li:not(:last-child),
+.players li:not(:last-child) {
     margin-bottom: 10px;
 }
 
-.played-games li:nth-child(odd) {
+.played-games li:nth-child(odd){
     background-color: #ccc;
+}
+
+.played-games li:nth-child(even){
+    background-color: #eee;
 }
 
 .number-of-plays {

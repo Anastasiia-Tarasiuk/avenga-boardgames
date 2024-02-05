@@ -262,12 +262,16 @@ header {
   width: 30px;
 }
 
-.played-games li:not(:last-child) {
+.played-games li:not(:last-child), .players li:not(:last-child) {
   margin-bottom: 10px;
 }
 
 .played-games li:nth-child(2n+1) {
   background-color: #ccc;
+}
+
+.played-games li:nth-child(2n) {
+  background-color: #eee;
 }
 
 .number-of-plays {
@@ -287,6 +291,44 @@ header {
 .plays {
   flex-direction: column;
   display: flex;
+}
+
+.accordion {
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  background-color: #eee;
+  border: none;
+  outline: none;
+  padding: 15px;
+  transition: all .4s;
+}
+
+.active, .accordion:hover {
+  background-color: #ccc;
+}
+
+.panel {
+  background-color: #fff;
+  padding: 0 18px;
+  display: none;
+  overflow: hidden;
+}
+
+.accordion:after {
+  content: "";
+  width: 24px;
+  height: 24px;
+  float: right;
+  background-image: url("arrow.bed98e3f.png");
+  background-repeat: no-repeat;
+  background-size: 24px 24px;
+  display: inline-block;
+  transform: rotate(180deg);
+}
+
+.active:after {
+  transform: rotate(0deg);
 }
 
 /*# sourceMappingURL=index.b07a87f3.css.map */

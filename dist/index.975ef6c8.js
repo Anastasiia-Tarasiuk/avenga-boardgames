@@ -507,8 +507,9 @@ var _gameSearch = require("./js/game_search");
 var _login = require("./js/login");
 var _gameList = require("./js/game_list");
 var _addPlays = require("./js/add_plays");
+var _players = require("./js/players");
 
-},{"./js/game_search":"eYq3g","./js/login":"47T64","./js/game_list":"1RWSs","./js/add_plays":"crlNm"}],"eYq3g":[function(require,module,exports) {
+},{"./js/game_search":"eYq3g","./js/login":"47T64","./js/game_list":"1RWSs","./js/add_plays":"crlNm","./js/players":"bRgy2"}],"eYq3g":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "getCurrentUserDocRef", ()=>getCurrentUserDocRef);
@@ -44136,7 +44137,6 @@ const playerSelectEl = document.querySelector("#player-select");
 const closePlayerModalButtonEl = document.querySelector(".close-player-modal");
 const playsEl = document.querySelector(".plays");
 const dateEl = document.querySelector(".date");
-// const playersFormEl = document.querySelector(".players-form");
 if (playerSelectEl) {
     playerSelectEl.addEventListener("change", (e)=>addNewPlayer(e));
     closePlayerModalButtonEl.addEventListener("click", closePlayerModal);
@@ -44241,6 +44241,7 @@ function submitPlayerForm(e) {
     } else (0, _notiflixNotifyAio.Notify).failure(`Name field shouldn't be empty`);
 }
 function closePlayerModal() {
+    playerSelectEl.firstElementChild.setAttribute("selected", "");
     addPlayerModalOverlay.classList.add("hidden");
 }
 async function addPlayerToPlayers(player) {
@@ -44567,6 +44568,46 @@ var global = arguments[3];
 }
 module.exports = debounce;
 
-},{}]},["1RB6v","8lqZg"], "8lqZg", "parcelRequired7c6")
+},{}],"bRgy2":[function(require,module,exports) {
+var _auth = require("firebase/auth");
+var _login = require("./login");
+var _gameList = require("./game_list");
+const playersEl = document.querySelector(".players");
+let docData = null;
+if (playersEl) renderPlayersData();
+async function renderPlayersData() {
+    (0, _auth.onAuthStateChanged)((0, _login.auth), async (user)=>{
+        if (user) {
+            docData = await (0, _gameList.getCurrentUserData)(user);
+            playersTemplate(docData.players);
+        }
+    });
+}
+function playersTemplate(players) {
+    players.forEach((player)=>{
+        const playerItem = document.createElement("li");
+        getStats(player.id);
+        playerItem.innerHTML = `   
+            <button class="accordion">${player.name}</button>
+            <div class="panel">
+                <p>No played games</p>
+            </div>`;
+        playerItem.querySelector(".accordion").addEventListener("click", (e)=>toggleAccordion(e));
+        playersEl.insertAdjacentElement("beforeend", playerItem);
+    });
+}
+function toggleAccordion(e) {
+    const button = e.currentTarget;
+    button.classList.toggle("active");
+    const panel = button.nextElementSibling;
+    if (panel.style.display === "block") panel.style.display = "none";
+    else panel.style.display = "block";
+}
+function getStats(playerId) {
+    const stats = {};
+    for (const play of docData.plays)if (play.playerId === playerId.toString()) console.log(play);
+}
+
+},{"firebase/auth":"79vzg","./login":"47T64","./game_list":"1RWSs"}]},["1RB6v","8lqZg"], "8lqZg", "parcelRequired7c6")
 
 //# sourceMappingURL=index.975ef6c8.js.map

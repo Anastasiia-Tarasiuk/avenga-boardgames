@@ -13,9 +13,6 @@ const playerSelectEl = document.querySelector("#player-select");
 const closePlayerModalButtonEl = document.querySelector(".close-player-modal");
 const playsEl = document.querySelector(".plays");
 const dateEl = document.querySelector(".date");
-// const playersFormEl = document.querySelector(".players-form");
-
-
 
 if (playerSelectEl) {
     playerSelectEl.addEventListener('change', e => addNewPlayer(e));
@@ -63,12 +60,12 @@ function renderPlayers() {
             }
         }
     })
+
     docData.players.forEach(player => {
         const option = document.createElement("option");
         option.innerHTML = player.name;
         option.setAttribute("value", player.name);
         option.dataset.id = player.id;
-
         playerSelectEl.firstElementChild.after(option);
     })
 }
@@ -151,6 +148,7 @@ function submitPlayerForm(e) {
 }
 
 function closePlayerModal() {
+    playerSelectEl.firstElementChild.setAttribute("selected", "");
     addPlayerModalOverlay.classList.add('hidden');
 }
 
