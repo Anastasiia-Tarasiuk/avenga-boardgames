@@ -44588,8 +44588,9 @@ function playersTemplate(players) {
         const playerItem = document.createElement("li");
         const stats = getStats(player.id);
         const games = getPersonalGameStats(stats);
-        // const bestScore =
-        console.log(33, games);
+        console.log(player.name);
+        // console.log("stats", stats)
+        // console.log("games", games)
         playerItem.innerHTML = `   
             <button class="accordion">${player.name}</button>
             <div class="panel">
@@ -44602,10 +44603,6 @@ function playersTemplate(players) {
                 
                 <!-- Tab content -->
                 <ul id="gamesId" class="tabcontent">
-<!--                  <h3>London</h3>-->
-<!--                  <p>London is the capital city of England.</p>-->
-                  
-                  
                 </ul>
                 
                 <div id="Paris" class="tabcontent">
@@ -44619,15 +44616,17 @@ function playersTemplate(players) {
                 </div>
             </div>`;
         playerItem.querySelector(".accordion").addEventListener("click", (e)=>toggleAccordion(e));
-        playerItem.querySelector(".games").addEventListener("click", (e)=>openCity(e, "gamesId", playerItem));
-        playerItem.querySelector(".paris").addEventListener("click", (e)=>openCity(e, "Paris", playerItem));
-        playerItem.querySelector(".tokyo").addEventListener("click", (e)=>openCity(e, "Tokyo", playerItem));
+        playerItem.querySelector(".games").addEventListener("click", (e)=>toggleTabs(e, "gamesId", playerItem));
+        playerItem.querySelector(".paris").addEventListener("click", (e)=>toggleTabs(e, "Paris", playerItem));
+        playerItem.querySelector(".tokyo").addEventListener("click", (e)=>toggleTabs(e, "Tokyo", playerItem));
         const gameList = playerItem.querySelector("#gamesId");
-        let bestScore = 0;
-        let sum = 0;
         games.forEach((game)=>{
+            let bestScore = 0;
+            let sum = 0;
+            let plays = 0;
             for(const gameKey in game){
                 game[gameKey].forEach((session)=>{
+                    plays += 1;
                     const score = Number(session.score);
                     if (score > bestScore) bestScore = score;
                     sum += score;
@@ -44636,7 +44635,7 @@ function playersTemplate(players) {
                     if (docDataGame.id === gameKey) {
                         const gameListItem = document.createElement("li");
                         gameListItem.classList.add("game-list-item");
-                        gameListItem.innerHTML = `<div><p>${docDataGame.name}</p><img class="thumbnail" src=${docDataGame.url}><p>Best score: ${bestScore}</p><p>Average score: ${sum / games.length}</p><p>Plays: ${games.length}</p></div>`;
+                        gameListItem.innerHTML = `<div><p>${docDataGame.name}</p><img class="thumbnail" src=${docDataGame.url}><p>Best score: ${bestScore}</p><p>Average score: ${sum / plays}</p><p>Plays: ${plays}</p></div>`;
                         gameList.insertAdjacentElement("beforeend", gameListItem);
                     }
                 });
@@ -44658,7 +44657,7 @@ function getStats(playerId) {
     for (const play of docData.plays)if (play.playerId === playerId.toString()) stats.push(play);
     return stats;
 }
-function openCity(e, city, parent) {
+function toggleTabs(e, city, parent) {
     // Get all elements with class="tabcontent" and hide them
     const tabcontent = parent.querySelectorAll(".tabcontent");
     for(let i = 0; i < tabcontent.length; i++)tabcontent[i].style.display = "none";
@@ -44681,7 +44680,7 @@ function getPersonalGameStats(stats) {
         ids.push(play.gameId);
         games.push(game);
     } else games.forEach((game)=>{
-        if (game[play.gameId] === play.gameId) game[play.gameId].push(play);
+        if (game[play.gameId]) game[play.gameId].push(play);
     });
     return games;
 }
