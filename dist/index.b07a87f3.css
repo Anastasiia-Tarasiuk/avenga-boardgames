@@ -372,4 +372,9 @@ header {
   }
 }
 
+.legend ul {
+  flex-wrap: wrap;
+  display: flex;
+}
+
 /*# sourceMappingURL=index.b07a87f3.css.map */

@@ -1,11 +1,11 @@
 import {onAuthStateChanged} from "firebase/auth";
 import {auth} from "./login";
 import {getCurrentUserData} from "./game_list";
+import {PieChart} from "./pieChart";
+import {COLORS as colors} from "./constants";
 
 const playersEl = document.querySelector(".players");
-
 let docData = null;
-
 
 if (playersEl) {
     renderPlayersData();
@@ -24,46 +24,43 @@ async function renderPlayersData() {
 function playersTemplate(players) {
     players.forEach(player => {
         const playerItem = document.createElement("li");
-
         const stats = getStats(player.id);
-
         const games = getPersonalGameStats(stats);
 
         console.log(player.name)
-        // console.log("stats", stats)
-        // console.log("games", games)
 
         playerItem.innerHTML = `   
             <button class="accordion">${player.name}</button>
             <div class="panel">
                 <!-- Tab links -->
                 <div class="tab">
-                  <button class="tablinks games" id="defaultOpen">Played Games</button>
-                  <button class="tablinks paris">Statistics</button>
-                  <button class="tablinks tokyo">Tokyo</button>
+                    <button class="tablinks games" id="defaultOpen">Played games</button>
+                    <button class="tablinks chartPie">Pie chart</button>
+                    <button class="tablinks settings">Player settings</button>
                 </div>
                 
                 <!-- Tab content -->
                 <ul id="gamesId" class="tabcontent">
                 </ul>
                 
-                <div id="Paris" class="tabcontent">
-                  <h3>Paris</h3>
-                  <p>Paris is the capital of France.</p>
+                <div id="chartId" class="tabcontent">
+                    <canvas></canvas>
+                    <div class="legend"></div>
                 </div>
                 
-                <div id="Tokyo" class="tabcontent">
+                <div id="settingsId" class="tabcontent">
                   <h3>Tokyo</h3>
                   <p>Tokyo is the capital of Japan.</p>
                 </div>
             </div>`;
         playerItem.querySelector(".accordion").addEventListener("click", e => toggleAccordion(e));
         playerItem.querySelector(".games").addEventListener("click", e => toggleTabs(e, 'gamesId', playerItem));
-        playerItem.querySelector(".paris").addEventListener("click", e => toggleTabs(e, 'Paris', playerItem));
-        playerItem.querySelector(".tokyo").addEventListener("click", e => toggleTabs(e, 'Tokyo', playerItem));
+        playerItem.querySelector(".chartPie").addEventListener("click", e => toggleTabs(e, 'chartId', playerItem));
+        playerItem.querySelector(".settings").addEventListener("click", e => toggleTabs(e, 'settingsId', playerItem));
 
         const gameList = playerItem.querySelector("#gamesId");
-
+        const chartList = playerItem.querySelector("#chartId");
+        const pieChartData = [];
 
         games.forEach(game => {
             let bestScore = 0;
@@ -82,10 +79,20 @@ function playersTemplate(players) {
 
                 docData.games.forEach(docDataGame => {
                     if (docDataGame.id === gameKey) {
+                        const averageScore = Math.round(sum/plays);
+                        const pieChartGameData = {}
                         const gameListItem = document.createElement("li");
                         gameListItem.classList.add("game-list-item");
-                        gameListItem.innerHTML =`<div><p>${docDataGame.name}</p><img class="thumbnail" src=${docDataGame.url}><p>Best score: ${bestScore}</p><p>Average score: ${sum/plays}</p><p>Plays: ${plays}</p></div>`
+                        gameListItem.innerHTML =`<div><p>${docDataGame.name}</p><img class="thumbnail" src=${docDataGame.url}><p>Best score: ${bestScore}</p><p>Average score: ${averageScore}</p><p>Plays: ${plays}</p></div>`
                         gameList.insertAdjacentElement("beforeend", gameListItem);
+
+                        pieChartGameData.id = docDataGame.id;
+                        pieChartGameData.name = docDataGame.name;
+                        pieChartGameData.bestScore = bestScore;
+                        pieChartGameData.averageScore = averageScore;
+                        pieChartGameData.plays = plays;
+
+                        pieChartData.push(pieChartGameData);
                     }
                 })
             }
@@ -93,6 +100,8 @@ function playersTemplate(players) {
 
         playersEl.insertAdjacentElement("beforeend", playerItem);
         playersEl.querySelectorAll("#defaultOpen").forEach(item => item.click());
+
+        createChart(chartList, pieChartData);
     })
 }
 
@@ -147,7 +156,6 @@ function getPersonalGameStats(stats) {
             const game = {
                 [play.gameId]: [play]
             }
-
             ids.push(play.gameId);
             games.push(game);
         } else {
@@ -161,3 +169,26 @@ function getPersonalGameStats(stats) {
 
     return games;
 }
+
+function createChart(parent, data) {
+    const pieChart = {}
+
+    data.forEach(game => {
+        pieChart[game.name] = game.plays;
+
+    })
+
+    const canvas = parent.querySelector("canvas");
+    const legend = parent.querySelector(".legend");
+    const options = {
+        canvas,
+        pieChart,
+        colors,
+        legend
+    }
+
+    const gamesPieChart = new PieChart(options);
+    gamesPieChart.drawSlices();
+    gamesPieChart.drawLegend();
+}
+
