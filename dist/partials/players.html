@@ -41,6 +41,25 @@
     <div class="container">
         <ul class="players"></ul>
     </div>
+
+    <div class="players-settings-modal-overlay hidden">
+        <form id="rename-form">
+            <label>
+                <span>Type new name</span>
+                <input type="text" name="player-name" id="player-name" required="">
+            </label>
+            <button type="submit" data-action="rename-submit-btn"></button>
+            <button type="button" class="close-player-settings-modal">X</button>
+        </form>
+
+        <form id="hide-form">
+            <label>
+                <span>Are you sure you want to hide this player from the list?</span>
+            </label>
+            <button type="submit" data-action="hide-submit-btn"></button>
+            <button type="button" class="close-player-settings-modal">X</button>
+        </form>
+    </div>
 </main>
 
 </body>

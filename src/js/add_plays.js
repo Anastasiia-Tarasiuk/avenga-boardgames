@@ -73,6 +73,7 @@ function renderPlayers() {
 function addNewPlayer(e) {
     const select = e.target;
     const value = select.value;
+
     if (value === "new-player") {
         addPlayerModalOverlay.classList.remove('hidden');
     } else {
@@ -135,7 +136,7 @@ function submitPlayerForm(e) {
             const player = {
                 name,
                 id: Date.now(),
-
+                hidden: false
             }
             addPlayerToPlayers(player);
             renderPlayers();

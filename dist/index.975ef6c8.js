@@ -44231,7 +44231,8 @@ function submitPlayerForm(e) {
         if (validate) {
             const player = {
                 name,
-                id: Date.now()
+                id: Date.now(),
+                hidden: false
             };
             addPlayerToPlayers(player);
             renderPlayers();
@@ -44574,9 +44575,21 @@ var _login = require("./login");
 var _gameList = require("./game_list");
 var _pieChart = require("./pieChart");
 var _constants = require("./constants");
+var _firestore = require("firebase/firestore");
+var _gameSearch = require("./game_search");
+var _notiflixNotifyAio = require("notiflix/build/notiflix-notify-aio");
 const playersEl = document.querySelector(".players");
+const renameFormEl = document.querySelector("[id='rename-form']");
+const hideFormEl = document.querySelector("[id='hide-form']");
+const modalSettingsOverlayEl = document.querySelector(".players-settings-modal-overlay");
+const closeLoginModalButtonEls = document.querySelectorAll(".close-player-settings-modal");
+closeLoginModalButtonEls.forEach((btn)=>btn.addEventListener("click", closePlayerSettingModal));
 let docData = null;
 if (playersEl) renderPlayersData();
+if (modalSettingsOverlayEl) {
+    const submitFormButtonsEl = modalSettingsOverlayEl.querySelectorAll("button[type='submit']");
+    submitFormButtonsEl.forEach((btn)=>btn.addEventListener("click", (e)=>submitPlayerSettingsForm(e)));
+}
 async function renderPlayersData() {
     (0, _auth.onAuthStateChanged)((0, _login.auth), async (user)=>{
         if (user) {
@@ -44587,7 +44600,10 @@ async function renderPlayersData() {
 }
 function playersTemplate(players) {
     players.forEach((player)=>{
+        if (player.hidden === "true") return;
         const playerItem = document.createElement("li");
+        console.log(player.id);
+        playerItem.setAttribute("data-player-item-id", player.id);
         const stats = getStats(player.id);
         const games = getPersonalGameStats(stats);
         console.log(player.name);
@@ -44602,25 +44618,29 @@ function playersTemplate(players) {
                 </div>
                 
                 <!-- Tab content -->
-                <ul id="gamesId" class="tabcontent">
+                <ul id="gamesId" class="tabcontent empty">
                 </ul>
                 
-                <div id="chartId" class="tabcontent">
+                <div id="chartId" class="tabcontent empty">
                     <canvas></canvas>
                     <div class="legend"></div>
                 </div>
                 
                 <div id="settingsId" class="tabcontent">
-                  <h3>Tokyo</h3>
-                  <p>Tokyo is the capital of Japan.</p>
+                  <button class="renameButton">Rename player</button>
+                  <button class="deleteButton">Hide player</button>
                 </div>
             </div>`;
         playerItem.querySelector(".accordion").addEventListener("click", (e)=>toggleAccordion(e));
         playerItem.querySelector(".games").addEventListener("click", (e)=>toggleTabs(e, "gamesId", playerItem));
         playerItem.querySelector(".chartPie").addEventListener("click", (e)=>toggleTabs(e, "chartId", playerItem));
         playerItem.querySelector(".settings").addEventListener("click", (e)=>toggleTabs(e, "settingsId", playerItem));
+        // playerItem.querySelector(".renameButton").addEventListener("click", renamePlayer);
+        // playerItem.querySelector(".deleteButton").addEventListener("click", hidePlayer);
         const gameList = playerItem.querySelector("#gamesId");
         const chartList = playerItem.querySelector("#chartId");
+        const settingsList = playerItem.querySelector("#settingsId");
+        settingsList.addEventListener("click", (e)=>showSettingsForm(e, player));
         const pieChartData = [];
         games.forEach((game)=>{
             let bestScore = 0;
@@ -44641,6 +44661,7 @@ function playersTemplate(players) {
                         gameListItem.classList.add("game-list-item");
                         gameListItem.innerHTML = `<div><p>${docDataGame.name}</p><img class="thumbnail" src=${docDataGame.url}><p>Best score: ${bestScore}</p><p>Average score: ${averageScore}</p><p>Plays: ${plays}</p></div>`;
                         gameList.insertAdjacentElement("beforeend", gameListItem);
+                        if (gameList.classList.contains("empty")) gameList.classList.remove("empty");
                         pieChartGameData.id = docDataGame.id;
                         pieChartGameData.name = docDataGame.name;
                         pieChartGameData.bestScore = bestScore;
@@ -44700,6 +44721,7 @@ function createChart(parent, data) {
     data.forEach((game)=>{
         pieChart[game.name] = game.plays;
     });
+    if (parent.classList.contains("empty")) parent.classList.remove("empty");
     const canvas = parent.querySelector("canvas");
     const legend = parent.querySelector(".legend");
     const options = {
@@ -44712,8 +44734,76 @@ function createChart(parent, data) {
     gamesPieChart.drawSlices();
     gamesPieChart.drawLegend();
 }
+async function renamePlayer(playerId, submitButton) {
+    const allPlayerItems = playersEl.children;
+    let newName = null;
+    const formData = new FormData(renameFormEl, submitButton);
+    for (const [_, value] of formData)if (value.trim()) {
+        console.log(value);
+        newName = value;
+    } else (0, _notiflixNotifyAio.Notify).failure("Value shouln't be empty");
+    if (docData) try {
+        docData.players.forEach((player)=>{
+            if (player.id.toString() === playerId) player.name = newName;
+        });
+        await (0, _firestore.updateDoc)((0, _gameSearch.getCurrentUserDocRef)(), docData);
+        (0, _notiflixNotifyAio.Notify).success("The player is removed successfully");
+    } catch (e) {
+        console.error("Error adding player: ", e);
+    }
+    [
+        ...allPlayerItems
+    ].forEach((item)=>{
+        if (item.dataset.playerItemId === playerId) item.querySelector("button").innerHTML = newName;
+    });
+    closePlayerSettingModal();
+}
+async function hidePlayer(playerId) {
+    const allPlayerItems = playersEl.children;
+    [
+        ...allPlayerItems
+    ].forEach((item)=>{
+        if (item.dataset.playerItemId === playerId) item.classList.add("hidden");
+    });
+    if (docData) try {
+        docData.players.forEach((player)=>{
+            if (player.id.toString() === playerId) player.hidden = "true";
+        });
+        await (0, _firestore.updateDoc)((0, _gameSearch.getCurrentUserDocRef)(), docData);
+        (0, _notiflixNotifyAio.Notify).success("The player is removed successfully");
+    } catch (e) {
+        console.error("Error adding player: ", e);
+    }
+    closePlayerSettingModal();
+}
+function showSettingsForm(e, player) {
+    const button = e.target;
+    modalSettingsOverlayEl.classList.remove("hidden");
+    if (button.classList.contains("renameButton")) {
+        hideFormEl.style.display = "none";
+        renameFormEl.style.display = "flex";
+        const submitButtonEl = renameFormEl.querySelector("button[type='submit']");
+        submitButtonEl.setAttribute("data-playerid", player.id);
+        submitButtonEl.innerText = `Rename ${player.name}`;
+    } else {
+        hideFormEl.style.display = "flex";
+        renameFormEl.style.display = "none";
+        const submitButtonEl = hideFormEl.querySelector("button[type='submit']");
+        submitButtonEl.setAttribute("data-playerid", player.id);
+        submitButtonEl.innerText = `Hide ${player.name}`;
+    }
+}
+function closePlayerSettingModal() {
+    modalSettingsOverlayEl.classList.add("hidden");
+}
+function submitPlayerSettingsForm(e) {
+    e.preventDefault();
+    const actionButton = e.target;
+    if (actionButton.dataset.action === "hide-submit-btn") hidePlayer(actionButton.dataset.playerid);
+    else renamePlayer(actionButton.dataset.playerid, actionButton);
+}
 
-},{"firebase/auth":"79vzg","./login":"47T64","./game_list":"1RWSs","./pieChart":"dlNL4","./constants":"itKcQ"}],"dlNL4":[function(require,module,exports) {
+},{"firebase/auth":"79vzg","./login":"47T64","./game_list":"1RWSs","./pieChart":"dlNL4","./constants":"itKcQ","firebase/firestore":"8A4BC","./game_search":"eYq3g","notiflix/build/notiflix-notify-aio":"eXQLZ"}],"dlNL4":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "PieChart", ()=>PieChart);
@@ -44774,6 +44864,7 @@ class PieChart {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "COLORS", ()=>COLORS);
+parcelHelpers.export(exports, "HIDDEN_PLAYERS", ()=>HIDDEN_PLAYERS);
 const palette = [
     "#F44336",
     "#FFEBEE",
@@ -45031,6 +45122,7 @@ const palette = [
     "#263238"
 ];
 const COLORS = palette.sort(()=>Math.random() > 0.5 ? 1 : -1);
+const HIDDEN_PLAYERS = [];
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["1RB6v","8lqZg"], "8lqZg", "parcelRequired7c6")
 

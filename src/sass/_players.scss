@@ -65,10 +65,12 @@
 
 /* Style the tab content */
 .tabcontent {
+  height: 205px;
   display: none;
   padding: 6px 12px;
   border: 1px solid #ccc;
   border-top: none;
+  overflow-y: scroll;
 }
 
 .tabcontent {
@@ -84,4 +86,13 @@
 .legend ul {
   display: flex;
   flex-wrap: wrap;
+}
+
+.empty::after {
+  content: "No games played yet";
+  display: inline-block;
+}
+
+.empty canvas {
+  display: none;
 }
