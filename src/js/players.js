@@ -37,6 +37,8 @@ async function renderPlayersData() {
 }
 
 function playersTemplate(players) {
+    const container = document.createElement("div");
+
     players.forEach(player => {
         if (player.hidden === "true") {
             return;
@@ -124,11 +126,13 @@ function playersTemplate(players) {
             }
         })
 
-        playersEl.insertAdjacentElement("beforeend", playerItem);
-        playersEl.querySelectorAll("#defaultOpen").forEach(item => item.click());
+        container.insertAdjacentElement("beforeend", playerItem);
 
         createChart(chartList, pieChartData);
     })
+
+    playersEl.innerHTML = container.innerHTML;
+    playersEl.querySelectorAll("#defaultOpen").forEach(item => item.click());
 }
 
 function toggleAccordion(e) {

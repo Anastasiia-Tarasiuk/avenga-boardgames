@@ -44113,9 +44113,9 @@ function renderPlayedGames() {
     });
 }
 function gameItemTemplate(data) {
-    playedGamesListEl.innerHTML = "";
     if (!data) return;
     const gameStats = getGameSessions(data);
+    const container = document.createElement("div");
     data.games.forEach((game)=>{
         let number = 0;
         gameStats.forEach((stat)=>{
@@ -44124,8 +44124,9 @@ function gameItemTemplate(data) {
         const gameListItem = document.createElement("li");
         gameListItem.classList.add("game-list-item");
         gameListItem.innerHTML = `<div><p>${game.name}</p><img class="thumbnail" src=${game.url}></div><a class="add-plays-link" href="../../partials/add_plays.html?id=${game.id}"><div class="add-plays-container"><span class="number-of-plays ">${number} </span>plays</div><span class="tooltip-text">Add your score<span></a>`;
-        playedGamesListEl.insertAdjacentElement("beforeend", gameListItem);
+        container.insertAdjacentElement("beforeend", gameListItem);
     });
+    playedGamesListEl.innerHTML = container.innerHTML;
 }
 async function getCurrentUserData(user) {
     const userId = user.uid;
@@ -44632,6 +44633,7 @@ async function renderPlayersData() {
     });
 }
 function playersTemplate(players) {
+    const container = document.createElement("div");
     players.forEach((player)=>{
         if (player.hidden === "true") return;
         const playerItem = document.createElement("li");
@@ -44702,10 +44704,11 @@ function playersTemplate(players) {
                 });
             }
         });
-        playersEl.insertAdjacentElement("beforeend", playerItem);
-        playersEl.querySelectorAll("#defaultOpen").forEach((item)=>item.click());
+        container.insertAdjacentElement("beforeend", playerItem);
         createChart(chartList, pieChartData);
     });
+    playersEl.innerHTML = container.innerHTML;
+    playersEl.querySelectorAll("#defaultOpen").forEach((item)=>item.click());
 }
 function toggleAccordion(e) {
     const button = e.currentTarget;
