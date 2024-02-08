@@ -139,6 +139,11 @@ button {
   display: none !important;
 }
 
+.active-link {
+  color: #67ba04;
+  text-decoration: underline;
+}
+
 .logo {
   width: 50px;
 }
@@ -281,11 +286,44 @@ header {
 .add-game {
   position: fixed;
   bottom: 30px;
-  right: 80px;
+  right: 110px;
+}
+
+.tooltip-text {
+  visibility: hidden;
+  background-color: #fff;
+  font-size: 12px;
+  position: absolute;
+}
+
+.add-game:hover .tooltip-text {
+  visibility: visible;
+  width: 94px;
+  top: 40px;
+  left: -30px;
 }
 
 .add-game img {
   width: 30px;
+}
+
+.add-plays-container {
+  height: 40px;
+  background-color: #67ba04;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.add-plays-link {
+  position: absolute;
+  right: 30px;
+}
+
+.add-plays-link:hover .tooltip-text {
+  visibility: visible;
+  width: 87px;
+  top: 50px;
+  left: -10px;
 }
 
 .plays {

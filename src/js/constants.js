@@ -256,5 +256,3 @@ const palette = [
 ];
 
  export const COLORS = palette.sort(() => (Math.random() > 0.5) ? 1 : -1);
-
- export const HIDDEN_PLAYERS = [];

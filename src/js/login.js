@@ -218,8 +218,28 @@ function validation(email, password) {
 }
 
 function logout() {
+    //todo change logic!!!
+    const main = document.querySelector("main");
     signOut(auth)
         .then(res => {
+            const url = window.location.href;
+
+            if (!url.includes("index.html")) {
+                const urlArray = url.split("/");
+                let newUrl = "";
+
+                urlArray.forEach((item, index) => {
+                    if (index === urlArray.length - 1) {
+                        item = "index.html"
+                    }
+
+                    newUrl += `${item}/`;
+                })
+
+                window.location.replace(newUrl.substring(0, newUrl.length - 1));
+            }
+
+            main.querySelector(".container").innerHTML = "Please sign in or sign up"
             Notify.success('Successfully signed out');
         })
         .catch(err => {
@@ -227,7 +247,6 @@ function logout() {
             Notify.failure('Sorry, something went wrong');
         })
 }
-
 
 async function setUserDataToStorage(user) {
     try {

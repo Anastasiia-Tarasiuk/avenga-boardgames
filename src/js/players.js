@@ -30,8 +30,8 @@ async function renderPlayersData() {
     onAuthStateChanged(auth, async user => {
         if (user) {
             docData = await getCurrentUserData(user);
+            playersEl.innerHTML = ""
             playersTemplate(docData.players);
-
         }
     });
 }
@@ -43,7 +43,6 @@ function playersTemplate(players) {
         }
 
         const playerItem = document.createElement("li");
-        console.log(player.id)
         playerItem.setAttribute("data-player-item-id", player.id)
         const stats = getStats(player.id);
         const games = getPersonalGameStats(stats);
@@ -231,7 +230,6 @@ async function renamePlayer(playerId, submitButton) {
 
     for (const [_, value] of formData) {
         if (value.trim()) {
-            console.log(value)
             newName = value;
         } else  {
             Notify.failure('Value shouln\'t be empty');

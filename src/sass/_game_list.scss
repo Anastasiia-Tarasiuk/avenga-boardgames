@@ -18,9 +18,45 @@
 .add-game {
     position: fixed;
     bottom: 30px;
-    right: 80px;
+    right: 110px;
+}
+
+.tooltip-text {
+    font-size: 12px;
+    visibility: hidden;
+    position: absolute;
+    background-color: #fff;
+}
+
+.add-game:hover .tooltip-text {
+    visibility: visible;
+    top: 40px;
+    left: -30px;
+    width: 94px;
 }
 
 .add-game img {
     width: 30px;
 }
+
+.add-plays-container {
+    padding: 10px;
+    background-color: #67ba04;
+    height: 40px;
+    border-radius: 5px;
+}
+
+.add-plays-link {
+    position: absolute;
+    right: 30px;
+}
+
+.add-plays-link:hover .tooltip-text {
+    visibility: visible;
+    top: 50px;
+    left: -10px;
+    width: 87px;
+}
+
+
+

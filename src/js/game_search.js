@@ -23,9 +23,10 @@ function submitForm(e) {
     for (const [_, value] of formData) {
         if (value) {
             gameSearch(value);
-        } else {
+        }
+        else {
             gameListEl.innerHTML = `<p>Type something...</p>`
-        }   
+        }
     }
 }
 
@@ -136,7 +137,7 @@ function renderGames(obj) {
     }
 
     obj.originalName = originalName;
-
+    // window.location.href = "http://localhost:1234/partials/game_search.html";
     gameListItem.setAttribute("data-id", obj.id);
     gameListItem.innerHTML =`<div class="thumb"><p>${obj.name}</p><img class="thumbnail" src=${obj.url}><p>Original name: ${originalName}</p></div><button class="add-game-button" type="button"><img src=${addGameImage}></button>`
     gameListItem.querySelector(".thumb").insertAdjacentElement("beforeend", categoriesEl);

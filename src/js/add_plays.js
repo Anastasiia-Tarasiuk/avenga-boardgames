@@ -62,11 +62,13 @@ function renderPlayers() {
     })
 
     docData.players.forEach(player => {
-        const option = document.createElement("option");
-        option.innerHTML = player.name;
-        option.setAttribute("value", player.name);
-        option.dataset.id = player.id;
-        playerSelectEl.firstElementChild.after(option);
+        if (player.hidden !== "true") {
+            const option = document.createElement("option");
+            option.innerHTML = player.name;
+            option.setAttribute("value", player.name);
+            option.dataset.id = player.id;
+            playerSelectEl.firstElementChild.after(option);
+        }
     })
 }
 
@@ -79,6 +81,7 @@ function addNewPlayer(e) {
     } else {
         if (value !== "") {
             [...select.children].forEach(option => {
+                console.log(option)
                 if (option.selected) {
                     select.dataset.id = option.dataset.id;
                 }
@@ -100,11 +103,11 @@ function addNewPlayer(e) {
 
                 if (shouldBeRendered) {
                     playsEl.insertAdjacentElement("beforeend", playsLabel);
-                    playsLabel.querySelector("input").addEventListener("keydown", debounce(e => setScore(e), 1000));
+                    playsLabel.querySelector("input").addEventListener("keydown", debounce(e => setScore(e), 700));
                 }
             } else {
                 playsEl.insertAdjacentElement("beforeend", playsLabel);
-                playsLabel.querySelector("input").addEventListener("keydown", debounce(e => setScore(e), 1000));
+                playsLabel.querySelector("input").addEventListener("keydown", debounce(e => setScore(e), 700));
             }
         }
     }

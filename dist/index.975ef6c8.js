@@ -633,6 +633,7 @@ function renderGames(obj) {
     });
     else originalName = otherNames._text;
     obj.originalName = originalName;
+    // window.location.href = "http://localhost:1234/partials/game_search.html";
     gameListItem.setAttribute("data-id", obj.id);
     gameListItem.innerHTML = `<div class="thumb"><p>${obj.name}</p><img class="thumbnail" src=${obj.url}><p>Original name: ${originalName}</p></div><button class="add-game-button" type="button"><img src=${0, _plusPngDefault.default}></button>`;
     gameListItem.querySelector(".thumb").insertAdjacentElement("beforeend", categoriesEl);
@@ -8005,7 +8006,20 @@ function validation(email, password) {
     return true;
 }
 function logout() {
+    //todo change logic!!!
+    const main = document.querySelector("main");
     (0, _auth.signOut)(auth).then((res)=>{
+        const url = window.location.href;
+        if (!url.includes("index.html")) {
+            const urlArray = url.split("/");
+            let newUrl = "";
+            urlArray.forEach((item, index)=>{
+                if (index === urlArray.length - 1) item = "index.html";
+                newUrl += `${item}/`;
+            });
+            window.location.replace(newUrl.substring(0, newUrl.length - 1));
+        }
+        main.querySelector(".container").innerHTML = "Please sign in or sign up";
         (0, _notiflixNotifyAio.Notify).success("Successfully signed out");
     }).catch((err)=>{
         console.error(err);
@@ -44089,27 +44103,27 @@ var _auth = require("firebase/auth");
 var _login = require("./login");
 var _firestore = require("firebase/firestore");
 const playedGamesListEl = document.querySelector(".played-games");
-if (playedGamesListEl) {
-    console.log(playedGamesListEl);
-    renderPlayedGames();
-}
+if (playedGamesListEl) renderPlayedGames();
 function renderPlayedGames() {
-    // TODO doesn't work currentUser
-    // const currentUser = getAuth().currentUser;
     (0, _auth.onAuthStateChanged)((0, _login.auth), async (user)=>{
         if (user) {
             const docData = await getCurrentUserData(user);
-            gameItemTemplate(docData.games);
+            gameItemTemplate(docData);
         }
     });
 }
 function gameItemTemplate(data) {
     playedGamesListEl.innerHTML = "";
     if (!data) return;
-    data.forEach((game)=>{
+    const gameStats = getGameSessions(data);
+    data.games.forEach((game)=>{
+        let number = 0;
+        gameStats.forEach((stat)=>{
+            if (stat.id === game.id) number = stat.sessions.length;
+        });
         const gameListItem = document.createElement("li");
         gameListItem.classList.add("game-list-item");
-        gameListItem.innerHTML = `<div><p>${game.name}</p><img class="thumbnail" src=${game.url}></div><a href="../../partials/add_plays.html?id=${game.id}"><span class="number-of-plays ">0</span>plays</a>`;
+        gameListItem.innerHTML = `<div><p>${game.name}</p><img class="thumbnail" src=${game.url}></div><a class="add-plays-link" href="../../partials/add_plays.html?id=${game.id}"><div class="add-plays-container"><span class="number-of-plays ">${number} </span>plays</div><span class="tooltip-text">Add your score<span></a>`;
         playedGamesListEl.insertAdjacentElement("beforeend", gameListItem);
     });
 }
@@ -44118,6 +44132,21 @@ async function getCurrentUserData(user) {
     const currentUserDocRef = (0, _firestore.doc)((0, _login.db), "users", userId);
     const currentUserDoc = await (0, _firestore.getDoc)(currentUserDocRef);
     return currentUserDoc.data();
+}
+function getGameSessions(data) {
+    const games = [];
+    for (const game1 of data.games)if (!games.includes(game1.id)) games.push({
+        id: game1.id,
+        sessions: []
+    });
+    games.forEach((game)=>{
+        data.plays.forEach((play)=>{
+            if (play.gameId === game.id) {
+                if (!game.sessions.includes(play.sessionId)) game.sessions.push(play.sessionId);
+            }
+        });
+    });
+    return games;
 }
 
 },{"firebase/auth":"79vzg","./login":"47T64","firebase/firestore":"8A4BC","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"crlNm":[function(require,module,exports) {
@@ -44174,11 +44203,13 @@ function renderPlayers() {
         }
     });
     docData.players.forEach((player)=>{
-        const option = document.createElement("option");
-        option.innerHTML = player.name;
-        option.setAttribute("value", player.name);
-        option.dataset.id = player.id;
-        playerSelectEl.firstElementChild.after(option);
+        if (player.hidden !== "true") {
+            const option = document.createElement("option");
+            option.innerHTML = player.name;
+            option.setAttribute("value", player.name);
+            option.dataset.id = player.id;
+            playerSelectEl.firstElementChild.after(option);
+        }
     });
 }
 function addNewPlayer(e1) {
@@ -44189,6 +44220,7 @@ function addNewPlayer(e1) {
         [
             ...select.children
         ].forEach((option)=>{
+            console.log(option);
             if (option.selected) select.dataset.id = option.dataset.id;
         });
         let shouldBeRendered = true;
@@ -44205,11 +44237,11 @@ function addNewPlayer(e1) {
             }
             if (shouldBeRendered) {
                 playsEl.insertAdjacentElement("beforeend", playsLabel);
-                playsLabel.querySelector("input").addEventListener("keydown", (0, _lodashDebounceDefault.default)((e)=>setScore(e), 1000));
+                playsLabel.querySelector("input").addEventListener("keydown", (0, _lodashDebounceDefault.default)((e)=>setScore(e), 700));
             }
         } else {
             playsEl.insertAdjacentElement("beforeend", playsLabel);
-            playsLabel.querySelector("input").addEventListener("keydown", (0, _lodashDebounceDefault.default)((e)=>setScore(e), 1000));
+            playsLabel.querySelector("input").addEventListener("keydown", (0, _lodashDebounceDefault.default)((e)=>setScore(e), 700));
         }
     }
 }
@@ -44594,6 +44626,7 @@ async function renderPlayersData() {
     (0, _auth.onAuthStateChanged)((0, _login.auth), async (user)=>{
         if (user) {
             docData = await (0, _gameList.getCurrentUserData)(user);
+            playersEl.innerHTML = "";
             playersTemplate(docData.players);
         }
     });
@@ -44602,7 +44635,6 @@ function playersTemplate(players) {
     players.forEach((player)=>{
         if (player.hidden === "true") return;
         const playerItem = document.createElement("li");
-        console.log(player.id);
         playerItem.setAttribute("data-player-item-id", player.id);
         const stats = getStats(player.id);
         const games = getPersonalGameStats(stats);
@@ -44635,8 +44667,6 @@ function playersTemplate(players) {
         playerItem.querySelector(".games").addEventListener("click", (e)=>toggleTabs(e, "gamesId", playerItem));
         playerItem.querySelector(".chartPie").addEventListener("click", (e)=>toggleTabs(e, "chartId", playerItem));
         playerItem.querySelector(".settings").addEventListener("click", (e)=>toggleTabs(e, "settingsId", playerItem));
-        // playerItem.querySelector(".renameButton").addEventListener("click", renamePlayer);
-        // playerItem.querySelector(".deleteButton").addEventListener("click", hidePlayer);
         const gameList = playerItem.querySelector("#gamesId");
         const chartList = playerItem.querySelector("#chartId");
         const settingsList = playerItem.querySelector("#settingsId");
@@ -44738,10 +44768,8 @@ async function renamePlayer(playerId, submitButton) {
     const allPlayerItems = playersEl.children;
     let newName = null;
     const formData = new FormData(renameFormEl, submitButton);
-    for (const [_, value] of formData)if (value.trim()) {
-        console.log(value);
-        newName = value;
-    } else (0, _notiflixNotifyAio.Notify).failure("Value shouln't be empty");
+    for (const [_, value] of formData)if (value.trim()) newName = value;
+    else (0, _notiflixNotifyAio.Notify).failure("Value shouln't be empty");
     if (docData) try {
         docData.players.forEach((player)=>{
             if (player.id.toString() === playerId) player.name = newName;
@@ -44864,7 +44892,6 @@ class PieChart {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "COLORS", ()=>COLORS);
-parcelHelpers.export(exports, "HIDDEN_PLAYERS", ()=>HIDDEN_PLAYERS);
 const palette = [
     "#F44336",
     "#FFEBEE",
@@ -45122,7 +45149,6 @@ const palette = [
     "#263238"
 ];
 const COLORS = palette.sort(()=>Math.random() > 0.5 ? 1 : -1);
-const HIDDEN_PLAYERS = [];
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["1RB6v","8lqZg"], "8lqZg", "parcelRequired7c6")
 
