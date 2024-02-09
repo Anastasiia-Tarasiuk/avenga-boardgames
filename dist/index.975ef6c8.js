@@ -44633,7 +44633,6 @@ async function renderPlayersData() {
     });
 }
 function playersTemplate(players) {
-    const container = document.createElement("div");
     players.forEach((player)=>{
         if (player.hidden === "true") return;
         const playerItem = document.createElement("li");
@@ -44704,13 +44703,13 @@ function playersTemplate(players) {
                 });
             }
         });
-        container.insertAdjacentElement("beforeend", playerItem);
+        playersEl.insertAdjacentElement("beforeend", playerItem);
         createChart(chartList, pieChartData);
     });
-    playersEl.innerHTML = container.innerHTML;
     playersEl.querySelectorAll("#defaultOpen").forEach((item)=>item.click());
 }
 function toggleAccordion(e) {
+    console.log(123);
     const button = e.currentTarget;
     button.classList.toggle("active");
     const panel = button.nextElementSibling;

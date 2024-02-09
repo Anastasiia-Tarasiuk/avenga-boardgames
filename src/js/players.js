@@ -37,8 +37,6 @@ async function renderPlayersData() {
 }
 
 function playersTemplate(players) {
-    const container = document.createElement("div");
-
     players.forEach(player => {
         if (player.hidden === "true") {
             return;
@@ -75,6 +73,7 @@ function playersTemplate(players) {
                   <button class="deleteButton">Hide player</button>
                 </div>
             </div>`;
+
         playerItem.querySelector(".accordion").addEventListener("click", e => toggleAccordion(e));
         playerItem.querySelector(".games").addEventListener("click", e => toggleTabs(e, 'gamesId', playerItem));
         playerItem.querySelector(".chartPie").addEventListener("click", e => toggleTabs(e, 'chartId', playerItem));
@@ -126,16 +125,15 @@ function playersTemplate(players) {
             }
         })
 
-        container.insertAdjacentElement("beforeend", playerItem);
-
+        playersEl.insertAdjacentElement("beforeend", playerItem);
         createChart(chartList, pieChartData);
     })
 
-    playersEl.innerHTML = container.innerHTML;
     playersEl.querySelectorAll("#defaultOpen").forEach(item => item.click());
 }
 
 function toggleAccordion(e) {
+    console.log(123)
     const button = e.currentTarget;
     button.classList.toggle("active");
 
@@ -260,7 +258,6 @@ async function renamePlayer(playerId, submitButton) {
             item.querySelector("button").innerHTML = newName;
         }
     })
-
 
     closePlayerSettingModal();
 }
