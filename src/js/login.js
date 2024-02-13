@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup} from "firebase/auth";
-import { getFirestore, collection, doc, setDoc} from "firebase/firestore";
+import {getFirestore, collection, doc, addDoc, setDoc, updateDoc} from "firebase/firestore";
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
 const firebaseConfig = {
@@ -249,24 +249,21 @@ function logout() {
 }
 
 async function setUserDataToStorage(user) {
+    const dateId = Date.now().toString();
     try {
-        const usersRef = collection(db, "users");
-
-        await setDoc(doc(usersRef, user.uid), {
-            user: {
-                id: user.uid,
-                email: user.email,
-                name: user.displayName || "User",
-                createdAt: user.metadata.creationTime
-            },
-            players: [
-                {
-                    id: user.uid,
-                    name: user.displayName || "You"
-                }
-            ],
-            plays: []
+        await setDoc(doc(collection(db, `users/${user.uid}/user`), user.uid), {
+            id: user.uid,
+            email: user.email,
+            name: user.displayName || "User",
         })
+
+        await setDoc(doc(collection(db, `users/${user.uid}/players`), dateId), {
+            id: user.uid,
+            name: user.displayName || "You",
+            hidden: false,
+            documentId: dateId,
+        })
+
     } catch (e) {
         console.error("Error adding document: ", e);
     }

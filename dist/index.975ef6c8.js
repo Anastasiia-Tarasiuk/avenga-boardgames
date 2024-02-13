@@ -543,8 +543,6 @@ async function fetchAPI(url) {
             compact: true,
             spaces: 4
         }));
-    // var XmlNode = new DOMParser().parseFromString(xmlString, 'text/xml');
-    // return xmlToJson(XmlNode)
     } catch (error) {
         gameListEl.innerHTML = `<p>Oops... Something went wrong</p>`;
         console.error("There has been a problem with your fetch operation:", error);
@@ -633,7 +631,6 @@ function renderGames(obj) {
     });
     else originalName = otherNames._text;
     obj.originalName = originalName;
-    // window.location.href = "http://localhost:1234/partials/game_search.html";
     gameListItem.setAttribute("data-id", obj.id);
     gameListItem.innerHTML = `<div class="thumb"><p>${obj.name}</p><img class="thumbnail" src=${obj.url}><p>Original name: ${originalName}</p></div><button class="add-game-button" type="button"><img src=${0, _plusPngDefault.default}></button>`;
     gameListItem.querySelector(".thumb").insertAdjacentElement("beforeend", categoriesEl);
@@ -641,53 +638,22 @@ function renderGames(obj) {
     addGameButtonEl.addEventListener("click", (e)=>addGameToGames(e, obj));
     gameListEl.insertAdjacentElement("beforeend", gameListItem);
 }
-// function toggleAccordion(e) {
-//     const item = e.currentTarget.parentElement;
-//     const thumbnail = item.querySelector(".thumbnail");
-//     const accordion =  item.querySelector(".accordion");
-//     const panel = item.querySelector(".panel");
-//     accordion.classList.toggle("active");
-//     if (panel.style.display === "block") {
-//         panel.style.display = "none";
-//         thumbnail.style.display = "block";
-//     } else {
-//         panel.style.display = "block";
-//         thumbnail.style.display = "none";
-//     }
-// }
 function handleWrongSearchRequest(searchValue) {
     gameListEl.innerHTML = `<p>There is no game called <span>"${searchValue}"</span></p>`;
 }
-async function addGameToGames(_, game1) {
-    const gameId = game1.id;
-    const currentUserDocRef = getCurrentUserDocRef();
-    const currentUserDoc = await (0, _firestore.getDoc)(currentUserDocRef);
-    const docData = currentUserDoc.data();
-    let gameExists = false;
-    if (docData.games) {
-        docData.games.forEach((game)=>{
-            if (game.id === gameId) {
-                gameExists = true;
-                (0, _notiflixNotifyAio.Notify).failure("The game is already in the list");
-                return;
-            }
-        });
-        if (!gameExists) try {
-            docData.games.push(game1);
-            console.log("data", docData);
-            await (0, _firestore.updateDoc)(currentUserDocRef, docData);
+async function addGameToGames(_, game) {
+    const auth = (0, _auth.getAuth)();
+    const user = auth.currentUser;
+    const gamesRef = (0, _firestore.collection)((0, _login.db), `users/${user.uid}/games`);
+    try {
+        const q = (0, _firestore.query)(gamesRef, (0, _firestore.where)("id", "==", game.id));
+        const querySnapshot = await (0, _firestore.getDocs)(q);
+        if (querySnapshot.empty) {
+            await (0, _firestore.addDoc)(gamesRef, game);
             (0, _notiflixNotifyAio.Notify).success("The game is added successfully");
-        } catch (e) {
-            console.error("Error adding game: ", e);
-        }
-    } else try {
-        docData.games = [
-            game1
-        ];
-        await (0, _firestore.updateDoc)(currentUserDocRef, docData);
-        (0, _notiflixNotifyAio.Notify).success("The game is added successfully");
+        } else (0, _notiflixNotifyAio.Notify).failure("The game is already in the list");
     } catch (e) {
-        console.error("Error adding game: ", e);
+        console.error("Error adding document: ", e);
     }
 }
 function getCurrentUserDocRef() {
@@ -6013,8 +5979,8 @@ Object.defineProperty(Duplex.prototype, "destroyed", {
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
 "use strict";
-var process = require("process");
 var global = arguments[3];
+var process = require("process");
 module.exports = Writable;
 /* <replacement> */ function WriteReq(chunk, encoding, cb) {
     this.chunk = chunk;
@@ -8027,22 +7993,18 @@ function logout() {
     });
 }
 async function setUserDataToStorage(user) {
+    const dateId = Date.now().toString();
     try {
-        const usersRef = (0, _firestore.collection)(db, "users");
-        await (0, _firestore.setDoc)((0, _firestore.doc)(usersRef, user.uid), {
-            user: {
-                id: user.uid,
-                email: user.email,
-                name: user.displayName || "User",
-                createdAt: user.metadata.creationTime
-            },
-            players: [
-                {
-                    id: user.uid,
-                    name: user.displayName || "You"
-                }
-            ],
-            plays: []
+        await (0, _firestore.setDoc)((0, _firestore.doc)((0, _firestore.collection)(db, `users/${user.uid}/user`), user.uid), {
+            id: user.uid,
+            email: user.email,
+            name: user.displayName || "User"
+        });
+        await (0, _firestore.setDoc)((0, _firestore.doc)((0, _firestore.collection)(db, `users/${user.uid}/players`), dateId), {
+            id: user.uid,
+            name: user.displayName || "You",
+            hidden: false,
+            documentId: dateId
         });
     } catch (e) {
         console.error("Error adding document: ", e);
@@ -44096,9 +44058,6 @@ var global = arguments[3];
 });
 
 },{}],"1RWSs":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "getCurrentUserData", ()=>getCurrentUserData);
 var _auth = require("firebase/auth");
 var _login = require("./login");
 var _firestore = require("firebase/firestore");
@@ -44107,57 +44066,40 @@ if (playedGamesListEl) renderPlayedGames();
 function renderPlayedGames() {
     (0, _auth.onAuthStateChanged)((0, _login.auth), async (user)=>{
         if (user) {
-            const docData = await getCurrentUserData(user);
-            gameItemTemplate(docData);
+            playedGamesListEl.innerHTML = "";
+            const gamesRef = (0, _firestore.collection)((0, _login.db), `users/${user.uid}/games`);
+            const q = (0, _firestore.query)(gamesRef);
+            const querySnapshot = await (0, _firestore.getDocs)(q);
+            querySnapshot.forEach((doc)=>{
+                gameItemTemplate(doc.data(), user.uid);
+            });
         }
     });
 }
-function gameItemTemplate(data) {
-    if (!data) return;
-    const gameStats = getGameSessions(data);
-    const container = document.createElement("div");
-    data.games.forEach((game)=>{
-        let number = 0;
-        gameStats.forEach((stat)=>{
-            if (stat.id === game.id) number = stat.sessions.length;
-        });
-        const gameListItem = document.createElement("li");
-        gameListItem.classList.add("game-list-item");
-        gameListItem.innerHTML = `<div><p>${game.name}</p><img class="thumbnail" src=${game.url}></div><a class="add-plays-link" href="../../partials/add_plays.html?id=${game.id}"><div class="add-plays-container"><span class="number-of-plays ">${number} </span>plays</div><span class="tooltip-text">Add your score<span></a>`;
-        container.insertAdjacentElement("beforeend", gameListItem);
-    });
-    playedGamesListEl.innerHTML = container.innerHTML;
+async function gameItemTemplate(game, userId) {
+    const number = await getGameSessions(game, userId);
+    const gameListItem = document.createElement("li");
+    gameListItem.classList.add("game-list-item");
+    gameListItem.innerHTML = `<div><p>${game.name}</p><img class="thumbnail" src=${game.url}></div><a class="add-plays-link" href="../../partials/add_plays.html?id=${game.id}"><div class="add-plays-container"><span class="number-of-plays ">${number} </span>plays</div><span class="tooltip-text">Add your score<span></a>`;
+    playedGamesListEl.insertAdjacentElement("beforeend", gameListItem);
 }
-async function getCurrentUserData(user) {
-    const userId = user.uid;
-    const currentUserDocRef = (0, _firestore.doc)((0, _login.db), "users", userId);
-    const currentUserDoc = await (0, _firestore.getDoc)(currentUserDocRef);
-    return currentUserDoc.data();
-}
-function getGameSessions(data) {
-    const games = [];
-    for (const game1 of data.games)if (!games.includes(game1.id)) games.push({
-        id: game1.id,
-        sessions: []
+async function getGameSessions(game, userId) {
+    const sessions = [];
+    const gamesRef = (0, _firestore.collection)((0, _login.db), `users/${userId}/plays`);
+    const q = (0, _firestore.query)(gamesRef, (0, _firestore.where)("gameId", "==", game.id));
+    const querySnapshot = await (0, _firestore.getDocs)(q);
+    querySnapshot.forEach((doc)=>{
+        if (!sessions.includes(doc.data().sessionId)) sessions.push(doc.data().sessionId);
     });
-    games.forEach((game)=>{
-        data.plays.forEach((play)=>{
-            if (play.gameId === game.id) {
-                if (!game.sessions.includes(play.sessionId)) game.sessions.push(play.sessionId);
-            }
-        });
-    });
-    return games;
+    return sessions.length;
 }
 
-},{"firebase/auth":"79vzg","./login":"47T64","firebase/firestore":"8A4BC","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"crlNm":[function(require,module,exports) {
+},{"firebase/auth":"79vzg","./login":"47T64","firebase/firestore":"8A4BC"}],"crlNm":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-var _gameList = require("./game_list");
 var _auth = require("firebase/auth");
 var _login = require("./login");
 var _notiflixNotifyAio = require("notiflix/build/notiflix-notify-aio");
 var _firestore = require("firebase/firestore");
-var _gameSearch = require("./game_search");
 var _lodashDebounce = require("lodash.debounce");
 var _lodashDebounceDefault = parcelHelpers.interopDefault(_lodashDebounce);
 const gameToScoreEl = document.querySelector(".game-to-score");
@@ -44174,7 +44116,6 @@ if (playerSelectEl) {
     submitFormButtonEl.addEventListener("click", (e)=>submitPlayerForm(e));
 }
 let id = null;
-let docData = null;
 const sessionId = Date.now();
 if (searchParams) {
     id = searchParams.get("id");
@@ -44183,19 +44124,21 @@ if (searchParams) {
 async function renderGameToScore() {
     (0, _auth.onAuthStateChanged)((0, _login.auth), async (user)=>{
         if (user) {
-            docData = await (0, _gameList.getCurrentUserData)(user);
-            gameTemplate(docData.games);
-            renderPlayers();
+            const q = (0, _firestore.query)((0, _firestore.collection)((0, _login.db), `users/${user.uid}/games`), (0, _firestore.where)("id", "==", id));
+            const querySnapshot = await (0, _firestore.getDocs)(q);
+            querySnapshot.forEach((doc)=>{
+                gameTemplate(doc.data());
+                renderPlayers(user.uid);
+            });
         }
     });
 }
-function gameTemplate(games) {
-    for (const game of games)if (game.id === id) {
-        gameToScoreEl.innerHTML = `<div><p>${game.name}</p><img class="thumbnail" src=${game.url}></div>`;
-        return;
-    }
+function gameTemplate(game) {
+    gameToScoreEl.innerHTML = `<div><p>${game.name}</p><img class="thumbnail" src=${game.url}></div>`;
 }
-function renderPlayers() {
+async function renderPlayers(userId) {
+    const q = (0, _firestore.query)((0, _firestore.collection)((0, _login.db), `users/${userId}/players`));
+    const querySnapshot = await (0, _firestore.getDocs)(q);
     [
         ...playerSelectEl.children
     ].forEach((child)=>{
@@ -44203,15 +44146,18 @@ function renderPlayers() {
             if (child.value !== "new-player") child.remove();
         }
     });
-    docData.players.forEach((player)=>{
-        if (player.hidden !== "true") {
-            const option = document.createElement("option");
-            option.innerHTML = player.name;
-            option.setAttribute("value", player.name);
-            option.dataset.id = player.id;
-            playerSelectEl.firstElementChild.after(option);
-        }
+    querySnapshot.forEach((doc)=>{
+        createPlayer(doc.data());
     });
+}
+function createPlayer(player) {
+    if (player.hidden !== "true") {
+        const option = document.createElement("option");
+        option.innerHTML = player.name;
+        option.setAttribute("value", player.name);
+        option.dataset.id = player.id;
+        playerSelectEl.firstElementChild.after(option);
+    }
 }
 function addNewPlayer(e1) {
     const select = e1.target;
@@ -44221,7 +44167,6 @@ function addNewPlayer(e1) {
         [
             ...select.children
         ].forEach((option)=>{
-            console.log(option);
             if (option.selected) select.dataset.id = option.dataset.id;
         });
         let shouldBeRendered = true;
@@ -44246,42 +44191,40 @@ function addNewPlayer(e1) {
         }
     }
 }
-function submitPlayerForm(e) {
+async function submitPlayerForm(e) {
+    const auth = (0, _auth.getAuth)();
+    const user = auth.currentUser;
     e.preventDefault();
     const submitButton = e.currentTarget;
     const form = submitButton.parentElement;
     const formData = new FormData(submitButton.parentElement, submitButton);
     let name = null;
-    let validate = true;
     for (const [key, value] of formData)if (key === "name") name = value.trim();
     if (name.length > 0) {
-        docData.players.forEach((player)=>{
-            if (player.name.toLowerCase() === name.toLowerCase()) {
-                (0, _notiflixNotifyAio.Notify).failure(`Player with name ${name} already exists`);
-                validate = false;
-            }
-        });
-        if (validate) {
+        const q = (0, _firestore.query)((0, _firestore.collection)((0, _login.db), `users/${user.uid}/players`), (0, _firestore.where)("name", "==", name));
+        const querySnapshot = await (0, _firestore.getDocs)(q);
+        if (querySnapshot.empty) {
             const player = {
                 name,
                 id: Date.now(),
                 hidden: false
             };
-            addPlayerToPlayers(player);
-            renderPlayers();
+            addPlayerToPlayers(user.uid, player);
+            renderPlayers(user.uid);
             form.reset();
             closePlayerModal();
-        }
+        } else (0, _notiflixNotifyAio.Notify).failure(`Player with name ${name} already exists`);
     } else (0, _notiflixNotifyAio.Notify).failure(`Name field shouldn't be empty`);
 }
 function closePlayerModal() {
     playerSelectEl.firstElementChild.setAttribute("selected", "");
     addPlayerModalOverlay.classList.add("hidden");
 }
-async function addPlayerToPlayers(player) {
-    if (docData) try {
-        docData.players.push(player);
-        await (0, _firestore.updateDoc)((0, _gameSearch.getCurrentUserDocRef)(), docData);
+async function addPlayerToPlayers(userId, player) {
+    const dateId = Date.now().toString();
+    player.documentId = dateId;
+    try {
+        await (0, _firestore.setDoc)((0, _firestore.doc)((0, _firestore.collection)((0, _login.db), `users/${userId}/players`), dateId), player);
         (0, _notiflixNotifyAio.Notify).success("The player is added successfully");
     } catch (e) {
         console.error("Error adding player: ", e);
@@ -44296,28 +44239,18 @@ async function setScore(e) {
         gameId: id,
         sessionId: sessionId
     };
-    if (docData) try {
-        if (docData.plays.length > 0) {
-            let isNewPlay = true;
-            for (const savedPlay of docData.plays){
-                if (savedPlay.sessionId === sessionId) {
-                    if (savedPlay.playerId === option.id) {
-                        savedPlay.score = option.value;
-                        isNewPlay = false;
-                        break;
-                    }
-                }
-            }
-            if (isNewPlay) docData.plays.push(play);
-        } else docData.plays.push(play);
-        await (0, _firestore.updateDoc)((0, _gameSearch.getCurrentUserDocRef)(), docData);
+    const auth = (0, _auth.getAuth)();
+    const user = auth.currentUser;
+    const playsRef = (0, _firestore.collection)((0, _login.db), `users/${user.uid}/plays`);
+    try {
+        await (0, _firestore.setDoc)((0, _firestore.doc)(playsRef), play);
         (0, _notiflixNotifyAio.Notify).success("The score is added successfully");
     } catch (e2) {
         console.error("Error adding score: ", e2);
     }
 }
 
-},{"./game_list":"1RWSs","firebase/auth":"79vzg","./login":"47T64","notiflix/build/notiflix-notify-aio":"eXQLZ","firebase/firestore":"8A4BC","./game_search":"eYq3g","lodash.debounce":"3JP5n","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"3JP5n":[function(require,module,exports) {
+},{"firebase/auth":"79vzg","./login":"47T64","notiflix/build/notiflix-notify-aio":"eXQLZ","firebase/firestore":"8A4BC","lodash.debounce":"3JP5n","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"3JP5n":[function(require,module,exports) {
 var global = arguments[3];
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -44605,7 +44538,6 @@ module.exports = debounce;
 },{}],"bRgy2":[function(require,module,exports) {
 var _auth = require("firebase/auth");
 var _login = require("./login");
-var _gameList = require("./game_list");
 var _pieChart = require("./pieChart");
 var _constants = require("./constants");
 var _firestore = require("firebase/firestore");
@@ -44617,7 +44549,6 @@ const hideFormEl = document.querySelector("[id='hide-form']");
 const modalSettingsOverlayEl = document.querySelector(".players-settings-modal-overlay");
 const closeLoginModalButtonEls = document.querySelectorAll(".close-player-settings-modal");
 closeLoginModalButtonEls.forEach((btn)=>btn.addEventListener("click", closePlayerSettingModal));
-let docData = null;
 if (playersEl) renderPlayersData();
 if (modalSettingsOverlayEl) {
     const submitFormButtonsEl = modalSettingsOverlayEl.querySelectorAll("button[type='submit']");
@@ -44626,102 +44557,113 @@ if (modalSettingsOverlayEl) {
 async function renderPlayersData() {
     (0, _auth.onAuthStateChanged)((0, _login.auth), async (user)=>{
         if (user) {
-            docData = await (0, _gameList.getCurrentUserData)(user);
+            const playersRef = (0, _firestore.collection)((0, _login.db), `users/${user.uid}/players`);
+            const q = (0, _firestore.query)(playersRef);
+            const querySnapshot = await (0, _firestore.getDocs)(q);
             playersEl.innerHTML = "";
-            playersTemplate(docData.players);
+            querySnapshot.forEach((doc)=>{
+                playersTemplate(doc.data(), user.uid);
+            });
         }
     });
 }
-function playersTemplate(players) {
-    players.forEach((player)=>{
-        if (player.hidden === "true") return;
-        const playerItem = document.createElement("li");
-        playerItem.setAttribute("data-player-item-id", player.id);
-        const stats = getStats(player.id);
-        const games = getPersonalGameStats(stats);
-        console.log(player.name);
-        playerItem.innerHTML = `   
-            <button class="accordion">${player.name}</button>
-            <div class="panel">
-                <!-- Tab links -->
-                <div class="tab">
-                    <button class="tablinks games" id="defaultOpen">Played games</button>
-                    <button class="tablinks chartPie">Pie chart</button>
-                    <button class="tablinks settings">Player settings</button>
-                </div>
-                
-                <!-- Tab content -->
-                <ul id="gamesId" class="tabcontent empty">
-                </ul>
-                
-                <div id="chartId" class="tabcontent empty">
-                    <canvas></canvas>
-                    <div class="legend"></div>
-                </div>
-                
-                <div id="settingsId" class="tabcontent">
-                  <button class="renameButton">Rename player</button>
-                  <button class="deleteButton">Hide player</button>
-                </div>
-            </div>`;
-        playerItem.querySelector(".accordion").addEventListener("click", (e)=>toggleAccordion(e));
-        playerItem.querySelector(".games").addEventListener("click", (e)=>toggleTabs(e, "gamesId", playerItem));
-        playerItem.querySelector(".chartPie").addEventListener("click", (e)=>toggleTabs(e, "chartId", playerItem));
-        playerItem.querySelector(".settings").addEventListener("click", (e)=>toggleTabs(e, "settingsId", playerItem));
-        const gameList = playerItem.querySelector("#gamesId");
-        const chartList = playerItem.querySelector("#chartId");
-        const settingsList = playerItem.querySelector("#settingsId");
-        settingsList.addEventListener("click", (e)=>showSettingsForm(e, player));
-        const pieChartData = [];
-        games.forEach((game)=>{
-            let bestScore = 0;
-            let sum = 0;
-            let plays = 0;
-            for(const gameKey in game){
-                game[gameKey].forEach((session)=>{
-                    plays += 1;
-                    const score = Number(session.score);
-                    if (score > bestScore) bestScore = score;
-                    sum += score;
-                });
-                docData.games.forEach((docDataGame)=>{
-                    if (docDataGame.id === gameKey) {
-                        const averageScore = Math.round(sum / plays);
-                        const pieChartGameData = {};
-                        const gameListItem = document.createElement("li");
-                        gameListItem.classList.add("game-list-item");
-                        gameListItem.innerHTML = `<div><p>${docDataGame.name}</p><img class="thumbnail" src=${docDataGame.url}><p>Best score: ${bestScore}</p><p>Average score: ${averageScore}</p><p>Plays: ${plays}</p></div>`;
-                        gameList.insertAdjacentElement("beforeend", gameListItem);
-                        if (gameList.classList.contains("empty")) gameList.classList.remove("empty");
-                        pieChartGameData.id = docDataGame.id;
-                        pieChartGameData.name = docDataGame.name;
-                        pieChartGameData.bestScore = bestScore;
-                        pieChartGameData.averageScore = averageScore;
-                        pieChartGameData.plays = plays;
-                        pieChartData.push(pieChartGameData);
-                    }
-                });
-            }
+async function playersTemplate(player, userId) {
+    if (player.hidden === true) return;
+    const pieChartData = [];
+    const playerItem = document.createElement("li");
+    playerItem.setAttribute("data-player-item-id", player.id);
+    const stats = await getStats(player.id, userId);
+    playerItem.innerHTML = `   
+        <button class="accordion">${player.name}</button>
+        <div class="panel">
+            <!-- Tab links -->
+            <div class="tab">
+                <button class="tablinks games" id="defaultOpen">Played games</button>
+                <button class="tablinks chartPie">Pie chart</button>
+                <button class="tablinks settings">Player settings</button>
+            </div>
+            
+            <!-- Tab content -->
+            <ul id="gamesId" class="tabcontent empty">
+            </ul>
+            
+            <div id="chartId" class="tabcontent empty">
+                <canvas></canvas>
+                <div class="legend"></div>
+            </div>
+            
+            <div id="settingsId" class="tabcontent">
+              <button class="renameButton">Rename player</button>
+              <button class="deleteButton">Hide player</button>
+            </div>
+        </div>`;
+    const gameList = playerItem.querySelector("#gamesId");
+    const chartList = playerItem.querySelector("#chartId");
+    const settingsList = playerItem.querySelector("#settingsId");
+    settingsList.addEventListener("click", (e)=>showSettingsForm(e, player));
+    playerItem.querySelector(".accordion").addEventListener("click", (e)=>toggleAccordion(e));
+    playerItem.querySelector(".games").addEventListener("click", (e)=>toggleTabs(e, "gamesId", playerItem));
+    playerItem.querySelector(".chartPie").addEventListener("click", (e)=>toggleTabs(e, "chartId", playerItem, pieChartData, chartList));
+    playerItem.querySelector(".settings").addEventListener("click", (e)=>toggleTabs(e, "settingsId", playerItem));
+    stats.map(async (game)=>{
+        const q = (0, _firestore.query)((0, _firestore.collection)((0, _login.db), `users/${userId}/games`), (0, _firestore.where)("id", "==", game.gameId));
+        const querySnapshot = await (0, _firestore.getDocs)(q);
+        querySnapshot.forEach((doc)=>{
+            const data = doc.data();
+            const averageScore = Math.round(game.sumOfScore / game.numberOfPlays);
+            const gameListItem = document.createElement("li");
+            gameListItem.classList.add("game-list-item");
+            gameListItem.innerHTML = `<div><p>${data.name}</p><img class="thumbnail" src=${data.url}><p>Best score: ${game.bestScore}</p><p>Average score: ${averageScore}</p><p>Plays: ${game.numberOfPlays}</p></div>`;
+            gameList.insertAdjacentElement("beforeend", gameListItem);
+            if (gameList.classList.contains("empty")) gameList.classList.remove("empty");
+            const pieChartGameData = {
+                id: data.id,
+                name: data.name,
+                bestScore: game.bestScore,
+                averageScore: averageScore,
+                plays: game.numberOfPlays
+            };
+            pieChartData.push(pieChartGameData);
         });
-        playersEl.insertAdjacentElement("beforeend", playerItem);
-        createChart(chartList, pieChartData);
     });
+    playersEl.insertAdjacentElement("beforeend", playerItem);
     playersEl.querySelectorAll("#defaultOpen").forEach((item)=>item.click());
 }
 function toggleAccordion(e) {
-    console.log(123);
     const button = e.currentTarget;
     button.classList.toggle("active");
     const panel = button.nextElementSibling;
     if (panel.style.display === "block") panel.style.display = "none";
     else panel.style.display = "block";
 }
-function getStats(playerId) {
+async function getStats(playerId, userId) {
     const stats = [];
-    for (const play of docData.plays)if (play.playerId === playerId.toString()) stats.push(play);
+    const ids = [];
+    const q = (0, _firestore.query)((0, _firestore.collection)((0, _login.db), `users/${userId}/plays`), (0, _firestore.where)("playerId", "==", playerId.toString()));
+    const querySnapshot = await (0, _firestore.getDocs)(q);
+    querySnapshot.forEach((doc)=>{
+        const play = doc.data();
+        if (!ids.includes(play.gameId)) {
+            const game = {
+                bestScore: Number(play.score),
+                numberOfPlays: 1,
+                sumOfScore: Number(play.score),
+                gameId: play.gameId
+            };
+            stats.push(game);
+            ids.push(play.gameId);
+        } else stats.forEach((game)=>{
+            if (game.gameId === play.gameId) {
+                game.bestScore = game.bestScore > Number(play.score) ? game.bestScore : Number(play.score);
+                game.numberOfPlays = game.numberOfPlays + 1;
+                game.sumOfScore = game.sumOfScore + Number(play.score);
+            }
+        });
+    });
     return stats;
 }
-function toggleTabs(e, city, parent) {
+function toggleTabs(e, tab, parent, pieChartData, selector) {
+    if (tab === "chartId") createChart(selector, pieChartData);
     // Get all elements with class="tabcontent" and hide them
     const tabcontent = parent.querySelectorAll(".tabcontent");
     for(let i = 0; i < tabcontent.length; i++)tabcontent[i].style.display = "none";
@@ -44729,24 +44671,8 @@ function toggleTabs(e, city, parent) {
     const tablinks = parent.querySelectorAll(".tablinks");
     for(let i1 = 0; i1 < tablinks.length; i1++)tablinks[i1].className = tablinks[i1].className.replace("active", "");
     // Show the current tab, and add an "active" class to the button that opened the tab
-    parent.querySelector(`#${city}`).style.display = "block";
+    parent.querySelector(`#${tab}`).style.display = "block";
     e.currentTarget.className += " active";
-}
-function getPersonalGameStats(stats) {
-    const games = [];
-    const ids = [];
-    for (const play of stats)if (!ids.includes(play.gameId)) {
-        const game = {
-            [play.gameId]: [
-                play
-            ]
-        };
-        ids.push(play.gameId);
-        games.push(game);
-    } else games.forEach((game)=>{
-        if (game[play.gameId]) game[play.gameId].push(play);
-    });
-    return games;
 }
 function createChart(parent, data) {
     const pieChart = {};
@@ -44772,20 +44698,35 @@ async function renamePlayer(playerId, submitButton) {
     const formData = new FormData(renameFormEl, submitButton);
     for (const [_, value] of formData)if (value.trim()) newName = value;
     else (0, _notiflixNotifyAio.Notify).failure("Value shouln't be empty");
-    if (docData) try {
-        docData.players.forEach((player)=>{
-            if (player.id.toString() === playerId) player.name = newName;
+    try {
+        const auth = (0, _auth.getAuth)();
+        const user = auth.currentUser;
+        let docId;
+        const q = user.uid === playerId ? (0, _firestore.query)((0, _firestore.collection)((0, _login.db), `users/${user.uid}/players`), (0, _firestore.where)("id", "==", playerId)) : (0, _firestore.query)((0, _firestore.collection)((0, _login.db), `users/${user.uid}/players`), (0, _firestore.where)("id", "==", Number(playerId)));
+        const querySnapshot = await (0, _firestore.getDocs)(q);
+        querySnapshot.forEach((doc)=>{
+            docId = doc.data().documentId;
         });
-        await (0, _firestore.updateDoc)((0, _gameSearch.getCurrentUserDocRef)(), docData);
-        (0, _notiflixNotifyAio.Notify).success("The player is removed successfully");
+        const playerRef = (0, _firestore.doc)((0, _login.db), `users/${user.uid}/players`, docId);
+        await (0, _firestore.updateDoc)(playerRef, {
+            name: newName
+        });
+        (0, _notiflixNotifyAio.Notify).success("The player is renamed successfully");
+        if (user.uid === playerId) {
+            const userRef = (0, _firestore.doc)((0, _login.db), `users/${user.uid}/user`, user.uid);
+            await (0, _firestore.updateDoc)(userRef, {
+                name: newName
+            });
+        }
     } catch (e) {
-        console.error("Error adding player: ", e);
+        console.error("Error adding document: ", e);
     }
     [
         ...allPlayerItems
     ].forEach((item)=>{
         if (item.dataset.playerItemId === playerId) item.querySelector("button").innerHTML = newName;
     });
+    renameFormEl.reset();
     closePlayerSettingModal();
 }
 async function hidePlayer(playerId) {
@@ -44795,14 +44736,22 @@ async function hidePlayer(playerId) {
     ].forEach((item)=>{
         if (item.dataset.playerItemId === playerId) item.classList.add("hidden");
     });
-    if (docData) try {
-        docData.players.forEach((player)=>{
-            if (player.id.toString() === playerId) player.hidden = "true";
+    try {
+        const auth = (0, _auth.getAuth)();
+        const user = auth.currentUser;
+        let docId;
+        const q = user.uid === playerId ? (0, _firestore.query)((0, _firestore.collection)((0, _login.db), `users/${user.uid}/players`), (0, _firestore.where)("id", "==", playerId)) : (0, _firestore.query)((0, _firestore.collection)((0, _login.db), `users/${user.uid}/players`), (0, _firestore.where)("id", "==", Number(playerId)));
+        const querySnapshot = await (0, _firestore.getDocs)(q);
+        querySnapshot.forEach((doc)=>{
+            docId = doc.data().documentId;
         });
-        await (0, _firestore.updateDoc)((0, _gameSearch.getCurrentUserDocRef)(), docData);
-        (0, _notiflixNotifyAio.Notify).success("The player is removed successfully");
+        const playerRef = (0, _firestore.doc)((0, _login.db), `users/${user.uid}/players`, docId);
+        await (0, _firestore.updateDoc)(playerRef, {
+            hidden: true
+        });
+        (0, _notiflixNotifyAio.Notify).success("The player is hidden successfully");
     } catch (e) {
-        console.error("Error adding player: ", e);
+        console.error("Error adding document: ", e);
     }
     closePlayerSettingModal();
 }
@@ -44833,7 +44782,7 @@ function submitPlayerSettingsForm(e) {
     else renamePlayer(actionButton.dataset.playerid, actionButton);
 }
 
-},{"firebase/auth":"79vzg","./login":"47T64","./game_list":"1RWSs","./pieChart":"dlNL4","./constants":"itKcQ","firebase/firestore":"8A4BC","./game_search":"eYq3g","notiflix/build/notiflix-notify-aio":"eXQLZ"}],"dlNL4":[function(require,module,exports) {
+},{"firebase/auth":"79vzg","./login":"47T64","./pieChart":"dlNL4","./constants":"itKcQ","firebase/firestore":"8A4BC","./game_search":"eYq3g","notiflix/build/notiflix-notify-aio":"eXQLZ"}],"dlNL4":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "PieChart", ()=>PieChart);

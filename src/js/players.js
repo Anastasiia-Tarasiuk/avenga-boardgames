@@ -1,11 +1,12 @@
-import {onAuthStateChanged} from "firebase/auth";
+import {getAuth, onAuthStateChanged} from "firebase/auth";
 import {auth} from "./login";
-import {getCurrentUserData} from "./game_list";
 import {PieChart} from "./pieChart";
 import {COLORS as colors} from "./constants";
-import {updateDoc} from "firebase/firestore";
+import {addDoc, doc, updateDoc, runTransaction} from "firebase/firestore";
+import { collection, collectionGroup, query, where, getDocs, documentId } from "firebase/firestore";
 import {getCurrentUserDocRef} from "./game_search";
 import {Notify} from "notiflix/build/notiflix-notify-aio";
+import {db} from "./login";
 
 const playersEl = document.querySelector(".players");
 const renameFormEl = document.querySelector("[id='rename-form']");
@@ -14,8 +15,6 @@ const modalSettingsOverlayEl = document.querySelector(".players-settings-modal-o
 const closeLoginModalButtonEls = document.querySelectorAll(".close-player-settings-modal");
 
 closeLoginModalButtonEls.forEach(btn => btn.addEventListener("click", closePlayerSettingModal));
-
-let docData = null;
 
 if (playersEl) {
     renderPlayersData();
@@ -29,111 +28,98 @@ if (modalSettingsOverlayEl) {
 async function renderPlayersData() {
     onAuthStateChanged(auth, async user => {
         if (user) {
-            docData = await getCurrentUserData(user);
-            playersEl.innerHTML = ""
-            playersTemplate(docData.players);
+            const playersRef = collection(db, `users/${user.uid}/players`);
+            const q = query(playersRef);
+            const querySnapshot = await getDocs(q);
+
+            playersEl.innerHTML = "";
+
+            querySnapshot.forEach((doc) => {
+                playersTemplate(doc.data(), user.uid)
+            });
         }
     });
 }
 
-function playersTemplate(players) {
-    players.forEach(player => {
-        if (player.hidden === "true") {
-            return;
-        }
+async function playersTemplate(player, userId) {
+    if (player.hidden === true) {
+        return;
+    }
 
-        const playerItem = document.createElement("li");
-        playerItem.setAttribute("data-player-item-id", player.id)
-        const stats = getStats(player.id);
-        const games = getPersonalGameStats(stats);
+    const pieChartData = [];
+    const playerItem = document.createElement("li");
+    playerItem.setAttribute("data-player-item-id", player.id);
+    const stats = await getStats(player.id, userId);
 
-        console.log(player.name)
+    playerItem.innerHTML = `   
+        <button class="accordion">${player.name}</button>
+        <div class="panel">
+            <!-- Tab links -->
+            <div class="tab">
+                <button class="tablinks games" id="defaultOpen">Played games</button>
+                <button class="tablinks chartPie">Pie chart</button>
+                <button class="tablinks settings">Player settings</button>
+            </div>
+            
+            <!-- Tab content -->
+            <ul id="gamesId" class="tabcontent empty">
+            </ul>
+            
+            <div id="chartId" class="tabcontent empty">
+                <canvas></canvas>
+                <div class="legend"></div>
+            </div>
+            
+            <div id="settingsId" class="tabcontent">
+              <button class="renameButton">Rename player</button>
+              <button class="deleteButton">Hide player</button>
+            </div>
+        </div>`;
 
-        playerItem.innerHTML = `   
-            <button class="accordion">${player.name}</button>
-            <div class="panel">
-                <!-- Tab links -->
-                <div class="tab">
-                    <button class="tablinks games" id="defaultOpen">Played games</button>
-                    <button class="tablinks chartPie">Pie chart</button>
-                    <button class="tablinks settings">Player settings</button>
-                </div>
-                
-                <!-- Tab content -->
-                <ul id="gamesId" class="tabcontent empty">
-                </ul>
-                
-                <div id="chartId" class="tabcontent empty">
-                    <canvas></canvas>
-                    <div class="legend"></div>
-                </div>
-                
-                <div id="settingsId" class="tabcontent">
-                  <button class="renameButton">Rename player</button>
-                  <button class="deleteButton">Hide player</button>
-                </div>
-            </div>`;
+    const gameList = playerItem.querySelector("#gamesId");
+    const chartList = playerItem.querySelector("#chartId");
+    const settingsList = playerItem.querySelector("#settingsId");
+    settingsList.addEventListener("click", e => showSettingsForm(e, player));
 
-        playerItem.querySelector(".accordion").addEventListener("click", e => toggleAccordion(e));
-        playerItem.querySelector(".games").addEventListener("click", e => toggleTabs(e, 'gamesId', playerItem));
-        playerItem.querySelector(".chartPie").addEventListener("click", e => toggleTabs(e, 'chartId', playerItem));
-        playerItem.querySelector(".settings").addEventListener("click", e => toggleTabs(e, 'settingsId', playerItem));
+    playerItem.querySelector(".accordion").addEventListener("click", e => toggleAccordion(e));
+    playerItem.querySelector(".games").addEventListener("click", e => toggleTabs(e, 'gamesId', playerItem));
+    playerItem.querySelector(".chartPie").addEventListener("click", e => toggleTabs(e, 'chartId', playerItem, pieChartData, chartList));
+    playerItem.querySelector(".settings").addEventListener("click", e => toggleTabs(e, 'settingsId', playerItem));
 
-        const gameList = playerItem.querySelector("#gamesId");
-        const chartList = playerItem.querySelector("#chartId");
-        const settingsList = playerItem.querySelector("#settingsId");
-        settingsList.addEventListener("click", e => showSettingsForm(e, player));
-        const pieChartData = [];
+   stats.map(async game => {
+        const q = query(collection(db, `users/${userId}/games`), where("id", "==", game.gameId));
+        const querySnapshot = await getDocs(q);
 
-        games.forEach(game => {
-            let bestScore = 0;
-            let sum = 0;
-            let plays = 0;
+        querySnapshot.forEach(doc => {
+            const data = doc.data();
+            const averageScore = Math.round(game.sumOfScore/game.numberOfPlays);
+            const gameListItem = document.createElement("li");
+            gameListItem.classList.add("game-list-item");
+            gameListItem.innerHTML =`<div><p>${data.name}</p><img class="thumbnail" src=${data.url}><p>Best score: ${game.bestScore}</p><p>Average score: ${averageScore}</p><p>Plays: ${game.numberOfPlays}</p></div>`
+            gameList.insertAdjacentElement("beforeend", gameListItem);
 
-            for (const gameKey in game) {
-                game[gameKey].forEach(session => {
-                    plays += 1;
-                    const score = Number(session.score);
-                    if (score > bestScore) {
-                        bestScore = score;
-                    }
-                    sum += score;
-                })
-
-                docData.games.forEach(docDataGame => {
-                    if (docDataGame.id === gameKey) {
-                        const averageScore = Math.round(sum/plays);
-                        const pieChartGameData = {}
-                        const gameListItem = document.createElement("li");
-                        gameListItem.classList.add("game-list-item");
-                        gameListItem.innerHTML =`<div><p>${docDataGame.name}</p><img class="thumbnail" src=${docDataGame.url}><p>Best score: ${bestScore}</p><p>Average score: ${averageScore}</p><p>Plays: ${plays}</p></div>`
-                        gameList.insertAdjacentElement("beforeend", gameListItem);
-
-                        if (gameList.classList.contains("empty")) {
-                            gameList.classList.remove("empty");
-                        }
-
-                        pieChartGameData.id = docDataGame.id;
-                        pieChartGameData.name = docDataGame.name;
-                        pieChartGameData.bestScore = bestScore;
-                        pieChartGameData.averageScore = averageScore;
-                        pieChartGameData.plays = plays;
-
-                        pieChartData.push(pieChartGameData);
-                    }
-                })
+            if (gameList.classList.contains("empty")) {
+                gameList.classList.remove("empty");
             }
-        })
 
-        playersEl.insertAdjacentElement("beforeend", playerItem);
-        createChart(chartList, pieChartData);
+            const pieChartGameData = {
+                id: data.id,
+                name: data.name,
+                bestScore: game.bestScore,
+                averageScore: averageScore,
+                plays: game.numberOfPlays,
+            }
+
+            pieChartData.push(pieChartGameData);
+        })
     })
 
+    playersEl.insertAdjacentElement("beforeend", playerItem);
     playersEl.querySelectorAll("#defaultOpen").forEach(item => item.click());
 }
 
 function toggleAccordion(e) {
-    console.log(123)
+
     const button = e.currentTarget;
     button.classList.toggle("active");
 
@@ -145,17 +131,44 @@ function toggleAccordion(e) {
     }
 }
 
-function getStats(playerId) {
+async function getStats(playerId, userId) {
     const stats = [];
-    for (const play of docData.plays) {
-        if (play.playerId === playerId.toString()) {
-            stats.push(play);
+    const ids = [];
+    const q = query(collection(db, `users/${userId}/plays`), where("playerId", "==", playerId.toString()));
+    const querySnapshot = await getDocs(q);
+
+    querySnapshot.forEach(doc => {
+        const play = doc.data();
+
+        if (!ids.includes(play.gameId)) {
+            const game = {
+                bestScore: Number(play.score),
+                numberOfPlays: 1,
+                sumOfScore: Number(play.score),
+                gameId: play.gameId
+            }
+
+            stats.push(game)
+            ids.push(play.gameId)
+        } else {
+            stats.forEach(game => {
+                if (game.gameId  === play.gameId) {
+                    game.bestScore = game.bestScore > Number(play.score) ? game.bestScore : Number(play.score);
+                    game.numberOfPlays = game.numberOfPlays + 1;
+                    game.sumOfScore = game.sumOfScore + Number(play.score);
+                }
+            })
         }
-    }
+    })
+
     return stats;
 }
 
-function toggleTabs(e, city, parent) {
+function toggleTabs(e, tab, parent, pieChartData, selector) {
+
+    if (tab === "chartId") {
+        createChart(selector, pieChartData)
+    }
     // Get all elements with class="tabcontent" and hide them
     const tabcontent = parent.querySelectorAll(".tabcontent");
 
@@ -171,35 +184,12 @@ function toggleTabs(e, city, parent) {
     }
 
     // Show the current tab, and add an "active" class to the button that opened the tab
-    parent.querySelector(`#${city}`).style.display = "block";
+    parent.querySelector(`#${tab}`).style.display = "block";
     e.currentTarget.className += " active";
 }
 
-function getPersonalGameStats(stats) {
-    const games = [];
-    const ids = [];
-
-    for (const play of stats) {
-        if (!ids.includes(play.gameId)) {
-            const game = {
-                [play.gameId]: [play]
-            }
-            ids.push(play.gameId);
-            games.push(game);
-        } else {
-            games.forEach(game => {
-                if (game[play.gameId]) {
-                    game[play.gameId].push(play);
-                }
-            })
-        }
-    }
-
-    return games;
-}
-
 function createChart(parent, data) {
-    const pieChart = {}
+    const pieChart = {};
 
     data.forEach(game => {
         pieChart[game.name] = game.plays;
@@ -227,7 +217,6 @@ function createChart(parent, data) {
 async function renamePlayer(playerId, submitButton) {
     const allPlayerItems = playersEl.children;
     let newName = null;
-
     const formData = new FormData(renameFormEl, submitButton);
 
     for (const [_, value] of formData) {
@@ -238,19 +227,38 @@ async function renamePlayer(playerId, submitButton) {
         }
     }
 
-    if (docData) {
-        try {
-            docData.players.forEach(player => {
-                if (player.id.toString() === playerId) {
-                    player.name = newName;
-                }
-            })
+    try {
+        const auth = getAuth();
+        const user = auth.currentUser;
+        let docId;
 
-            await updateDoc(getCurrentUserDocRef(), docData);
-            Notify.success('The player is removed successfully');
-        } catch (e) {
-            console.error("Error adding player: ", e);
+        const q = user.uid === playerId
+            ? query(collection(db, `users/${user.uid}/players`), where("id", "==", playerId))
+            : query(collection(db, `users/${user.uid}/players`), where("id", "==", Number(playerId)));
+
+        const querySnapshot = await getDocs(q);
+
+        querySnapshot.forEach(( doc) => {
+             docId = doc.data().documentId;
+        });
+
+        const playerRef = doc(db, `users/${user.uid}/players`, docId);
+
+        await updateDoc(playerRef, {
+            name: newName
+        });
+
+        Notify.success('The player is renamed successfully');
+
+        if (user.uid === playerId) {
+            const userRef = doc(db, `users/${user.uid}/user`, user.uid);
+
+            await updateDoc(userRef, {
+                name: newName
+            });
         }
+    } catch (e) {
+        console.error("Error adding document: ", e);
     }
 
     [...allPlayerItems].forEach(item => {
@@ -259,6 +267,7 @@ async function renamePlayer(playerId, submitButton) {
         }
     })
 
+    renameFormEl.reset();
     closePlayerSettingModal();
 }
 
@@ -271,19 +280,30 @@ async function hidePlayer(playerId) {
         }
     })
 
-    if (docData) {
-        try {
-            docData.players.forEach(player => {
-                if (player.id.toString() === playerId) {
-                    player.hidden = "true";
-                }
-            })
+    try {
+        const auth = getAuth();
+        const user = auth.currentUser;
+        let docId;
 
-            await updateDoc(getCurrentUserDocRef(), docData);
-            Notify.success('The player is removed successfully');
-        } catch (e) {
-            console.error("Error adding player: ", e);
-        }
+        const q = user.uid === playerId
+            ? query(collection(db, `users/${user.uid}/players`), where("id", "==", playerId))
+            : query(collection(db, `users/${user.uid}/players`), where("id", "==", Number(playerId)));
+
+        const querySnapshot = await getDocs(q);
+
+        querySnapshot.forEach(( doc) => {
+            docId = doc.data().documentId;
+        });
+
+        const playerRef = doc(db, `users/${user.uid}/players`, docId);
+
+        await updateDoc(playerRef, {
+            hidden: true
+        });
+
+        Notify.success('The player is hidden successfully');
+    } catch (e) {
+        console.error("Error adding document: ", e);
     }
 
     closePlayerSettingModal();

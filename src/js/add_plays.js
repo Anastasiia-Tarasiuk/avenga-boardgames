@@ -1,9 +1,7 @@
-import {getCurrentUserData} from "./game_list";
-import {onAuthStateChanged} from "firebase/auth";
-import {auth} from "./login";
+import {getAuth, onAuthStateChanged} from "firebase/auth";
+import {auth, db} from "./login";
 import {Notify} from "notiflix/build/notiflix-notify-aio";
-import {updateDoc} from "firebase/firestore";
-import {getCurrentUserDocRef} from "./game_search";
+import {collection, doc, getDocs, query, setDoc, where} from "firebase/firestore";
 import debounce from 'lodash.debounce';
 
 const gameToScoreEl = document.querySelector(".game-to-score");
@@ -22,7 +20,6 @@ if (playerSelectEl) {
 }
 
 let id = null;
-let docData = null;
 const sessionId = Date.now();
 
 if (searchParams) {
@@ -36,23 +33,25 @@ if (searchParams) {
 async function renderGameToScore() {
     onAuthStateChanged(auth, async user => {
         if (user) {
-            docData = await getCurrentUserData(user);
-            gameTemplate(docData.games);
-            renderPlayers();
+            const q = query(collection(db, `users/${user.uid}/games`), where("id", "==", id));
+            const querySnapshot = await getDocs(q);
+
+            querySnapshot.forEach((doc) => {
+                gameTemplate(doc.data());
+                renderPlayers(user.uid);
+            });
         }
     });
 }
 
-function gameTemplate(games) {
-    for (const game of games) {
-        if (game.id === id) {
-            gameToScoreEl.innerHTML =`<div><p>${game.name}</p><img class="thumbnail" src=${game.url}></div>`
-            return;
-        }
-    }
+function gameTemplate(game) {
+    gameToScoreEl.innerHTML =`<div><p>${game.name}</p><img class="thumbnail" src=${game.url}></div>`
 }
 
-function renderPlayers() {
+async function renderPlayers(userId) {
+    const q = query(collection(db, `users/${userId}/players`));
+    const querySnapshot = await getDocs(q);
+
     [...playerSelectEl.children].forEach(child => {
         if (child.value !== "") {
             if (child.value !== "new-player") {
@@ -61,15 +60,19 @@ function renderPlayers() {
         }
     })
 
-    docData.players.forEach(player => {
-        if (player.hidden !== "true") {
-            const option = document.createElement("option");
-            option.innerHTML = player.name;
-            option.setAttribute("value", player.name);
-            option.dataset.id = player.id;
-            playerSelectEl.firstElementChild.after(option);
-        }
-    })
+    querySnapshot.forEach((doc) => {
+        createPlayer(doc.data())
+    });
+}
+
+function createPlayer(player) {
+    if (player.hidden !== "true") {
+        const option = document.createElement("option");
+        option.innerHTML = player.name;
+        option.setAttribute("value", player.name);
+        option.dataset.id = player.id;
+        playerSelectEl.firstElementChild.after(option);
+    }
 }
 
 function addNewPlayer(e) {
@@ -81,7 +84,6 @@ function addNewPlayer(e) {
     } else {
         if (value !== "") {
             [...select.children].forEach(option => {
-                console.log(option)
                 if (option.selected) {
                     select.dataset.id = option.dataset.id;
                 }
@@ -113,13 +115,15 @@ function addNewPlayer(e) {
     }
 }
 
-function submitPlayerForm(e) {
+async function submitPlayerForm(e) {
+    const auth = getAuth();
+    const user = auth.currentUser;
+
     e.preventDefault();
     const submitButton = e.currentTarget;
     const form = submitButton.parentElement;
     const formData = new FormData(submitButton.parentElement, submitButton);
     let name = null;
-    let validate = true;
 
     for (const [key, value] of formData) {
         if (key === "name") {
@@ -128,23 +132,21 @@ function submitPlayerForm(e) {
     }
 
     if (name.length > 0) {
-        docData.players.forEach(player => {
-            if (player.name.toLowerCase() === name.toLowerCase()) {
-                Notify.failure(`Player with name ${name} already exists`);
-                validate = false;
-            }
-        })
+        const q = query(collection(db, `users/${user.uid}/players`), where("name", "==", name));
+        const querySnapshot = await getDocs(q);
 
-        if (validate) {
+        if (querySnapshot.empty) {
             const player = {
                 name,
                 id: Date.now(),
                 hidden: false
             }
-            addPlayerToPlayers(player);
-            renderPlayers();
+            addPlayerToPlayers(user.uid, player);
+            renderPlayers(user.uid);
             form.reset();
             closePlayerModal();
+        } else {
+            Notify.failure(`Player with name ${name} already exists`);
         }
     } else {
         Notify.failure(`Name field shouldn't be empty`);
@@ -156,15 +158,15 @@ function closePlayerModal() {
     addPlayerModalOverlay.classList.add('hidden');
 }
 
-async function addPlayerToPlayers(player) {
-    if (docData) {
-        try {
-            docData.players.push(player);
-            await updateDoc(getCurrentUserDocRef(), docData);
-            Notify.success('The player is added successfully');
-        } catch (e) {
-            console.error("Error adding player: ", e);
-        }
+async function addPlayerToPlayers(userId, player) {
+    const dateId = Date.now().toString();
+    player.documentId = dateId;
+
+    try {
+        await setDoc(doc(collection(db, `users/${userId}/players`), dateId), player);
+        Notify.success('The player is added successfully');
+    } catch (e) {
+        console.error("Error adding player: ", e);
     }
 }
 
@@ -178,32 +180,14 @@ async function setScore(e) {
         sessionId: sessionId
     }
 
-    if (docData) {
-        try {
-            if (docData.plays.length > 0) {
-                let isNewPlay = true;
+    const auth = getAuth();
+    const user = auth.currentUser;
+    const playsRef = collection(db, `users/${user.uid}/plays`);
 
-                for (const savedPlay of docData.plays) {
-                    if (savedPlay.sessionId === sessionId) {
-                        if (savedPlay.playerId === option.id) {
-                            savedPlay.score = option.value;
-                            isNewPlay = false;
-                            break;
-                        }
-                    }
-                }
-
-                if (isNewPlay) {
-                    docData.plays.push(play);
-                }
-            } else {
-                docData.plays.push(play);
-            }
-
-            await updateDoc(getCurrentUserDocRef(), docData);
-            Notify.success('The score is added successfully');
-        } catch (e) {
-            console.error("Error adding score: ", e);
-        }
+    try {
+        await setDoc(doc(playsRef), play);
+        Notify.success('The score is added successfully');
+    } catch(e){
+        console.error("Error adding score: ", e);
     }
 }

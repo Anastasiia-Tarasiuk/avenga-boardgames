@@ -3,7 +3,7 @@ import defaultImage from "../images/no_image.jpg";
 import convert from "xml-js";
 import {db} from "./login";
 import {getAuth} from "firebase/auth";
-import {doc, getDoc, updateDoc} from "firebase/firestore";
+import {addDoc, collection, doc, getDoc, getDocs, query, setDoc, updateDoc, where} from "firebase/firestore";
 import {Notify} from "notiflix/build/notiflix-notify-aio";
 
 const gameListEl = document.querySelector(".game-list");
@@ -39,11 +39,7 @@ async function fetchAPI(url) {
         }
 
         const xmlString = await response.text();
-
         return JSON.parse(convert.xml2json(xmlString, {compact: true, spaces: 4}));
-
-        // var XmlNode = new DOMParser().parseFromString(xmlString, 'text/xml');
-        // return xmlToJson(XmlNode)
     } catch (error) {
         gameListEl.innerHTML = `<p>Oops... Something went wrong</p>`
         console.error("There has been a problem with your fetch operation:", error);
@@ -137,7 +133,6 @@ function renderGames(obj) {
     }
 
     obj.originalName = originalName;
-    // window.location.href = "http://localhost:1234/partials/game_search.html";
     gameListItem.setAttribute("data-id", obj.id);
     gameListItem.innerHTML =`<div class="thumb"><p>${obj.name}</p><img class="thumbnail" src=${obj.url}><p>Original name: ${originalName}</p></div><button class="add-game-button" type="button"><img src=${addGameImage}></button>`
     gameListItem.querySelector(".thumb").insertAdjacentElement("beforeend", categoriesEl);
@@ -146,61 +141,27 @@ function renderGames(obj) {
     gameListEl.insertAdjacentElement("beforeend", gameListItem);
 }
 
-// function toggleAccordion(e) {
-//     const item = e.currentTarget.parentElement;
-//     const thumbnail = item.querySelector(".thumbnail");
-//     const accordion =  item.querySelector(".accordion");
-//     const panel = item.querySelector(".panel");
-
-//     accordion.classList.toggle("active");
-
-//     if (panel.style.display === "block") {
-//         panel.style.display = "none";
-//         thumbnail.style.display = "block";
-//     } else {
-//         panel.style.display = "block";
-//         thumbnail.style.display = "none";
-//     }
-// }
-
 function handleWrongSearchRequest(searchValue) {
     gameListEl.innerHTML = `<p>There is no game called <span>"${searchValue}"</span></p>`
 }
 
 async function addGameToGames(_, game) {
-    const gameId = game.id;
-    const currentUserDocRef = getCurrentUserDocRef();
-    const currentUserDoc = await getDoc(currentUserDocRef);
-    const docData = currentUserDoc.data();
-    let gameExists = false;
+    const auth = getAuth();
+    const user = auth.currentUser;
+    const gamesRef = collection(db, `users/${user.uid}/games`);
 
-    if (docData.games) {
-        docData.games.forEach(game => {
-            if (game.id === gameId) {
-                gameExists = true;
-                Notify.failure('The game is already in the list');
-                return;
-            }
-        })
+    try {
+        const q = query(gamesRef, where("id", "==", game.id));
+        const querySnapshot = await getDocs(q);
 
-        if (!gameExists) {
-            try {
-                docData.games.push(game);
-                console.log("data", docData)
-                await updateDoc(currentUserDocRef, docData);
-                Notify.success('The game is added successfully');
-            } catch (e) {
-                console.error("Error adding game: ", e);
-            }
-        }
-    } else {
-        try {
-            docData.games = [game];
-            await updateDoc(currentUserDocRef, docData);
+        if (querySnapshot.empty) {
+            await addDoc(gamesRef, game);
             Notify.success('The game is added successfully');
-        } catch (e) {
-            console.error("Error adding game: ", e);
+        } else {
+            Notify.failure('The game is already in the list');
         }
+    } catch (e) {
+        console.error("Error adding document: ", e);
     }
 }
 
