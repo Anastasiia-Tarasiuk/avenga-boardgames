@@ -520,8 +520,7 @@ submitFormButtonsEl.forEach((btn)=>btn.addEventListener("click", (e)=>submitPlay
 (0, _auth.onAuthStateChanged)((0, _login.auth), async (user)=>{
     if (user) {
         playersEl.innerHTML = "";
-        const playersRef = (0, _firestore.collection)((0, _login.db), `users/${user.uid}/players`);
-        const q = (0, _firestore.query)(playersRef);
+        const q = (0, _firestore.query)((0, _constants.getRefs)(user.uid).players);
         const querySnapshot = await (0, _firestore.getDocs)(q);
         querySnapshot.forEach((doc)=>{
             playersTemplate(doc.data(), user.uid);
@@ -568,7 +567,7 @@ async function playersTemplate(player, userId) {
     playerItem.querySelector(".chartPie").addEventListener("click", (e)=>toggleTabs(e, "chartId", playerItem, pieChartData, chartList));
     playerItem.querySelector(".settings").addEventListener("click", (e)=>toggleTabs(e, "settingsId", playerItem));
     stats.map(async (game)=>{
-        const q = (0, _firestore.query)((0, _firestore.collection)((0, _login.db), `users/${userId}/games`), (0, _firestore.where)("id", "==", game.gameId));
+        const q = (0, _firestore.query)((0, _constants.getRefs)(userId).games, (0, _firestore.where)("id", "==", game.gameId));
         const querySnapshot = await (0, _firestore.getDocs)(q);
         querySnapshot.forEach((doc)=>{
             const data = doc.data();
@@ -601,7 +600,7 @@ function toggleAccordion(e) {
 async function getStats(playerId, userId) {
     const stats = [];
     const ids = [];
-    const q = (0, _firestore.query)((0, _firestore.collection)((0, _login.db), `users/${userId}/plays`), (0, _firestore.where)("playerId", "==", playerId.toString()));
+    const q = (0, _firestore.query)((0, _constants.getRefs)(userId).plays, (0, _firestore.where)("playerId", "==", playerId.toString()));
     const querySnapshot = await (0, _firestore.getDocs)(q);
     querySnapshot.forEach((doc)=>{
         const play = doc.data();
@@ -627,29 +626,32 @@ async function getStats(playerId, userId) {
 function toggleTabs(e, tab, parent, pieChartData, selector) {
     if (tab === "chartId") createChart(selector, pieChartData);
     const tabcontent = parent.querySelectorAll(".tabcontent");
-    for(let i = 0; i < tabcontent.length; i++)tabcontent[i].style.display = "none";
     const tablinks = parent.querySelectorAll(".tablinks");
+    for(let i = 0; i < tabcontent.length; i++)tabcontent[i].style.display = "none";
     for(let i1 = 0; i1 < tablinks.length; i1++)tablinks[i1].className = tablinks[i1].className.replace("active", "");
     parent.querySelector(`#${tab}`).style.display = "block";
     e.currentTarget.className += " active";
 }
 function createChart(parent, data) {
     const pieChart = {};
-    data.forEach((game)=>{
-        pieChart[game.name] = game.plays;
-    });
-    if (parent.classList.contains("empty")) parent.classList.remove("empty");
-    const canvas = parent.querySelector("canvas");
-    const legend = parent.querySelector(".legend");
-    const options = {
-        canvas,
-        pieChart,
-        colors: (0, _constants.COLORS),
-        legend
-    };
-    const gamesPieChart = new (0, _pieChart.PieChart)(options);
-    gamesPieChart.drawSlices();
-    gamesPieChart.drawLegend();
+    if (data.length !== 0) {
+        data.forEach((game)=>{
+            pieChart[game.name] = game.plays;
+        });
+        if (parent.classList.contains("empty")) parent.classList.remove("empty");
+        const canvas = parent.querySelector("canvas");
+        const legend = parent.querySelector(".legend");
+        const options = {
+            canvas,
+            pieChart,
+            colors: (0, _constants.COLORS),
+            legend
+        };
+        legend.innerHTML = "";
+        const gamesPieChart = new (0, _pieChart.PieChart)(options);
+        gamesPieChart.drawSlices();
+        gamesPieChart.drawLegend();
+    }
 }
 async function renamePlayer(playerId, submitButton) {
     const allPlayerItems = playersEl.children;
@@ -730,7 +732,7 @@ async function getPlayerRef(playerId) {
     const auth = (0, _auth.getAuth)();
     const user = auth.currentUser;
     let docId;
-    const q = user.uid === playerId ? (0, _firestore.query)((0, _firestore.collection)((0, _login.db), `users/${user.uid}/players`), (0, _firestore.where)("id", "==", playerId)) : (0, _firestore.query)((0, _firestore.collection)((0, _login.db), `users/${user.uid}/players`), (0, _firestore.where)("id", "==", Number(playerId)));
+    const q = user.uid === playerId ? (0, _firestore.query)((0, _constants.getRefs)(user.uid).players, (0, _firestore.where)("id", "==", playerId)) : (0, _firestore.query)((0, _constants.getRefs)(user.uid).players, (0, _firestore.where)("id", "==", Number(playerId)));
     const querySnapshot = await (0, _firestore.getDocs)(q);
     querySnapshot.forEach((doc)=>{
         docId = doc.data().documentId;

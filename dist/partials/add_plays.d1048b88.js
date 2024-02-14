@@ -510,6 +510,7 @@ var _notiflixNotifyAio = require("notiflix/build/notiflix-notify-aio");
 var _firestore = require("firebase/firestore");
 var _lodashDebounce = require("lodash.debounce");
 var _lodashDebounceDefault = parcelHelpers.interopDefault(_lodashDebounce);
+var _constants = require("./constants");
 const gameToScoreEl = document.querySelector(".game-to-score");
 const addPlayerModalOverlay = document.querySelector(".add-player-modal-overlay");
 const submitFormButtonEl = document.querySelector("button[type='submit']");
@@ -525,7 +526,7 @@ const id = searchParams.get("id");
 const sessionId = Date.now();
 (0, _auth.onAuthStateChanged)((0, _login.auth), async (user)=>{
     if (user) {
-        const q = (0, _firestore.query)((0, _firestore.collection)((0, _login.db), `users/${user.uid}/games`), (0, _firestore.where)("id", "==", id));
+        const q = (0, _firestore.query)((0, _constants.getRefs)(user.uid).games, (0, _firestore.where)("id", "==", id));
         const querySnapshot = await (0, _firestore.getDocs)(q);
         querySnapshot.forEach((doc)=>{
             gameTemplate(doc.data());
@@ -537,7 +538,7 @@ function gameTemplate(game) {
     gameToScoreEl.innerHTML = `<div><p>${game.name}</p><img class="thumbnail" src=${game.url}></div>`;
 }
 async function renderPlayers(userId) {
-    const q = (0, _firestore.query)((0, _firestore.collection)((0, _login.db), `users/${userId}/players`));
+    const q = (0, _firestore.query)((0, _constants.getRefs)(userId).players);
     const querySnapshot = await (0, _firestore.getDocs)(q);
     [
         ...playerSelectEl.children
@@ -601,7 +602,7 @@ async function submitPlayerForm(e) {
     let name = null;
     for (const [key, value] of formData)if (key === "name") name = value.trim();
     if (name.length > 0) {
-        const q = (0, _firestore.query)((0, _firestore.collection)((0, _login.db), `users/${user.uid}/players`), (0, _firestore.where)("name", "==", name));
+        const q = (0, _firestore.query)((0, _constants.getRefs)(user.uid).players, (0, _firestore.where)("name", "==", name));
         const querySnapshot = await (0, _firestore.getDocs)(q);
         if (querySnapshot.empty) {
             const player = {
@@ -624,7 +625,7 @@ async function addPlayerToPlayers(userId, player) {
     const dateId = Date.now().toString();
     player.documentId = dateId;
     try {
-        await (0, _firestore.setDoc)((0, _firestore.doc)((0, _firestore.collection)((0, _login.db), `users/${userId}/players`), dateId), player);
+        await (0, _firestore.setDoc)((0, _firestore.doc)((0, _constants.getRefs)(userId).players, dateId), player);
         (0, _notiflixNotifyAio.Notify).success("The player is added successfully");
     } catch (e) {
         console.error("Error adding player: ", e);
@@ -641,16 +642,15 @@ async function setScore(e) {
     };
     const auth = (0, _auth.getAuth)();
     const user = auth.currentUser;
-    const playsRef = (0, _firestore.collection)((0, _login.db), `users/${user.uid}/plays`);
     try {
-        await (0, _firestore.setDoc)((0, _firestore.doc)(playsRef), play);
+        await (0, _firestore.setDoc)((0, _firestore.doc)((0, _constants.getRefs)(user.uid).plays), play);
         (0, _notiflixNotifyAio.Notify).success("The score is added successfully");
     } catch (e2) {
         console.error("Error adding score: ", e2);
     }
 }
 
-},{"firebase/auth":"79vzg","./login":"47T64","notiflix/build/notiflix-notify-aio":"eXQLZ","firebase/firestore":"8A4BC","lodash.debounce":"3JP5n","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"3JP5n":[function(require,module,exports) {
+},{"firebase/auth":"79vzg","./login":"47T64","notiflix/build/notiflix-notify-aio":"eXQLZ","firebase/firestore":"8A4BC","lodash.debounce":"3JP5n","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./constants":"itKcQ"}],"3JP5n":[function(require,module,exports) {
 var global = arguments[3];
 /**
  * lodash (Custom Build) <https://lodash.com/>

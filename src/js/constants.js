@@ -1,4 +1,3 @@
-import {getAuth} from "firebase/auth";
 import {collection} from "firebase/firestore";
 import {db} from "./login";
 
@@ -259,16 +258,14 @@ const palette = [
     '#263238'
 ];
 
- export const COLORS = palette.sort(() => (Math.random() > 0.5) ? 1 : -1);
+export const COLORS = palette.sort(() => (Math.random() > 0.5) ? 1 : -1);
 
-export function getCurrentUserId() {
-    const auth = getAuth();
-    return auth.currentUser.uid;
+export function getRefs(userId) {
+    return ({
+        games: collection(db, `users/${userId}/games`),
+        plays: collection(db, `users/${userId}/plays`),
+        players: collection(db, `users/${userId}/players`),
+        user: collection(db, `users/${userId}/user`),
+ })
 }
 
-// export const refs = {
-//      games: collection(db, `users/${getCurrentUserId()}/games`),
-//      plays: collection(db, `users/${getCurrentUserId()}/plays`),
-//      players: collection(db, `users/${getCurrentUserId()}/players`),
-//  }
-//

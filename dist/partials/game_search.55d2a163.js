@@ -510,16 +510,14 @@ var _noImageJpg = require("../images/no_image.jpg");
 var _noImageJpgDefault = parcelHelpers.interopDefault(_noImageJpg);
 var _xmlJs = require("xml-js");
 var _xmlJsDefault = parcelHelpers.interopDefault(_xmlJs);
-var _login = require("./login");
 var _firestore = require("firebase/firestore");
 var _notiflixNotifyAio = require("notiflix/build/notiflix-notify-aio");
+var _auth = require("firebase/auth");
 var _constants = require("./constants");
 const gameListEl = document.querySelector(".game-list");
 const searchFormEl = document.querySelector(".search-form");
 const submitButtonEl = document.querySelector(".submit-button");
-// if (submitButtonEl) {
 submitButtonEl.addEventListener("click", (e)=>submitForm(e));
-// }
 const gameData = {};
 function submitForm(e) {
     e.preventDefault();
@@ -635,12 +633,13 @@ function handleWrongSearchRequest(searchValue) {
     gameListEl.innerHTML = `<p>There is no game called <span>"${searchValue}"</span></p>`;
 }
 async function addGameToGames(_, game) {
-    const gamesRef = (0, _firestore.collection)((0, _login.db), `users/${(0, _constants.getCurrentUserId)()}/games`);
+    const auth = (0, _auth.getAuth)();
+    const user = auth.currentUser;
     try {
-        const q = (0, _firestore.query)(gamesRef, (0, _firestore.where)("id", "==", game.id));
+        const q = (0, _firestore.query)((0, _constants.getRefs)(user.uid).games, (0, _firestore.where)("id", "==", game.id));
         const querySnapshot = await (0, _firestore.getDocs)(q);
         if (querySnapshot.empty) {
-            await (0, _firestore.addDoc)(gamesRef, game);
+            await (0, _firestore.addDoc)((0, _constants.getRefs)(user.uid).games, game);
             (0, _notiflixNotifyAio.Notify).success("The game is added successfully");
         } else (0, _notiflixNotifyAio.Notify).failure("The game is already in the list");
     } catch (e) {
@@ -648,7 +647,7 @@ async function addGameToGames(_, game) {
     }
 }
 
-},{"../images/plus.png":"bFEW6","../images/no_image.jpg":"uA0id","xml-js":"6mugM","./login":"47T64","firebase/firestore":"8A4BC","notiflix/build/notiflix-notify-aio":"eXQLZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./constants":"itKcQ"}],"bFEW6":[function(require,module,exports) {
+},{"../images/plus.png":"bFEW6","../images/no_image.jpg":"uA0id","xml-js":"6mugM","firebase/firestore":"8A4BC","notiflix/build/notiflix-notify-aio":"eXQLZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./constants":"itKcQ","firebase/auth":"79vzg"}],"bFEW6":[function(require,module,exports) {
 module.exports = require("./helpers/bundle-url").getBundleURL("eglpp") + "../plus.516f8977.png" + "?" + Date.now();
 
 },{"./helpers/bundle-url":"lgJ39"}],"lgJ39":[function(require,module,exports) {

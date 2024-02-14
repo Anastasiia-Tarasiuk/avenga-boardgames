@@ -1,9 +1,9 @@
 import {getAuth, onAuthStateChanged} from "firebase/auth";
 import {auth} from "./login";
 import {PieChart} from "./pieChart";
-import {COLORS as colors} from "./constants";
+import {COLORS as colors, getRefs} from "./constants";
 import {doc, updateDoc} from "firebase/firestore";
-import {collection, query, where, getDocs} from "firebase/firestore";
+import {query, where, getDocs} from "firebase/firestore";
 import {Notify} from "notiflix/build/notiflix-notify-aio";
 import {db} from "./login";
 
@@ -17,13 +17,10 @@ const submitFormButtonsEl = modalSettingsOverlayEl.querySelectorAll("button[type
 closeLoginModalButtonEls.forEach(btn => btn.addEventListener("click", closePlayerSettingModal));
 submitFormButtonsEl.forEach(btn => btn.addEventListener("click", (e) => submitPlayerSettingsForm(e)));
 
-
-
 onAuthStateChanged(auth, async user => {
     if (user) {
         playersEl.innerHTML = "";
-        const playersRef = collection(db, `users/${user.uid}/players`);
-        const q = query(playersRef);
+        const q = query(getRefs(user.uid).players);
         const querySnapshot = await getDocs(q);
 
         querySnapshot.forEach((doc) => {
@@ -80,7 +77,7 @@ async function playersTemplate(player, userId) {
     playerItem.querySelector(".settings").addEventListener("click", e => toggleTabs(e, 'settingsId', playerItem));
 
    stats.map(async game => {
-        const q = query(collection(db, `users/${userId}/games`), where("id", "==", game.gameId));
+        const q = query(getRefs(userId).games, where("id", "==", game.gameId));
         const querySnapshot = await getDocs(q);
 
         querySnapshot.forEach(doc => {
@@ -126,7 +123,7 @@ function toggleAccordion(e) {
 async function getStats(playerId, userId) {
     const stats = [];
     const ids = [];
-    const q = query(collection(db, `users/${userId}/plays`), where("playerId", "==", playerId.toString()));
+    const q = query(getRefs(userId).plays, where("playerId", "==", playerId.toString()));
     const querySnapshot = await getDocs(q);
 
     querySnapshot.forEach(doc => {
@@ -162,12 +159,11 @@ function toggleTabs(e, tab, parent, pieChartData, selector) {
     }
 
     const tabcontent = parent.querySelectorAll(".tabcontent");
+    const tablinks = parent.querySelectorAll(".tablinks");
 
     for (let i = 0; i < tabcontent.length; i++) {
         tabcontent[i].style.display = "none";
     }
-
-    const tablinks = parent.querySelectorAll(".tablinks");
 
     for (let i = 0; i < tablinks.length; i++) {
         tablinks[i].className = tablinks[i].className.replace("active", "");
@@ -180,27 +176,29 @@ function toggleTabs(e, tab, parent, pieChartData, selector) {
 function createChart(parent, data) {
     const pieChart = {};
 
-    data.forEach(game => {
-        pieChart[game.name] = game.plays;
+    if (data.length !== 0) {
+        data.forEach(game => {
+            pieChart[game.name] = game.plays;
 
-    })
+        })
 
-    if (parent.classList.contains("empty")) {
-        parent.classList.remove("empty");
+        if (parent.classList.contains("empty")) {
+            parent.classList.remove("empty");
+        }
+
+        const canvas = parent.querySelector("canvas");
+        const legend = parent.querySelector(".legend");
+        const options = {
+            canvas,
+            pieChart,
+            colors,
+            legend
+        }
+        legend.innerHTML = "";
+        const gamesPieChart = new PieChart(options);
+        gamesPieChart.drawSlices();
+        gamesPieChart.drawLegend();
     }
-
-    const canvas = parent.querySelector("canvas");
-    const legend = parent.querySelector(".legend");
-    const options = {
-        canvas,
-        pieChart,
-        colors,
-        legend
-    }
-
-    const gamesPieChart = new PieChart(options);
-    gamesPieChart.drawSlices();
-    gamesPieChart.drawLegend();
 }
 
 async function renamePlayer(playerId, submitButton) {
@@ -279,13 +277,11 @@ function showSettingsForm(e, player, accordion) {
     if (button.classList.contains("renameButton")) {
         hideFormEl.style.display = "none";
         renameFormEl.style.display = "flex";
-
         const submitButtonEl = renameFormEl.querySelector("button[type='submit']");
         submitButtonEl.setAttribute("data-playerid", player.id);
         submitButtonEl.innerText = `Rename ${playerName}`;
     } else {
         hideFormEl.style.display = "flex";
-
         renameFormEl.style.display = "none";
         const submitButtonEl = hideFormEl.querySelector("button[type='submit']");
         submitButtonEl.setAttribute("data-playerid", player.id);
@@ -314,8 +310,8 @@ async function getPlayerRef(playerId) {
     let docId;
 
     const q = user.uid === playerId
-        ? query(collection(db, `users/${user.uid}/players`), where("id", "==", playerId))
-        : query(collection(db, `users/${user.uid}/players`), where("id", "==", Number(playerId)));
+        ? query(getRefs(user.uid).players, where("id", "==", playerId))
+        : query(getRefs(user.uid).players, where("id", "==", Number(playerId)));
 
     const querySnapshot = await getDocs(q);
 

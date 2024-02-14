@@ -1,8 +1,9 @@
 import {getAuth, onAuthStateChanged} from "firebase/auth";
-import {auth, db} from "./login";
+import {auth} from "./login";
 import {Notify} from "notiflix/build/notiflix-notify-aio";
-import {collection, doc, getDocs, query, setDoc, where} from "firebase/firestore";
+import {doc, getDocs, query, setDoc, where} from "firebase/firestore";
 import debounce from 'lodash.debounce';
+import {getRefs} from "./constants";
 
 const gameToScoreEl = document.querySelector(".game-to-score");
 const addPlayerModalOverlay = document.querySelector(".add-player-modal-overlay");
@@ -22,7 +23,7 @@ const sessionId = Date.now();
 
 onAuthStateChanged(auth, async user => {
     if (user) {
-        const q = query(collection(db, `users/${user.uid}/games`), where("id", "==", id));
+        const q = query(getRefs(user.uid).games, where("id", "==", id));
         const querySnapshot = await getDocs(q);
 
         querySnapshot.forEach((doc) => {
@@ -37,7 +38,7 @@ function gameTemplate(game) {
 }
 
 async function renderPlayers(userId) {
-    const q = query(collection(db, `users/${userId}/players`));
+    const q = query(getRefs(userId).players);
     const querySnapshot = await getDocs(q);
 
     [...playerSelectEl.children].forEach(child => {
@@ -120,7 +121,7 @@ async function submitPlayerForm(e) {
     }
 
     if (name.length > 0) {
-        const q = query(collection(db, `users/${user.uid}/players`), where("name", "==", name));
+        const q = query(getRefs(user.uid).players, where("name", "==", name));
         const querySnapshot = await getDocs(q);
 
         if (querySnapshot.empty) {
@@ -151,7 +152,7 @@ async function addPlayerToPlayers(userId, player) {
     player.documentId = dateId;
 
     try {
-        await setDoc(doc(collection(db, `users/${userId}/players`), dateId), player);
+        await setDoc(doc(getRefs(userId).players, dateId), player);
         Notify.success('The player is added successfully');
     } catch (e) {
         console.error("Error adding player: ", e);
@@ -170,10 +171,9 @@ async function setScore(e) {
 
     const auth = getAuth();
     const user = auth.currentUser;
-    const playsRef = collection(db, `users/${user.uid}/plays`);
 
     try {
-        await setDoc(doc(playsRef), play);
+        await setDoc(doc(getRefs(user.uid).plays), play);
         Notify.success('The score is added successfully');
     } catch(e){
         console.error("Error adding score: ", e);

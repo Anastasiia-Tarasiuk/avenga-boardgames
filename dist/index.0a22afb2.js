@@ -506,11 +506,11 @@ function hmrAcceptRun(bundle, id) {
 var _auth = require("firebase/auth");
 var _login = require("./login");
 var _firestore = require("firebase/firestore");
+var _constants = require("./constants");
 const playedGamesListEl = document.querySelector(".played-games");
 (0, _auth.onAuthStateChanged)((0, _login.auth), async (user)=>{
     if (user) {
-        const gamesRef = (0, _firestore.collection)((0, _login.db), `users/${user.uid}/games`);
-        const q = (0, _firestore.query)(gamesRef);
+        const q = (0, _firestore.query)((0, _constants.getRefs)(user.uid).games);
         const querySnapshot = await (0, _firestore.getDocs)(q);
         if (!querySnapshot.empty) {
             playedGamesListEl.innerHTML = "";
@@ -529,8 +529,7 @@ async function renderPlayedGames(game, userId) {
 }
 async function getGameSessions(game, userId) {
     const sessions = [];
-    const gamesRef = (0, _firestore.collection)((0, _login.db), `users/${userId}/plays`);
-    const q = (0, _firestore.query)(gamesRef, (0, _firestore.where)("gameId", "==", game.id));
+    const q = (0, _firestore.query)((0, _constants.getRefs)(userId).plays, (0, _firestore.where)("gameId", "==", game.id));
     const querySnapshot = await (0, _firestore.getDocs)(q);
     querySnapshot.forEach((doc)=>{
         if (!sessions.includes(doc.data().sessionId)) sessions.push(doc.data().sessionId);
@@ -538,6 +537,6 @@ async function getGameSessions(game, userId) {
     return sessions.length;
 }
 
-},{"firebase/auth":"79vzg","./login":"47T64","firebase/firestore":"8A4BC"}]},["aM2k3","1RWSs"], "1RWSs", "parcelRequired7c6")
+},{"firebase/auth":"79vzg","./login":"47T64","firebase/firestore":"8A4BC","./constants":"itKcQ"}]},["aM2k3","1RWSs"], "1RWSs", "parcelRequired7c6")
 
 //# sourceMappingURL=index.0a22afb2.js.map

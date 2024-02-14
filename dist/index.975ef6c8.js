@@ -515,6 +515,7 @@ var _app = require("firebase/app");
 var _auth = require("firebase/auth");
 var _firestore = require("firebase/firestore");
 var _notiflixNotifyAio = require("notiflix/build/notiflix-notify-aio");
+var _constants = require("./constants");
 const firebaseConfig = {
     apiKey: "AIzaSyDfHEoFiYmKRqd8-ktFcO7zg3QLGxAViQc",
     authDomain: "board-games-saver.firebaseapp.com",
@@ -686,12 +687,12 @@ function logout() {
 async function setUserDataToStorage(user) {
     const dateId = Date.now().toString();
     try {
-        await (0, _firestore.setDoc)((0, _firestore.doc)((0, _firestore.collection)(db, `users/${user.uid}/user`), user.uid), {
+        await (0, _firestore.setDoc)((0, _firestore.doc)((0, _constants.getRefs)(user.uid).user, user.uid), {
             id: user.uid,
             email: user.email,
             name: user.displayName || "User"
         });
-        await (0, _firestore.setDoc)((0, _firestore.doc)((0, _firestore.collection)(db, `users/${user.uid}/players`), dateId), {
+        await (0, _firestore.setDoc)((0, _firestore.doc)((0, _constants.getRefs)(user.uid).players, dateId), {
             id: user.uid,
             name: user.displayName || "You",
             hidden: false,
@@ -702,7 +703,7 @@ async function setUserDataToStorage(user) {
     }
 }
 
-},{"firebase/app":"aM3Fo","firebase/auth":"79vzg","firebase/firestore":"8A4BC","notiflix/build/notiflix-notify-aio":"eXQLZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"aM3Fo":[function(require,module,exports) {
+},{"firebase/app":"aM3Fo","firebase/auth":"79vzg","firebase/firestore":"8A4BC","notiflix/build/notiflix-notify-aio":"eXQLZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./constants":"itKcQ"}],"aM3Fo":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _app = require("@firebase/app");
@@ -36897,14 +36898,7 @@ var global = arguments[3];
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "COLORS", ()=>COLORS);
-parcelHelpers.export(exports, "getCurrentUserId", ()=>getCurrentUserId) // export const refs = {
- //      games: collection(db, `users/${getCurrentUserId()}/games`),
- //      plays: collection(db, `users/${getCurrentUserId()}/plays`),
- //      players: collection(db, `users/${getCurrentUserId()}/players`),
- //  }
- //
-;
-var _auth = require("firebase/auth");
+parcelHelpers.export(exports, "getRefs", ()=>getRefs);
 var _firestore = require("firebase/firestore");
 var _login = require("./login");
 const palette = [
@@ -37164,11 +37158,15 @@ const palette = [
     "#263238"
 ];
 const COLORS = palette.sort(()=>Math.random() > 0.5 ? 1 : -1);
-function getCurrentUserId() {
-    const auth = (0, _auth.getAuth)();
-    return auth.currentUser.uid;
+function getRefs(userId) {
+    return {
+        games: (0, _firestore.collection)((0, _login.db), `users/${userId}/games`),
+        plays: (0, _firestore.collection)((0, _login.db), `users/${userId}/plays`),
+        players: (0, _firestore.collection)((0, _login.db), `users/${userId}/players`),
+        user: (0, _firestore.collection)((0, _login.db), `users/${userId}/user`)
+    };
 }
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","firebase/auth":"79vzg","firebase/firestore":"8A4BC","./login":"47T64"}]},["1RB6v","8lqZg"], "8lqZg", "parcelRequired7c6")
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","firebase/firestore":"8A4BC","./login":"47T64"}]},["1RB6v","8lqZg"], "8lqZg", "parcelRequired7c6")
 
 //# sourceMappingURL=index.975ef6c8.js.map

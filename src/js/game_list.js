@@ -1,13 +1,13 @@
 import {onAuthStateChanged} from "firebase/auth";
-import {auth, db} from "./login";
-import {collection, getDocs, query, where} from "firebase/firestore";
+import {auth} from "./login";
+import {getDocs, query, where} from "firebase/firestore";
+import {getRefs} from "./constants";
 
 const playedGamesListEl = document.querySelector(".played-games");
 
 onAuthStateChanged(auth, async user => {
     if (user) {
-        const gamesRef = collection(db, `users/${user.uid}/games`);
-        const q = query(gamesRef);
+        const q = query(getRefs(user.uid).games);
         const querySnapshot = await getDocs(q);
 
         if (!querySnapshot.empty) {
@@ -29,8 +29,7 @@ async function renderPlayedGames(game, userId) {
 
 async function getGameSessions(game, userId) {
     const sessions = [];
-    const gamesRef = collection(db, `users/${userId}/plays`);
-    const q = query(gamesRef, where("gameId", "==", game.id))
+    const q = query(getRefs(userId).plays, where("gameId", "==", game.id))
     const querySnapshot = await getDocs(q);
 
     querySnapshot.forEach((doc) => {

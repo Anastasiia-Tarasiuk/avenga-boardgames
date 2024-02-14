@@ -1,18 +1,16 @@
 import addGameImage from "../images/plus.png";
 import defaultImage from "../images/no_image.jpg";
 import convert from "xml-js";
-import {db} from "./login";
-import {addDoc, collection, getDocs, query, where} from "firebase/firestore";
+import {addDoc, getDocs, query, where} from "firebase/firestore";
 import {Notify} from "notiflix/build/notiflix-notify-aio";
-import {getCurrentUserId} from "./constants";
+import {getAuth} from "firebase/auth";
+import {getRefs} from "./constants";
 
 const gameListEl = document.querySelector(".game-list");
 const searchFormEl = document.querySelector(".search-form");
 const submitButtonEl = document.querySelector(".submit-button");
 
-// if (submitButtonEl) {
 submitButtonEl.addEventListener("click", e => submitForm(e));
-// }
 
 const gameData = {};
 
@@ -146,14 +144,15 @@ function handleWrongSearchRequest(searchValue) {
 }
 
 async function addGameToGames(_, game) {
-    const gamesRef = collection(db, `users/${getCurrentUserId()}/games`);
+    const auth = getAuth();
+    const user = auth.currentUser;
 
     try {
-        const q = query(gamesRef, where("id", "==", game.id));
+        const q = query(getRefs(user.uid).games, where("id", "==", game.id));
         const querySnapshot = await getDocs(q);
 
         if (querySnapshot.empty) {
-            await addDoc(gamesRef, game);
+            await addDoc(getRefs(user.uid).games, game);
             Notify.success('The game is added successfully');
         } else {
             Notify.failure('The game is already in the list');

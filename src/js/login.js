@@ -1,7 +1,8 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup} from "firebase/auth";
-import {getFirestore, collection, doc, setDoc} from "firebase/firestore";
+import {getFirestore, doc, setDoc} from "firebase/firestore";
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
+import {getRefs} from "./constants";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDfHEoFiYmKRqd8-ktFcO7zg3QLGxAViQc",
@@ -232,13 +233,13 @@ function logout() {
 async function setUserDataToStorage(user) {
     const dateId = Date.now().toString();
     try {
-        await setDoc(doc(collection(db, `users/${user.uid}/user`), user.uid), {
+        await setDoc(doc(getRefs(user.uid).user, user.uid), {
             id: user.uid,
             email: user.email,
             name: user.displayName || "User",
         })
 
-        await setDoc(doc(collection(db, `users/${user.uid}/players`), dateId), {
+        await setDoc(doc(getRefs(user.uid).players, dateId), {
             id: user.uid,
             name: user.displayName || "You",
             hidden: false,
