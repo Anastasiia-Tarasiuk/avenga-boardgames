@@ -268,4 +268,3 @@ export function getRefs(userId) {
         user: collection(db, `users/${userId}/user`),
  })
 }
-

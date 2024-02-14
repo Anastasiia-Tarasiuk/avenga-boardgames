@@ -633,13 +633,12 @@ function handleWrongSearchRequest(searchValue) {
     gameListEl.innerHTML = `<p>There is no game called <span>"${searchValue}"</span></p>`;
 }
 async function addGameToGames(_, game) {
-    const auth = (0, _auth.getAuth)();
-    const user = auth.currentUser;
+    const userId = localStorage.getItem("userId");
     try {
-        const q = (0, _firestore.query)((0, _constants.getRefs)(user.uid).games, (0, _firestore.where)("id", "==", game.id));
+        const q = (0, _firestore.query)((0, _constants.getRefs)(userId).games, (0, _firestore.where)("id", "==", game.id));
         const querySnapshot = await (0, _firestore.getDocs)(q);
         if (querySnapshot.empty) {
-            await (0, _firestore.addDoc)((0, _constants.getRefs)(user.uid).games, game);
+            await (0, _firestore.addDoc)((0, _constants.getRefs)(userId).games, game);
             (0, _notiflixNotifyAio.Notify).success("The game is added successfully");
         } else (0, _notiflixNotifyAio.Notify).failure("The game is already in the list");
     } catch (e) {

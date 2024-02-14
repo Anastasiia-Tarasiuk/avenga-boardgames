@@ -144,15 +144,14 @@ function handleWrongSearchRequest(searchValue) {
 }
 
 async function addGameToGames(_, game) {
-    const auth = getAuth();
-    const user = auth.currentUser;
+    const userId = localStorage.getItem("userId");
 
     try {
-        const q = query(getRefs(user.uid).games, where("id", "==", game.id));
+        const q = query(getRefs(userId).games, where("id", "==", game.id));
         const querySnapshot = await getDocs(q);
 
         if (querySnapshot.empty) {
-            await addDoc(getRefs(user.uid).games, game);
+            await addDoc(getRefs(userId).games, game);
             Notify.success('The game is added successfully');
         } else {
             Notify.failure('The game is already in the list');

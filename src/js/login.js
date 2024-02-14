@@ -97,6 +97,7 @@ function submitLoginForm(e) {
             signInWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
                 Notify.success(`Successfully signed in`);
+                localStorage.setItem("userId", userCredential.user.uid);
                 closeLoginModal();
             })
             .catch((error) => {
@@ -117,6 +118,7 @@ function submitLoginForm(e) {
                 Notify.success('Successfully signed up');
                 // Signed up 
                 const user = userCredential.user;
+                localStorage.setItem("userId", user.uid);
                 setUserDataToStorage(user);
                 closeLoginModal();
             })
@@ -146,6 +148,8 @@ function loginWithGoogle(e) {
                 Notify.success('Successfully signed up');
                 setUserDataToStorage(user);
             }
+
+            localStorage.setItem("userId", user.uid);
 
             closeLoginModal();
 
@@ -200,28 +204,10 @@ function validation(email, password) {
 }
 
 function logout() {
-    //todo change logic!!!
-    const main = document.querySelector("main");
     signOut(auth)
         .then(res => {
-            const url = window.location.href;
-
-            if (!url.includes("index.html")) {
-                const urlArray = url.split("/");
-                let newUrl = "";
-
-                urlArray.forEach((item, index) => {
-                    if (index === urlArray.length - 1) {
-                        item = "index.html"
-                    }
-
-                    newUrl += `${item}/`;
-                })
-
-                window.location.replace(newUrl.substring(0, newUrl.length - 1));
-            }
-
-            main.querySelector(".container").innerHTML = "Please sign in or sign up"
+            localStorage.removeItem("userId");
+            window.location.pathname = "partials/index.html";
             Notify.success('Successfully signed out');
         })
         .catch(err => {
@@ -231,7 +217,6 @@ function logout() {
 }
 
 async function setUserDataToStorage(user) {
-    const dateId = Date.now().toString();
     try {
         await setDoc(doc(getRefs(user.uid).user, user.uid), {
             id: user.uid,
@@ -239,11 +224,10 @@ async function setUserDataToStorage(user) {
             name: user.displayName || "User",
         })
 
-        await setDoc(doc(getRefs(user.uid).players, dateId), {
+        await setDoc(doc(getRefs(user.uid).players), {
             id: user.uid,
             name: user.displayName || "You",
             hidden: false,
-            documentId: dateId,
         })
 
     } catch (e) {

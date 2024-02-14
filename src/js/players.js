@@ -205,6 +205,7 @@ async function renamePlayer(playerId, submitButton) {
     const allPlayerItems = playersEl.children;
     let newName = null;
     const formData = new FormData(renameFormEl, submitButton);
+    const userId = localStorage.getItem("userId");
 
     for (const [_, value] of formData) {
         if (value.trim()) {
@@ -215,17 +216,17 @@ async function renamePlayer(playerId, submitButton) {
     }
 
     try {
-        const data = await getPlayerRef(playerId);
+        const playerRef = await getPlayerRef(playerId);
 
-        await updateDoc(data.playerRef, {
+        await updateDoc(playerRef, {
             name: newName
         });
 
         Notify.success('The player is renamed successfully');
 
         // if player is user
-        if (data.userId === playerId) {
-            const userRef = doc(db, `users/${data.userId}/user`, data.userId);
+        if (userId === playerId) {
+            const userRef = doc(db, `users/${userId}/user`, userId);
 
             await updateDoc(userRef, {
                 name: newName
@@ -255,9 +256,9 @@ async function hidePlayer(playerId) {
     })
 
     try {
-        const data = await getPlayerRef(playerId);
+        const playerRef = await getPlayerRef(playerId);
 
-        await updateDoc(data.playerRef, {
+        await updateDoc(playerRef, {
             hidden: true
         });
 
@@ -305,22 +306,18 @@ function submitPlayerSettingsForm(e) {
 }
 
 async function getPlayerRef(playerId) {
-    const auth = getAuth();
-    const user = auth.currentUser;
+    const userId = localStorage.getItem("userId");
     let docId;
 
-    const q = user.uid === playerId
-        ? query(getRefs(user.uid).players, where("id", "==", playerId))
-        : query(getRefs(user.uid).players, where("id", "==", Number(playerId)));
+    const q = userId === playerId
+        ? query(getRefs(userId).players, where("id", "==", playerId))
+        : query(getRefs(userId).players, where("id", "==", Number(playerId)));
 
     const querySnapshot = await getDocs(q);
 
     querySnapshot.forEach(( doc) => {
-        docId = doc.data().documentId;
+        docId = doc.id;
     });
 
-    return ({
-        playerRef: doc(db, `users/${user.uid}/players`, docId),
-        userId: user.uid
-    });
+    return  doc(db, `users/${userId}/players`, docId);
 }

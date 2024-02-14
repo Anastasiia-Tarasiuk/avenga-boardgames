@@ -657,17 +657,18 @@ async function renamePlayer(playerId, submitButton) {
     const allPlayerItems = playersEl.children;
     let newName = null;
     const formData = new FormData(renameFormEl, submitButton);
+    const userId = localStorage.getItem("userId");
     for (const [_, value] of formData)if (value.trim()) newName = value;
     else (0, _notiflixNotifyAio.Notify).failure("Value shouln't be empty");
     try {
-        const data = await getPlayerRef(playerId);
-        await (0, _firestore.updateDoc)(data.playerRef, {
+        const playerRef = await getPlayerRef(playerId);
+        await (0, _firestore.updateDoc)(playerRef, {
             name: newName
         });
         (0, _notiflixNotifyAio.Notify).success("The player is renamed successfully");
         // if player is user
-        if (data.userId === playerId) {
-            const userRef = (0, _firestore.doc)((0, _login.db), `users/${data.userId}/user`, data.userId);
+        if (userId === playerId) {
+            const userRef = (0, _firestore.doc)((0, _login.db), `users/${userId}/user`, userId);
             await (0, _firestore.updateDoc)(userRef, {
                 name: newName
             });
@@ -691,8 +692,8 @@ async function hidePlayer(playerId) {
         if (item.dataset.playerItemId === playerId) item.classList.add("hidden");
     });
     try {
-        const data = await getPlayerRef(playerId);
-        await (0, _firestore.updateDoc)(data.playerRef, {
+        const playerRef = await getPlayerRef(playerId);
+        await (0, _firestore.updateDoc)(playerRef, {
             hidden: true
         });
         (0, _notiflixNotifyAio.Notify).success("The player is hidden successfully");
@@ -729,18 +730,14 @@ function submitPlayerSettingsForm(e) {
     else renamePlayer(actionButton.dataset.playerid, actionButton);
 }
 async function getPlayerRef(playerId) {
-    const auth = (0, _auth.getAuth)();
-    const user = auth.currentUser;
+    const userId = localStorage.getItem("userId");
     let docId;
-    const q = user.uid === playerId ? (0, _firestore.query)((0, _constants.getRefs)(user.uid).players, (0, _firestore.where)("id", "==", playerId)) : (0, _firestore.query)((0, _constants.getRefs)(user.uid).players, (0, _firestore.where)("id", "==", Number(playerId)));
+    const q = userId === playerId ? (0, _firestore.query)((0, _constants.getRefs)(userId).players, (0, _firestore.where)("id", "==", playerId)) : (0, _firestore.query)((0, _constants.getRefs)(userId).players, (0, _firestore.where)("id", "==", Number(playerId)));
     const querySnapshot = await (0, _firestore.getDocs)(q);
     querySnapshot.forEach((doc)=>{
-        docId = doc.data().documentId;
+        docId = doc.id;
     });
-    return {
-        playerRef: (0, _firestore.doc)((0, _login.db), `users/${user.uid}/players`, docId),
-        userId: user.uid
-    };
+    return (0, _firestore.doc)((0, _login.db), `users/${userId}/players`, docId);
 }
 
 },{"firebase/auth":"79vzg","./login":"47T64","./pieChart":"dlNL4","./constants":"itKcQ","firebase/firestore":"8A4BC","notiflix/build/notiflix-notify-aio":"eXQLZ"}],"dlNL4":[function(require,module,exports) {

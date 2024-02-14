@@ -105,10 +105,8 @@ function addNewPlayer(e) {
 }
 
 async function submitPlayerForm(e) {
-    const auth = getAuth();
-    const user = auth.currentUser;
-
     e.preventDefault();
+    const userId = localStorage.getItem("userId");
     const submitButton = e.currentTarget;
     const form = submitButton.parentElement;
     const formData = new FormData(submitButton.parentElement, submitButton);
@@ -121,7 +119,7 @@ async function submitPlayerForm(e) {
     }
 
     if (name.length > 0) {
-        const q = query(getRefs(user.uid).players, where("name", "==", name));
+        const q = query(getRefs(userId).players, where("name", "==", name));
         const querySnapshot = await getDocs(q);
 
         if (querySnapshot.empty) {
@@ -130,8 +128,8 @@ async function submitPlayerForm(e) {
                 id: Date.now(),
                 hidden: false
             }
-            addPlayerToPlayers(user.uid, player);
-            renderPlayers(user.uid);
+            addPlayerToPlayers(userId, player);
+            renderPlayers(userId);
             form.reset();
             closePlayerModal();
         } else {
@@ -168,12 +166,10 @@ async function setScore(e) {
         gameId: id,
         sessionId: sessionId
     }
-
-    const auth = getAuth();
-    const user = auth.currentUser;
+    const userId = localStorage.getItem("userId");
 
     try {
-        await setDoc(doc(getRefs(user.uid).plays), play);
+        await setDoc(doc(getRefs(userId).plays), play);
         Notify.success('The score is added successfully');
     } catch(e){
         console.error("Error adding score: ", e);

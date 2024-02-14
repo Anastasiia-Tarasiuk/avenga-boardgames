@@ -589,6 +589,7 @@ function submitLoginForm(e) {
         if (validation(email, password)) // Sign in
         (0, _auth.signInWithEmailAndPassword)(auth, email, password).then((userCredential)=>{
             (0, _notiflixNotifyAio.Notify).success(`Successfully signed in`);
+            localStorage.setItem("userId", userCredential.user.uid);
             closeLoginModal();
         }).catch((error)=>{
             console.error(error);
@@ -604,6 +605,7 @@ function submitLoginForm(e) {
             (0, _notiflixNotifyAio.Notify).success("Successfully signed up");
             // Signed up 
             const user = userCredential.user;
+            localStorage.setItem("userId", user.uid);
             setUserDataToStorage(user);
             closeLoginModal();
         }).catch((error)=>{
@@ -626,6 +628,7 @@ function loginWithGoogle(e) {
             (0, _notiflixNotifyAio.Notify).success("Successfully signed up");
             setUserDataToStorage(user);
         }
+        localStorage.setItem("userId", user.uid);
         closeLoginModal();
     }).catch((error)=>{
         // Handle Errors here.
@@ -664,20 +667,9 @@ function validation(email, password) {
     return true;
 }
 function logout() {
-    //todo change logic!!!
-    const main = document.querySelector("main");
     (0, _auth.signOut)(auth).then((res)=>{
-        const url = window.location.href;
-        if (!url.includes("index.html")) {
-            const urlArray = url.split("/");
-            let newUrl = "";
-            urlArray.forEach((item, index)=>{
-                if (index === urlArray.length - 1) item = "index.html";
-                newUrl += `${item}/`;
-            });
-            window.location.replace(newUrl.substring(0, newUrl.length - 1));
-        }
-        main.querySelector(".container").innerHTML = "Please sign in or sign up";
+        localStorage.removeItem("userId");
+        window.location.pathname = "partials/index.html";
         (0, _notiflixNotifyAio.Notify).success("Successfully signed out");
     }).catch((err)=>{
         console.error(err);
@@ -685,18 +677,16 @@ function logout() {
     });
 }
 async function setUserDataToStorage(user) {
-    const dateId = Date.now().toString();
     try {
         await (0, _firestore.setDoc)((0, _firestore.doc)((0, _constants.getRefs)(user.uid).user, user.uid), {
             id: user.uid,
             email: user.email,
             name: user.displayName || "User"
         });
-        await (0, _firestore.setDoc)((0, _firestore.doc)((0, _constants.getRefs)(user.uid).players, dateId), {
+        await (0, _firestore.setDoc)((0, _firestore.doc)((0, _constants.getRefs)(user.uid).players), {
             id: user.uid,
             name: user.displayName || "You",
-            hidden: false,
-            documentId: dateId
+            hidden: false
         });
     } catch (e) {
         console.error("Error adding document: ", e);
