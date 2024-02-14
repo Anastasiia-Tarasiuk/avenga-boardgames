@@ -6,43 +6,31 @@ import debounce from 'lodash.debounce';
 
 const gameToScoreEl = document.querySelector(".game-to-score");
 const addPlayerModalOverlay = document.querySelector(".add-player-modal-overlay");
-const searchParams = new URLSearchParams(window.location.search);
+const submitFormButtonEl = document.querySelector("button[type='submit']");
 const playerSelectEl = document.querySelector("#player-select");
 const closePlayerModalButtonEl = document.querySelector(".close-player-modal");
 const playsEl = document.querySelector(".plays");
 const dateEl = document.querySelector(".date");
 
-if (playerSelectEl) {
-    playerSelectEl.addEventListener('change', e => addNewPlayer(e));
-    closePlayerModalButtonEl.addEventListener("click", closePlayerModal);
-    const submitFormButtonEl = document.querySelector("button[type='submit']");
-    submitFormButtonEl.addEventListener("click", (e) => submitPlayerForm(e));
-}
+playerSelectEl.addEventListener('change', e => addNewPlayer(e));
+closePlayerModalButtonEl.addEventListener("click", closePlayerModal);
+submitFormButtonEl.addEventListener("click", (e) => submitPlayerForm(e));
 
-let id = null;
+const searchParams = new URLSearchParams(window.location.search);
+const id = searchParams.get('id');
 const sessionId = Date.now();
 
-if (searchParams) {
-    id = searchParams.get('id');
+onAuthStateChanged(auth, async user => {
+    if (user) {
+        const q = query(collection(db, `users/${user.uid}/games`), where("id", "==", id));
+        const querySnapshot = await getDocs(q);
 
-    if (id) {
-        renderGameToScore();
+        querySnapshot.forEach((doc) => {
+            gameTemplate(doc.data());
+            renderPlayers(user.uid);
+        });
     }
-}
-
-async function renderGameToScore() {
-    onAuthStateChanged(auth, async user => {
-        if (user) {
-            const q = query(collection(db, `users/${user.uid}/games`), where("id", "==", id));
-            const querySnapshot = await getDocs(q);
-
-            querySnapshot.forEach((doc) => {
-                gameTemplate(doc.data());
-                renderPlayers(user.uid);
-            });
-        }
-    });
-}
+});
 
 function gameTemplate(game) {
     gameToScoreEl.innerHTML =`<div><p>${game.name}</p><img class="thumbnail" src=${game.url}></div>`
@@ -66,7 +54,7 @@ async function renderPlayers(userId) {
 }
 
 function createPlayer(player) {
-    if (player.hidden !== "true") {
+    if (player.hidden !== true) {
         const option = document.createElement("option");
         option.innerHTML = player.name;
         option.setAttribute("value", player.name);

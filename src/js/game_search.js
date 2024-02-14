@@ -2,17 +2,17 @@ import addGameImage from "../images/plus.png";
 import defaultImage from "../images/no_image.jpg";
 import convert from "xml-js";
 import {db} from "./login";
-import {getAuth} from "firebase/auth";
-import {addDoc, collection, doc, getDoc, getDocs, query, setDoc, updateDoc, where} from "firebase/firestore";
+import {addDoc, collection, getDocs, query, where} from "firebase/firestore";
 import {Notify} from "notiflix/build/notiflix-notify-aio";
+import {getCurrentUserId} from "./constants";
 
 const gameListEl = document.querySelector(".game-list");
 const searchFormEl = document.querySelector(".search-form");
 const submitButtonEl = document.querySelector(".submit-button");
 
-if (submitButtonEl) {
-    submitButtonEl.addEventListener("click", e => submitForm(e));
-}
+// if (submitButtonEl) {
+submitButtonEl.addEventListener("click", e => submitForm(e));
+// }
 
 const gameData = {};
 
@@ -146,9 +146,7 @@ function handleWrongSearchRequest(searchValue) {
 }
 
 async function addGameToGames(_, game) {
-    const auth = getAuth();
-    const user = auth.currentUser;
-    const gamesRef = collection(db, `users/${user.uid}/games`);
+    const gamesRef = collection(db, `users/${getCurrentUserId()}/games`);
 
     try {
         const q = query(gamesRef, where("id", "==", game.id));
@@ -163,9 +161,4 @@ async function addGameToGames(_, game) {
     } catch (e) {
         console.error("Error adding document: ", e);
     }
-}
-
-export function getCurrentUserDocRef() {
-    const currentUser = getAuth().currentUser;
-    return doc(db, "users", currentUser.uid);
 }

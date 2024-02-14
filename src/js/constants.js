@@ -1,3 +1,7 @@
+import {getAuth} from "firebase/auth";
+import {collection} from "firebase/firestore";
+import {db} from "./login";
+
 const palette = [
     '#F44336',
     '#FFEBEE',
@@ -256,3 +260,15 @@ const palette = [
 ];
 
  export const COLORS = palette.sort(() => (Math.random() > 0.5) ? 1 : -1);
+
+export function getCurrentUserId() {
+    const auth = getAuth();
+    return auth.currentUser.uid;
+}
+
+// export const refs = {
+//      games: collection(db, `users/${getCurrentUserId()}/games`),
+//      plays: collection(db, `users/${getCurrentUserId()}/plays`),
+//      players: collection(db, `users/${getCurrentUserId()}/players`),
+//  }
+//

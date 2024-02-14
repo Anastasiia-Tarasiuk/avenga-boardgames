@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup} from "firebase/auth";
-import {getFirestore, collection, doc, addDoc, setDoc, updateDoc} from "firebase/firestore";
+import {getFirestore, collection, doc, setDoc} from "firebase/firestore";
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
 const firebaseConfig = {
@@ -39,20 +39,14 @@ if (modalOverlayEl) {
 
 loginButtonEl.addEventListener("click", (e) => showModal(e));
 signupButtonEl.addEventListener("click", (e) => showModal(e));
-logoutButtonEl.addEventListener("click", logout)
+logoutButtonEl.addEventListener("click", logout);
 closeLoginModalButtonEls.forEach(btn => btn.addEventListener("click", closeLoginModal));
-
 googleButtonEls.forEach(btn => btn.addEventListener("click", (e) => loginWithGoogle(e)));
 
 onAuthStateChanged(auth, (user) => {
     if (user) {
-      // User is signed in
       showMenu();
-      // const uid = user.uid;
-
-      // ...
     } else {
-      // User is signed out
       hideMenu();
     }
 });
@@ -77,9 +71,7 @@ function closeLoginModal() {
 function submitLoginForm(e) {
     e.preventDefault();
     const submitButton = e.currentTarget;
-   
     const formData = new FormData(submitButton.parentElement, submitButton);
-
     let email = null;
     let password = null;
     let passwordConfirmation = null;
@@ -103,19 +95,11 @@ function submitLoginForm(e) {
             // Sign in
             signInWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
-                Notify.success('Successfully signed in');
-                // Signed in
-                const user = userCredential.user;
-                // userData.id = user.uid;
-                // userData.email = user.email;
-                // userData.createdAt = user.metadata.creationTime;
-                // userData.name = "User";
-
+                Notify.success(`Successfully signed in`);
                 closeLoginModal();
             })
             .catch((error) => {
-                const errorCode = error.code;
-                const errorMessage = error.message;
+                console.error(error);
                 Notify.failure('Sorry, something went wrong');
             });
         }
@@ -133,12 +117,10 @@ function submitLoginForm(e) {
                 // Signed up 
                 const user = userCredential.user;
                 setUserDataToStorage(user);
-
                 closeLoginModal();
             })
             .catch((error) => {
-                const errorCode = error.code;
-                const errorMessage = error.message;
+                console.error(error);
                 Notify.failure('Sorry, something went wrong');
             });
         }
@@ -165,8 +147,7 @@ function loginWithGoogle(e) {
             }
 
             closeLoginModal();
-            // IdP data available using getAdditionalUserInfo(result)
-            // ...
+
         })
         .catch((error) => {
             // Handle Errors here.

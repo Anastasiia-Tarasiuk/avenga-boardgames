@@ -4,26 +4,22 @@ import {collection, getDocs, query, where} from "firebase/firestore";
 
 const playedGamesListEl = document.querySelector(".played-games");
 
-if (playedGamesListEl) {
-    renderPlayedGames();
-}
+onAuthStateChanged(auth, async user => {
+    if (user) {
+        const gamesRef = collection(db, `users/${user.uid}/games`);
+        const q = query(gamesRef);
+        const querySnapshot = await getDocs(q);
 
-function renderPlayedGames() {
-    onAuthStateChanged(auth, async user => {
-        if (user) {
+        if (!querySnapshot.empty) {
             playedGamesListEl.innerHTML = "";
-            const gamesRef = collection(db, `users/${user.uid}/games`);
-            const q = query(gamesRef);
-            const querySnapshot = await getDocs(q);
-
             querySnapshot.forEach((doc) => {
-                gameItemTemplate(doc.data(), user.uid)
+                renderPlayedGames(doc.data(), user.uid)
             });
         }
-    });
-}
+    }
+});
 
-async function gameItemTemplate(game, userId) {
+async function renderPlayedGames(game, userId) {
     const number = await getGameSessions(game, userId);
     const gameListItem = document.createElement("li");
     gameListItem.classList.add("game-list-item");

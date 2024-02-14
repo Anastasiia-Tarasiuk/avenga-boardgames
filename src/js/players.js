@@ -2,9 +2,8 @@ import {getAuth, onAuthStateChanged} from "firebase/auth";
 import {auth} from "./login";
 import {PieChart} from "./pieChart";
 import {COLORS as colors} from "./constants";
-import {addDoc, doc, updateDoc, runTransaction} from "firebase/firestore";
-import { collection, collectionGroup, query, where, getDocs, documentId } from "firebase/firestore";
-import {getCurrentUserDocRef} from "./game_search";
+import {doc, updateDoc} from "firebase/firestore";
+import {collection, query, where, getDocs} from "firebase/firestore";
 import {Notify} from "notiflix/build/notiflix-notify-aio";
 import {db} from "./login";
 
@@ -13,33 +12,25 @@ const renameFormEl = document.querySelector("[id='rename-form']");
 const hideFormEl = document.querySelector("[id='hide-form']");
 const modalSettingsOverlayEl = document.querySelector(".players-settings-modal-overlay");
 const closeLoginModalButtonEls = document.querySelectorAll(".close-player-settings-modal");
+const submitFormButtonsEl = modalSettingsOverlayEl.querySelectorAll("button[type='submit']");
 
 closeLoginModalButtonEls.forEach(btn => btn.addEventListener("click", closePlayerSettingModal));
+submitFormButtonsEl.forEach(btn => btn.addEventListener("click", (e) => submitPlayerSettingsForm(e)));
 
-if (playersEl) {
-    renderPlayersData();
-}
 
-if (modalSettingsOverlayEl) {
-    const submitFormButtonsEl = modalSettingsOverlayEl.querySelectorAll("button[type='submit']");
-    submitFormButtonsEl.forEach(btn => btn.addEventListener("click", (e) => submitPlayerSettingsForm(e)));
-}
 
-async function renderPlayersData() {
-    onAuthStateChanged(auth, async user => {
-        if (user) {
-            const playersRef = collection(db, `users/${user.uid}/players`);
-            const q = query(playersRef);
-            const querySnapshot = await getDocs(q);
+onAuthStateChanged(auth, async user => {
+    if (user) {
+        playersEl.innerHTML = "";
+        const playersRef = collection(db, `users/${user.uid}/players`);
+        const q = query(playersRef);
+        const querySnapshot = await getDocs(q);
 
-            playersEl.innerHTML = "";
-
-            querySnapshot.forEach((doc) => {
-                playersTemplate(doc.data(), user.uid)
-            });
-        }
-    });
-}
+        querySnapshot.forEach((doc) => {
+            playersTemplate(doc.data(), user.uid)
+        });
+    }
+});
 
 async function playersTemplate(player, userId) {
     if (player.hidden === true) {
@@ -76,12 +67,14 @@ async function playersTemplate(player, userId) {
             </div>
         </div>`;
 
+    const accordionEl =  playerItem.querySelector(".accordion");
+
     const gameList = playerItem.querySelector("#gamesId");
     const chartList = playerItem.querySelector("#chartId");
     const settingsList = playerItem.querySelector("#settingsId");
-    settingsList.addEventListener("click", e => showSettingsForm(e, player));
+    settingsList.addEventListener("click", e => showSettingsForm(e, player, accordionEl));
 
-    playerItem.querySelector(".accordion").addEventListener("click", e => toggleAccordion(e));
+    accordionEl.addEventListener("click", e => toggleAccordion(e));
     playerItem.querySelector(".games").addEventListener("click", e => toggleTabs(e, 'gamesId', playerItem));
     playerItem.querySelector(".chartPie").addEventListener("click", e => toggleTabs(e, 'chartId', playerItem, pieChartData, chartList));
     playerItem.querySelector(".settings").addEventListener("click", e => toggleTabs(e, 'settingsId', playerItem));
@@ -119,7 +112,6 @@ async function playersTemplate(player, userId) {
 }
 
 function toggleAccordion(e) {
-
     const button = e.currentTarget;
     button.classList.toggle("active");
 
@@ -165,25 +157,22 @@ async function getStats(playerId, userId) {
 }
 
 function toggleTabs(e, tab, parent, pieChartData, selector) {
-
     if (tab === "chartId") {
-        createChart(selector, pieChartData)
+        createChart(selector, pieChartData);
     }
-    // Get all elements with class="tabcontent" and hide them
+
     const tabcontent = parent.querySelectorAll(".tabcontent");
 
     for (let i = 0; i < tabcontent.length; i++) {
         tabcontent[i].style.display = "none";
     }
 
-    // Get all elements with class="tablinks" and remove the class "active"
     const tablinks = parent.querySelectorAll(".tablinks");
 
     for (let i = 0; i < tablinks.length; i++) {
         tablinks[i].className = tablinks[i].className.replace("active", "");
     }
 
-    // Show the current tab, and add an "active" class to the button that opened the tab
     parent.querySelector(`#${tab}`).style.display = "block";
     e.currentTarget.className += " active";
 }
@@ -228,30 +217,17 @@ async function renamePlayer(playerId, submitButton) {
     }
 
     try {
-        const auth = getAuth();
-        const user = auth.currentUser;
-        let docId;
+        const data = await getPlayerRef(playerId);
 
-        const q = user.uid === playerId
-            ? query(collection(db, `users/${user.uid}/players`), where("id", "==", playerId))
-            : query(collection(db, `users/${user.uid}/players`), where("id", "==", Number(playerId)));
-
-        const querySnapshot = await getDocs(q);
-
-        querySnapshot.forEach(( doc) => {
-             docId = doc.data().documentId;
-        });
-
-        const playerRef = doc(db, `users/${user.uid}/players`, docId);
-
-        await updateDoc(playerRef, {
+        await updateDoc(data.playerRef, {
             name: newName
         });
 
         Notify.success('The player is renamed successfully');
 
-        if (user.uid === playerId) {
-            const userRef = doc(db, `users/${user.uid}/user`, user.uid);
+        // if player is user
+        if (data.userId === playerId) {
+            const userRef = doc(db, `users/${data.userId}/user`, data.userId);
 
             await updateDoc(userRef, {
                 name: newName
@@ -281,23 +257,9 @@ async function hidePlayer(playerId) {
     })
 
     try {
-        const auth = getAuth();
-        const user = auth.currentUser;
-        let docId;
+        const data = await getPlayerRef(playerId);
 
-        const q = user.uid === playerId
-            ? query(collection(db, `users/${user.uid}/players`), where("id", "==", playerId))
-            : query(collection(db, `users/${user.uid}/players`), where("id", "==", Number(playerId)));
-
-        const querySnapshot = await getDocs(q);
-
-        querySnapshot.forEach(( doc) => {
-            docId = doc.data().documentId;
-        });
-
-        const playerRef = doc(db, `users/${user.uid}/players`, docId);
-
-        await updateDoc(playerRef, {
+        await updateDoc(data.playerRef, {
             hidden: true
         });
 
@@ -309,7 +271,8 @@ async function hidePlayer(playerId) {
     closePlayerSettingModal();
 }
 
-function showSettingsForm(e, player) {
+function showSettingsForm(e, player, accordion) {
+    const playerName = accordion.innerText;
     const button = e.target;
     modalSettingsOverlayEl.classList.remove('hidden');
 
@@ -319,14 +282,14 @@ function showSettingsForm(e, player) {
 
         const submitButtonEl = renameFormEl.querySelector("button[type='submit']");
         submitButtonEl.setAttribute("data-playerid", player.id);
-        submitButtonEl.innerText = `Rename ${player.name}`;
+        submitButtonEl.innerText = `Rename ${playerName}`;
     } else {
         hideFormEl.style.display = "flex";
 
         renameFormEl.style.display = "none";
         const submitButtonEl = hideFormEl.querySelector("button[type='submit']");
         submitButtonEl.setAttribute("data-playerid", player.id);
-        submitButtonEl.innerText = `Hide ${player.name}`;
+        submitButtonEl.innerText = `Hide ${playerName}`;
     }
 }
 
@@ -343,4 +306,25 @@ function submitPlayerSettingsForm(e) {
     } else {
         renamePlayer(actionButton.dataset.playerid, actionButton);
     }
+}
+
+async function getPlayerRef(playerId) {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    let docId;
+
+    const q = user.uid === playerId
+        ? query(collection(db, `users/${user.uid}/players`), where("id", "==", playerId))
+        : query(collection(db, `users/${user.uid}/players`), where("id", "==", Number(playerId)));
+
+    const querySnapshot = await getDocs(q);
+
+    querySnapshot.forEach(( doc) => {
+        docId = doc.data().documentId;
+    });
+
+    return ({
+        playerRef: doc(db, `users/${user.uid}/players`, docId),
+        userId: user.uid
+    });
 }
