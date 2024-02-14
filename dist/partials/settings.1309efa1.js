@@ -555,6 +555,6 @@ async function changePlayerVisibility(e, playerId) {
     }
 }
 
-},{"firebase/firestore":"8A4BC","./constants":"itKcQ","firebase/auth":"79vzg","./login":"47T64","notiflix/build/notiflix-notify-aio":"eXQLZ"}]},["1Dboo","dXtqq"], "dXtqq", "parcelRequired7c6")
+},{"firebase/firestore":"8A4BC","./constants":"itKcQ","firebase/auth":"79vzg","./login":"47T64","notiflix/build/notiflix-notify-aio":"eXQLZ"}]},["1Dboo","dXtqq"], "dXtqq", "parcelRequire2ffc")
 
 //# sourceMappingURL=settings.1309efa1.js.map

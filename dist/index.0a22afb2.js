@@ -537,6 +537,6 @@ async function getGameSessions(game, userId) {
     return sessions.length;
 }
 
-},{"firebase/auth":"79vzg","./login":"47T64","firebase/firestore":"8A4BC","./constants":"itKcQ"}]},["aM2k3","1RWSs"], "1RWSs", "parcelRequired7c6")
+},{"firebase/auth":"79vzg","./login":"47T64","firebase/firestore":"8A4BC","./constants":"itKcQ"}]},["aM2k3","1RWSs"], "1RWSs", "parcelRequire2ffc")
 
 //# sourceMappingURL=index.0a22afb2.js.map

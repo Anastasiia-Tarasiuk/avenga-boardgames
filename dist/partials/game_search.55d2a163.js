@@ -7642,6 +7642,6 @@ module.exports = function(json, options) {
     return js2xml(js, options);
 };
 
-},{"buffer":"fCgem","./js2xml.js":"hOB1D"}]},["3si3S","eYq3g"], "eYq3g", "parcelRequired7c6")
+},{"buffer":"fCgem","./js2xml.js":"hOB1D"}]},["3si3S","eYq3g"], "eYq3g", "parcelRequire2ffc")
 
 //# sourceMappingURL=game_search.55d2a163.js.map

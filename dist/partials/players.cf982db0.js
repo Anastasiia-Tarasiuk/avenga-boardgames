@@ -787,6 +787,6 @@ class PieChart {
     }
 }
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["5eP3g","bRgy2"], "bRgy2", "parcelRequired7c6")
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["5eP3g","bRgy2"], "bRgy2", "parcelRequire2ffc")
 
 //# sourceMappingURL=players.cf982db0.js.map

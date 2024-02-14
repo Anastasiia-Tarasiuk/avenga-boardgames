@@ -1966,8 +1966,8 @@ parcelHelpers.export(exports, "validateCallback", ()=>validateCallback);
 parcelHelpers.export(exports, "validateContextObject", ()=>validateContextObject);
 parcelHelpers.export(exports, "validateIndexedDBOpenable", ()=>validateIndexedDBOpenable);
 parcelHelpers.export(exports, "validateNamespace", ()=>validateNamespace);
-var global = arguments[3];
 var process = require("process");
+var global = arguments[3];
 /**
  * @license
  * Copyright 2017 Google LLC
@@ -37168,6 +37168,6 @@ async function getPlayerRef(playerId) {
     return (0, _firestore.doc)((0, _login.db), `users/${userId}/players`, docId);
 }
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","firebase/firestore":"8A4BC","./login":"47T64"}]},["1RB6v","8lqZg"], "8lqZg", "parcelRequired7c6")
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","firebase/firestore":"8A4BC","./login":"47T64"}]},["1RB6v","8lqZg"], "8lqZg", "parcelRequire2ffc")
 
 //# sourceMappingURL=index.975ef6c8.js.map
