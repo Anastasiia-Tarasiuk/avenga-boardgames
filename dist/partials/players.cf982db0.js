@@ -661,7 +661,7 @@ async function renamePlayer(playerId, submitButton) {
     for (const [_, value] of formData)if (value.trim()) newName = value;
     else (0, _notiflixNotifyAio.Notify).failure("Value shouln't be empty");
     try {
-        const playerRef = await getPlayerRef(playerId);
+        const playerRef = await (0, _constants.getPlayerRef)(playerId);
         await (0, _firestore.updateDoc)(playerRef, {
             name: newName
         });
@@ -692,7 +692,7 @@ async function hidePlayer(playerId) {
         if (item.dataset.playerItemId === playerId) item.classList.add("hidden");
     });
     try {
-        const playerRef = await getPlayerRef(playerId);
+        const playerRef = await (0, _constants.getPlayerRef)(playerId);
         await (0, _firestore.updateDoc)(playerRef, {
             hidden: true
         });
@@ -728,16 +728,6 @@ function submitPlayerSettingsForm(e) {
     const actionButton = e.target;
     if (actionButton.dataset.action === "hide-submit-btn") hidePlayer(actionButton.dataset.playerid);
     else renamePlayer(actionButton.dataset.playerid, actionButton);
-}
-async function getPlayerRef(playerId) {
-    const userId = localStorage.getItem("userId");
-    let docId;
-    const q = userId === playerId ? (0, _firestore.query)((0, _constants.getRefs)(userId).players, (0, _firestore.where)("id", "==", playerId)) : (0, _firestore.query)((0, _constants.getRefs)(userId).players, (0, _firestore.where)("id", "==", Number(playerId)));
-    const querySnapshot = await (0, _firestore.getDocs)(q);
-    querySnapshot.forEach((doc)=>{
-        docId = doc.id;
-    });
-    return (0, _firestore.doc)((0, _login.db), `users/${userId}/players`, docId);
 }
 
 },{"firebase/auth":"79vzg","./login":"47T64","./pieChart":"dlNL4","./constants":"itKcQ","firebase/firestore":"8A4BC","notiflix/build/notiflix-notify-aio":"eXQLZ"}],"dlNL4":[function(require,module,exports) {

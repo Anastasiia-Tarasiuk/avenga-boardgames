@@ -36889,6 +36889,7 @@ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "COLORS", ()=>COLORS);
 parcelHelpers.export(exports, "getRefs", ()=>getRefs);
+parcelHelpers.export(exports, "getPlayerRef", ()=>getPlayerRef);
 var _firestore = require("firebase/firestore");
 var _login = require("./login");
 const palette = [
@@ -37155,6 +37156,16 @@ function getRefs(userId) {
         players: (0, _firestore.collection)((0, _login.db), `users/${userId}/players`),
         user: (0, _firestore.collection)((0, _login.db), `users/${userId}/user`)
     };
+}
+async function getPlayerRef(playerId) {
+    const userId = localStorage.getItem("userId");
+    let docId;
+    const q = userId === playerId ? (0, _firestore.query)(getRefs(userId).players, (0, _firestore.where)("id", "==", playerId)) : (0, _firestore.query)(getRefs(userId).players, (0, _firestore.where)("id", "==", Number(playerId)));
+    const querySnapshot = await (0, _firestore.getDocs)(q);
+    querySnapshot.forEach((doc)=>{
+        docId = doc.id;
+    });
+    return (0, _firestore.doc)((0, _login.db), `users/${userId}/players`, docId);
 }
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","firebase/firestore":"8A4BC","./login":"47T64"}]},["1RB6v","8lqZg"], "8lqZg", "parcelRequired7c6")

@@ -1,4 +1,4 @@
-import {getAuth, onAuthStateChanged} from "firebase/auth";
+import {onAuthStateChanged} from "firebase/auth";
 import {auth} from "./login";
 import {Notify} from "notiflix/build/notiflix-notify-aio";
 import {doc, getDocs, query, setDoc, where} from "firebase/firestore";

@@ -1,7 +1,7 @@
-import {getAuth, onAuthStateChanged} from "firebase/auth";
+import {onAuthStateChanged} from "firebase/auth";
 import {auth} from "./login";
 import {PieChart} from "./pieChart";
-import {COLORS as colors, getRefs} from "./constants";
+import {COLORS as colors, getPlayerRef, getRefs} from "./constants";
 import {doc, updateDoc} from "firebase/firestore";
 import {query, where, getDocs} from "firebase/firestore";
 import {Notify} from "notiflix/build/notiflix-notify-aio";
@@ -303,21 +303,4 @@ function submitPlayerSettingsForm(e) {
     } else {
         renamePlayer(actionButton.dataset.playerid, actionButton);
     }
-}
-
-async function getPlayerRef(playerId) {
-    const userId = localStorage.getItem("userId");
-    let docId;
-
-    const q = userId === playerId
-        ? query(getRefs(userId).players, where("id", "==", playerId))
-        : query(getRefs(userId).players, where("id", "==", Number(playerId)));
-
-    const querySnapshot = await getDocs(q);
-
-    querySnapshot.forEach(( doc) => {
-        docId = doc.id;
-    });
-
-    return  doc(db, `users/${userId}/players`, docId);
 }

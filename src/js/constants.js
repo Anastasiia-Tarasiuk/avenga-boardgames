@@ -1,4 +1,4 @@
-import {collection} from "firebase/firestore";
+import {collection, doc, getDocs, query, where} from "firebase/firestore";
 import {db} from "./login";
 
 const palette = [
@@ -267,4 +267,22 @@ export function getRefs(userId) {
         players: collection(db, `users/${userId}/players`),
         user: collection(db, `users/${userId}/user`),
  })
+}
+
+
+export async function getPlayerRef(playerId) {
+    const userId = localStorage.getItem("userId");
+    let docId;
+
+    const q = userId === playerId
+        ? query(getRefs(userId).players, where("id", "==", playerId))
+        : query(getRefs(userId).players, where("id", "==", Number(playerId)));
+
+    const querySnapshot = await getDocs(q);
+
+    querySnapshot.forEach(( doc) => {
+        docId = doc.id;
+    });
+
+    return  doc(db, `users/${userId}/players`, docId);
 }

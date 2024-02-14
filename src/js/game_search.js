@@ -3,7 +3,6 @@ import defaultImage from "../images/no_image.jpg";
 import convert from "xml-js";
 import {addDoc, getDocs, query, where} from "firebase/firestore";
 import {Notify} from "notiflix/build/notiflix-notify-aio";
-import {getAuth} from "firebase/auth";
 import {getRefs} from "./constants";
 
 const gameListEl = document.querySelector(".game-list");

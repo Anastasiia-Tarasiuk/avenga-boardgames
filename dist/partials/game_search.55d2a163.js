@@ -512,7 +512,6 @@ var _xmlJs = require("xml-js");
 var _xmlJsDefault = parcelHelpers.interopDefault(_xmlJs);
 var _firestore = require("firebase/firestore");
 var _notiflixNotifyAio = require("notiflix/build/notiflix-notify-aio");
-var _auth = require("firebase/auth");
 var _constants = require("./constants");
 const gameListEl = document.querySelector(".game-list");
 const searchFormEl = document.querySelector(".search-form");
@@ -646,7 +645,7 @@ async function addGameToGames(_, game) {
     }
 }
 
-},{"../images/plus.png":"bFEW6","../images/no_image.jpg":"uA0id","xml-js":"6mugM","firebase/firestore":"8A4BC","notiflix/build/notiflix-notify-aio":"eXQLZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./constants":"itKcQ","firebase/auth":"79vzg"}],"bFEW6":[function(require,module,exports) {
+},{"../images/plus.png":"bFEW6","../images/no_image.jpg":"uA0id","xml-js":"6mugM","firebase/firestore":"8A4BC","notiflix/build/notiflix-notify-aio":"eXQLZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./constants":"itKcQ"}],"bFEW6":[function(require,module,exports) {
 module.exports = require("./helpers/bundle-url").getBundleURL("eglpp") + "../plus.516f8977.png" + "?" + Date.now();
 
 },{"./helpers/bundle-url":"lgJ39"}],"lgJ39":[function(require,module,exports) {
