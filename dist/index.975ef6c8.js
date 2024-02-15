@@ -543,6 +543,8 @@ const closeLoginModalButtonEls = document.querySelectorAll(".close-login-modal")
 if (modalOverlayEl) {
     const submitFormButtonsEl = modalOverlayEl.querySelectorAll("button[type='submit']");
     submitFormButtonsEl.forEach((btn)=>btn.addEventListener("click", (e)=>submitLoginForm(e)));
+    const seePasswordEl = modalOverlayEl.querySelectorAll(".svg-icon");
+    seePasswordEl.forEach((icon)=>icon.addEventListener("click", (e)=>seePassword(e)));
 }
 loginButtonEl.addEventListener("click", (e)=>showModal(e));
 signupButtonEl.addEventListener("click", (e)=>showModal(e));
@@ -692,8 +694,19 @@ async function setUserDataToStorage(user) {
         console.error("Error adding document: ", e);
     }
 }
+function seePassword(e) {
+    const icon = e.currentTarget;
+    const input = icon.nextElementSibling;
+    if (icon.classList.contains("visible")) {
+        icon.classList.remove("visible");
+        input.setAttribute("type", "password");
+    } else {
+        icon.classList.add("visible");
+        input.setAttribute("type", "text");
+    }
+}
 
-},{"firebase/app":"aM3Fo","firebase/auth":"79vzg","firebase/firestore":"8A4BC","notiflix/build/notiflix-notify-aio":"eXQLZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./constants":"itKcQ"}],"aM3Fo":[function(require,module,exports) {
+},{"firebase/app":"aM3Fo","firebase/auth":"79vzg","firebase/firestore":"8A4BC","notiflix/build/notiflix-notify-aio":"eXQLZ","./constants":"itKcQ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"aM3Fo":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _app = require("@firebase/app");
@@ -37168,6 +37181,6 @@ async function getPlayerRef(playerId) {
     return (0, _firestore.doc)((0, _login.db), `users/${userId}/players`, docId);
 }
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","firebase/firestore":"8A4BC","./login":"47T64"}]},["1RB6v","8lqZg"], "8lqZg", "parcelRequire2ffc")
+},{"firebase/firestore":"8A4BC","./login":"47T64","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["1RB6v","8lqZg"], "8lqZg", "parcelRequire2ffc")
 
 //# sourceMappingURL=index.975ef6c8.js.map

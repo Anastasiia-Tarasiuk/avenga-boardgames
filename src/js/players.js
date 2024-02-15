@@ -17,6 +17,8 @@ const submitFormButtonsEl = modalSettingsOverlayEl.querySelectorAll("button[type
 closeLoginModalButtonEls.forEach(btn => btn.addEventListener("click", closePlayerSettingModal));
 submitFormButtonsEl.forEach(btn => btn.addEventListener("click", (e) => submitPlayerSettingsForm(e)));
 
+const playersNames = [];
+
 onAuthStateChanged(auth, async user => {
     if (user) {
         playersEl.innerHTML = "";
@@ -24,13 +26,18 @@ onAuthStateChanged(auth, async user => {
         const querySnapshot = await getDocs(q);
 
         querySnapshot.forEach((doc) => {
-            playersTemplate(doc.data(), user.uid)
+            const data = doc.data();
+            playersNames.push({
+                name: data.name.toLowerCase(),
+                id: data.id.toString()
+            });
+            playersTemplate(data, user.uid)
         });
     }
 });
 
 async function playersTemplate(player, userId) {
-    if (player.hidden === true) {
+    if (player.hidden) {
         return;
     }
 
@@ -93,10 +100,7 @@ async function playersTemplate(player, userId) {
             }
 
             const pieChartGameData = {
-                id: data.id,
                 name: data.name,
-                bestScore: game.bestScore,
-                averageScore: averageScore,
                 plays: game.numberOfPlays,
             }
 
@@ -111,8 +115,8 @@ async function playersTemplate(player, userId) {
 function toggleAccordion(e) {
     const button = e.currentTarget;
     button.classList.toggle("active");
-
     const panel = button.nextElementSibling;
+
     if (panel.style.display === "block") {
         panel.style.display = "none";
     } else {
@@ -203,9 +207,9 @@ function createChart(parent, data) {
 
 async function renamePlayer(playerId, submitButton) {
     const allPlayerItems = playersEl.children;
-    let newName = null;
     const formData = new FormData(renameFormEl, submitButton);
     const userId = localStorage.getItem("userId");
+    let newName = null;
 
     for (const [_, value] of formData) {
         if (value.trim()) {
@@ -215,12 +219,25 @@ async function renamePlayer(playerId, submitButton) {
         }
     }
 
+    for (const player of playersNames) {
+        if (player.name === newName.toLowerCase()) {
+            Notify.failure('Such player already exists');
+            return;
+        }
+    }
+
     try {
         const playerRef = await getPlayerRef(playerId);
 
         await updateDoc(playerRef, {
             name: newName
         });
+
+        for (const player of playersNames) {
+            if (player.id === playerId) {
+                player.name = newName.toLowerCase();
+            }
+        }
 
         Notify.success('The player is renamed successfully');
 

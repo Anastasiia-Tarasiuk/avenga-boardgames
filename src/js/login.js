@@ -35,6 +35,8 @@ const closeLoginModalButtonEls = document.querySelectorAll(".close-login-modal")
 if (modalOverlayEl) {
     const submitFormButtonsEl = modalOverlayEl.querySelectorAll("button[type='submit']");
     submitFormButtonsEl.forEach(btn => btn.addEventListener("click", (e) => submitLoginForm(e)));
+    const seePasswordEl = modalOverlayEl.querySelectorAll(".svg-icon");
+    seePasswordEl.forEach(icon => icon.addEventListener("click", e => seePassword(e)));
 }
 
 
@@ -233,4 +235,19 @@ async function setUserDataToStorage(user) {
     } catch (e) {
         console.error("Error adding document: ", e);
     }
+}
+
+function seePassword(e) {
+    const icon = e.currentTarget;
+    const input = icon.nextElementSibling;
+
+
+    if (icon.classList.contains("visible")) {
+        icon.classList.remove("visible");
+        input.setAttribute("type", "password");
+    } else {
+        icon.classList.add("visible");
+        input.setAttribute("type", "text");
+    }
+
 }

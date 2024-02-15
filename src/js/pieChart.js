@@ -4,19 +4,18 @@ export class PieChart {
         this.canvas = options.canvas;
         this.ctx = this.canvas.getContext("2d");
         this.colors = options.colors;
-        this.totalValue = [...Object.values(this.options.pieChart)].reduce((a, b) => a + b, 0);
+        this.totalPlays = [...Object.values(this.options.pieChart)].reduce((a, b) => a + b, 0);
         this.radius = Math.min(this.canvas.width / 2, this.canvas.height / 2);
         this.legend = options.legend;
-        this.others = [];
     }
 
     drawSlices() {
         let colorIndex = 0;
         let startAngle = -Math.PI / 2;
 
-        for (const category in this.options.pieChart) {
-            const value = this.options.pieChart[category];
-            const sliceAngle = (2 * Math.PI * value) / this.totalValue;
+        for (const gameName in this.options.pieChart) {
+            const numberOfPlays = this.options.pieChart[gameName];
+            const sliceAngle = (2 * Math.PI * numberOfPlays) / this.totalPlays;
             this.drawPieSlice(this.ctx, this.canvas.width / 2, this.canvas.height / 2, this.radius, startAngle, startAngle + sliceAngle, this.colors[colorIndex]);
             startAngle += sliceAngle;
             colorIndex += 1;
@@ -39,14 +38,14 @@ export class PieChart {
         let legend = this.legend;
         let ul = document.createElement("ul");
 
-        for (let category of Object.keys(this.options.pieChart)) {
-            const value = this.options.pieChart[category];
-            const labelText = Math.round((100 * value) / this.totalValue);
+        for (let gameName of Object.keys(this.options.pieChart)) {
+            const numberOfPlays = this.options.pieChart[gameName];
+            const labelText = Math.round((100 * numberOfPlays) / this.totalPlays);
             const li = document.createElement("li");
             li.style.listStyle = "none";
             li.style.borderLeft = "20px solid " + this.colors[index];
             li.style.padding = "5px";
-            li.textContent = category + " (" + labelText + "%)";
+            li.textContent = `${gameName} (${labelText}%)`;
             ul.append(li);
             index++;
         }

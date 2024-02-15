@@ -55,7 +55,7 @@ async function renderPlayers(userId) {
 }
 
 function createPlayer(player) {
-    if (player.hidden !== true) {
+    if (!player.hidden) {
         const option = document.createElement("option");
         option.innerHTML = player.name;
         option.setAttribute("value", player.name);

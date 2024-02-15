@@ -517,18 +517,24 @@ const closeLoginModalButtonEls = document.querySelectorAll(".close-player-settin
 const submitFormButtonsEl = modalSettingsOverlayEl.querySelectorAll("button[type='submit']");
 closeLoginModalButtonEls.forEach((btn)=>btn.addEventListener("click", closePlayerSettingModal));
 submitFormButtonsEl.forEach((btn)=>btn.addEventListener("click", (e)=>submitPlayerSettingsForm(e)));
+const playersNames = [];
 (0, _auth.onAuthStateChanged)((0, _login.auth), async (user)=>{
     if (user) {
         playersEl.innerHTML = "";
         const q = (0, _firestore.query)((0, _constants.getRefs)(user.uid).players);
         const querySnapshot = await (0, _firestore.getDocs)(q);
         querySnapshot.forEach((doc)=>{
-            playersTemplate(doc.data(), user.uid);
+            const data = doc.data();
+            playersNames.push({
+                name: data.name.toLowerCase(),
+                id: data.id.toString()
+            });
+            playersTemplate(data, user.uid);
         });
     }
 });
 async function playersTemplate(player, userId) {
-    if (player.hidden === true) return;
+    if (player.hidden) return;
     const pieChartData = [];
     const playerItem = document.createElement("li");
     playerItem.setAttribute("data-player-item-id", player.id);
@@ -578,10 +584,7 @@ async function playersTemplate(player, userId) {
             gameList.insertAdjacentElement("beforeend", gameListItem);
             if (gameList.classList.contains("empty")) gameList.classList.remove("empty");
             const pieChartGameData = {
-                id: data.id,
                 name: data.name,
-                bestScore: game.bestScore,
-                averageScore: averageScore,
                 plays: game.numberOfPlays
             };
             pieChartData.push(pieChartGameData);
@@ -655,16 +658,21 @@ function createChart(parent, data) {
 }
 async function renamePlayer(playerId, submitButton) {
     const allPlayerItems = playersEl.children;
-    let newName = null;
     const formData = new FormData(renameFormEl, submitButton);
     const userId = localStorage.getItem("userId");
+    let newName = null;
     for (const [_, value] of formData)if (value.trim()) newName = value;
     else (0, _notiflixNotifyAio.Notify).failure("Value shouln't be empty");
+    for (const player of playersNames)if (player.name === newName.toLowerCase()) {
+        (0, _notiflixNotifyAio.Notify).failure("Such player already exists");
+        return;
+    }
     try {
         const playerRef = await (0, _constants.getPlayerRef)(playerId);
         await (0, _firestore.updateDoc)(playerRef, {
             name: newName
         });
+        for (const player of playersNames)if (player.id === playerId) player.name = newName.toLowerCase();
         (0, _notiflixNotifyAio.Notify).success("The player is renamed successfully");
         // if player is user
         if (userId === playerId) {
@@ -740,19 +748,18 @@ class PieChart {
         this.canvas = options.canvas;
         this.ctx = this.canvas.getContext("2d");
         this.colors = options.colors;
-        this.totalValue = [
+        this.totalPlays = [
             ...Object.values(this.options.pieChart)
         ].reduce((a, b)=>a + b, 0);
         this.radius = Math.min(this.canvas.width / 2, this.canvas.height / 2);
         this.legend = options.legend;
-        this.others = [];
     }
     drawSlices() {
         let colorIndex = 0;
         let startAngle = -Math.PI / 2;
-        for(const category in this.options.pieChart){
-            const value = this.options.pieChart[category];
-            const sliceAngle = 2 * Math.PI * value / this.totalValue;
+        for(const gameName in this.options.pieChart){
+            const numberOfPlays = this.options.pieChart[gameName];
+            const sliceAngle = 2 * Math.PI * numberOfPlays / this.totalPlays;
             this.drawPieSlice(this.ctx, this.canvas.width / 2, this.canvas.height / 2, this.radius, startAngle, startAngle + sliceAngle, this.colors[colorIndex]);
             startAngle += sliceAngle;
             colorIndex += 1;
@@ -772,14 +779,14 @@ class PieChart {
         let index = 0;
         let legend = this.legend;
         let ul = document.createElement("ul");
-        for (let category of Object.keys(this.options.pieChart)){
-            const value = this.options.pieChart[category];
-            const labelText = Math.round(100 * value / this.totalValue);
+        for (let gameName of Object.keys(this.options.pieChart)){
+            const numberOfPlays = this.options.pieChart[gameName];
+            const labelText = Math.round(100 * numberOfPlays / this.totalPlays);
             const li = document.createElement("li");
             li.style.listStyle = "none";
             li.style.borderLeft = "20px solid " + this.colors[index];
             li.style.padding = "5px";
-            li.textContent = category + " (" + labelText + "%)";
+            li.textContent = `${gameName} (${labelText}%)`;
             ul.append(li);
             index++;
         }

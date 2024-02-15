@@ -552,7 +552,7 @@ async function renderPlayers(userId) {
     });
 }
 function createPlayer(player) {
-    if (player.hidden !== true) {
+    if (!player.hidden) {
         const option = document.createElement("option");
         option.innerHTML = player.name;
         option.setAttribute("value", player.name);
@@ -565,9 +565,7 @@ function addNewPlayer(e1) {
     const value = select.value;
     if (value === "new-player") addPlayerModalOverlay.classList.remove("hidden");
     else if (value !== "") {
-        [
-            ...select.children
-        ].forEach((option)=>{
+        [...select.children].forEach((option)=>{
             if (option.selected) select.dataset.id = option.dataset.id;
         });
         let shouldBeRendered = true;
@@ -575,9 +573,7 @@ function addNewPlayer(e1) {
         playsLabel.setAttribute("player-name", value);
         playsLabel.innerHTML = `${value}<input type="number" id=${select.dataset.id} name=${value} value="0">`;
         if (playsEl.children.length > 0) {
-            for (const label of [
-                ...playsEl.children
-            ])if (label.getAttribute("player-name") === value) {
+            for (const label of [...playsEl.children])if (label.getAttribute("player-name") === value) {
                 shouldBeRendered = false;
                 (0, _notiflixNotifyAio.Notify).failure(`Player ${name} was already added`);
                 return;
@@ -593,16 +589,15 @@ function addNewPlayer(e1) {
     }
 }
 async function submitPlayerForm(e) {
-    const auth = (0, _auth.getAuth)();
-    const user = auth.currentUser;
     e.preventDefault();
+    const userId = localStorage.getItem("userId");
     const submitButton = e.currentTarget;
     const form = submitButton.parentElement;
     const formData = new FormData(submitButton.parentElement, submitButton);
     let name = null;
     for (const [key, value] of formData)if (key === "name") name = value.trim();
     if (name.length > 0) {
-        const q = (0, _firestore.query)((0, _constants.getRefs)(user.uid).players, (0, _firestore.where)("name", "==", name));
+        const q = (0, _firestore.query)((0, _constants.getRefs)(userId).players, (0, _firestore.where)("name", "==", name));
         const querySnapshot = await (0, _firestore.getDocs)(q);
         if (querySnapshot.empty) {
             const player = {
@@ -610,8 +605,8 @@ async function submitPlayerForm(e) {
                 id: Date.now(),
                 hidden: false
             };
-            addPlayerToPlayers(user.uid, player);
-            renderPlayers(user.uid);
+            addPlayerToPlayers(userId, player);
+            renderPlayers(userId);
             form.reset();
             closePlayerModal();
         } else (0, _notiflixNotifyAio.Notify).failure(`Player with name ${name} already exists`);
@@ -640,17 +635,16 @@ async function setScore(e) {
         gameId: id,
         sessionId: sessionId
     };
-    const auth = (0, _auth.getAuth)();
-    const user = auth.currentUser;
+    const userId = localStorage.getItem("userId");
     try {
-        await (0, _firestore.setDoc)((0, _firestore.doc)((0, _constants.getRefs)(user.uid).plays), play);
+        await (0, _firestore.setDoc)((0, _firestore.doc)((0, _constants.getRefs)(userId).plays), play);
         (0, _notiflixNotifyAio.Notify).success("The score is added successfully");
     } catch (e2) {
         console.error("Error adding score: ", e2);
     }
 }
 
-},{"firebase/auth":"79vzg","./login":"47T64","notiflix/build/notiflix-notify-aio":"eXQLZ","firebase/firestore":"8A4BC","lodash.debounce":"3JP5n","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./constants":"itKcQ"}],"3JP5n":[function(require,module,exports) {
+},{"firebase/auth":"79vzg","./login":"47T64","notiflix/build/notiflix-notify-aio":"eXQLZ","firebase/firestore":"8A4BC","lodash.debounce":"3JP5n","./constants":"itKcQ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"3JP5n":[function(require,module,exports) {
 var global = arguments[3];
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -935,6 +929,6 @@ var global = arguments[3];
 }
 module.exports = debounce;
 
-},{}]},["d0CQu","crlNm"], "crlNm", "parcelRequired7c6")
+},{}]},["d0CQu","crlNm"], "crlNm", "parcelRequire2ffc")
 
 //# sourceMappingURL=add_plays.d1048b88.js.map

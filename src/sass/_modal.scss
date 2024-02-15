@@ -66,3 +66,29 @@
     height: 20px;
     margin-right: 10px;
 }
+
+.svg-icon {
+    position: absolute;
+    fill: #ccc;
+    height: 30px;
+    width: 30px;
+}
+form#login-form .svg-icon {
+    top: 108px;
+    left: 237px;
+}
+
+form#signup-form .password .svg-icon {
+    top: 108px;
+    left: 237px;
+}
+
+form#signup-form .confirm .svg-icon {
+    top: 171px;
+    left: 237px;
+}
+
+.svg-icon:hover,
+.svg-icon.visible {
+    fill: currentColor;
+}
