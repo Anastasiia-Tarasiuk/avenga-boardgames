@@ -197,6 +197,11 @@ function validation(email, password) {
         return;
     }
 
+    if (password.length > 16) {
+        Notify.failure('Password length should be less 17 symbols');
+        return;
+    }
+
     if (!email.includes("@")){
         Notify.failure('Email is not valid');
         return;

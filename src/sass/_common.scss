@@ -30,3 +30,23 @@ button {
     color: #67ba04;
     text-decoration: underline;
 }
+
+
+.filter-label {
+    display: block;
+    margin-bottom: 20px;
+}
+
+.filter {
+    width: 220px;
+}
+
+.filter-icon {
+    position: absolute;
+    fill: currentColor;
+    height: 20px;
+    width: 20px;
+    top: 116px;
+    left: 341px;
+}
+

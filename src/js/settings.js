@@ -1,10 +1,17 @@
 import {getDocs, query, updateDoc} from "firebase/firestore";
-import {getPlayerRef, getRefs} from "./constants";
+import {filterList, getPlayerRef, getRefs} from "./constants";
 import {onAuthStateChanged} from "firebase/auth";
 import {auth} from "./login";
 import {Notify} from "notiflix/build/notiflix-notify-aio";
+import debounce from "lodash.debounce";
 
 const playersListEl = document.querySelector(".players-manager");
+const filterLabelEl = document.querySelector(".filter-label");
+const filterEl = document.querySelector(".filter");
+
+const playersData = [];
+
+filterEl.addEventListener("keydown",  debounce(e => filterList(e, playersData, playersListEl, renderPlayersSettings), 500));
 
 onAuthStateChanged(auth, async user => {
     if (user) {
@@ -13,8 +20,10 @@ onAuthStateChanged(auth, async user => {
 
         if (!querySnapshot.empty) {
             playersListEl.innerHTML = "";
+            filterLabelEl.classList.remove("hidden");
 
             querySnapshot.forEach(doc => {
+                playersData.push(doc.data());
                 renderPlayersSettings(doc.data());
             })
         }
@@ -54,6 +63,12 @@ async function changePlayerVisibility(e, playerId) {
 
     try {
         const playerRef = await getPlayerRef(playerId);
+
+        playersData.forEach(player => {
+            if (player.id === playerId) {
+                player.hidden = !checkbox.checked;
+            }
+        })
 
         await updateDoc(playerRef, {
             hidden: !checkbox.checked

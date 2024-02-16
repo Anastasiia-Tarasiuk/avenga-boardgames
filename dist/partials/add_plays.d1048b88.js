@@ -565,7 +565,9 @@ function addNewPlayer(e1) {
     const value = select.value;
     if (value === "new-player") addPlayerModalOverlay.classList.remove("hidden");
     else if (value !== "") {
-        [...select.children].forEach((option)=>{
+        [
+            ...select.children
+        ].forEach((option)=>{
             if (option.selected) select.dataset.id = option.dataset.id;
         });
         let shouldBeRendered = true;
@@ -573,7 +575,9 @@ function addNewPlayer(e1) {
         playsLabel.setAttribute("player-name", value);
         playsLabel.innerHTML = `${value}<input type="number" id=${select.dataset.id} name=${value} value="0">`;
         if (playsEl.children.length > 0) {
-            for (const label of [...playsEl.children])if (label.getAttribute("player-name") === value) {
+            for (const label of [
+                ...playsEl.children
+            ])if (label.getAttribute("player-name") === value) {
                 shouldBeRendered = false;
                 (0, _notiflixNotifyAio.Notify).failure(`Player ${name} was already added`);
                 return;
@@ -613,8 +617,10 @@ async function submitPlayerForm(e) {
     } else (0, _notiflixNotifyAio.Notify).failure(`Name field shouldn't be empty`);
 }
 function closePlayerModal() {
-    playerSelectEl.firstElementChild.setAttribute("selected", "");
-    addPlayerModalOverlay.classList.add("hidden");
+    console.log("asdfghgfdsadfgh");
+    console.log(123, playerSelectEl.firstElementChild);
+// playerSelectEl.firstElementChild.setAttribute("selected", "");
+// addPlayerModalOverlay.classList.add('hidden');
 }
 async function addPlayerToPlayers(userId, player) {
     const dateId = Date.now().toString();

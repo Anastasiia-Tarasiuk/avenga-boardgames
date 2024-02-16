@@ -2,17 +2,29 @@ import {onAuthStateChanged} from "firebase/auth";
 import {auth} from "./login";
 import {getDocs, query, where} from "firebase/firestore";
 import {getRefs} from "./constants";
+import debounce from "lodash.debounce";
+import {filterList} from "./constants";
 
 const playedGamesListEl = document.querySelector(".played-games");
+const addGameButtonEl = document.querySelector(".add-game");
+const filterLabelEl = document.querySelector(".filter-label");
+const filterEl = document.querySelector(".filter");
+
+const gameData = [];
+
+filterEl.addEventListener("keydown",  debounce(e => filterList(e, gameData, playedGamesListEl, renderPlayedGames), 500));
 
 onAuthStateChanged(auth, async user => {
     if (user) {
+        addGameButtonEl.classList.remove("hidden");
         const q = query(getRefs(user.uid).games);
         const querySnapshot = await getDocs(q);
 
         if (!querySnapshot.empty) {
             playedGamesListEl.innerHTML = "";
-            querySnapshot.forEach((doc) => {
+            filterLabelEl.classList.remove("hidden");
+            querySnapshot.forEach(doc => {
+                gameData.push(doc.data());
                 renderPlayedGames(doc.data(), user.uid)
             });
         }

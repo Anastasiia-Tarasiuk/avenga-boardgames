@@ -286,3 +286,27 @@ export async function getPlayerRef(playerId) {
 
     return  doc(db, `users/${userId}/players`, docId);
 }
+
+export async function filterList(e, data, list, func) {
+    const value = e.target.value;
+    const userId = localStorage.getItem("userId");
+
+    if (value) {
+        const filteredElements = data.filter(el => el.name.toLowerCase().includes(value.toLowerCase()));
+        list.innerHTML = "";
+
+        if (filteredElements.length > 0) {
+            filteredElements.forEach(el => {
+                func(el, userId);
+            })
+        } else {
+            list.innerHTML = `<p>The list is empty</p>`
+        }
+    } else {
+        list.innerHTML = "";
+
+        data.forEach(el => {
+            func(el, userId);
+        })
+    }
+}

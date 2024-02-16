@@ -662,6 +662,10 @@ function validation(email, password) {
         (0, _notiflixNotifyAio.Notify).failure("Password length should be at least 6 symbols");
         return;
     }
+    if (password.length > 16) {
+        (0, _notiflixNotifyAio.Notify).failure("Password length should be less 17 symbols");
+        return;
+    }
     if (!email.includes("@")) {
         (0, _notiflixNotifyAio.Notify).failure("Email is not valid");
         return;
@@ -36903,6 +36907,7 @@ parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "COLORS", ()=>COLORS);
 parcelHelpers.export(exports, "getRefs", ()=>getRefs);
 parcelHelpers.export(exports, "getPlayerRef", ()=>getPlayerRef);
+parcelHelpers.export(exports, "filterList", ()=>filterList);
 var _firestore = require("firebase/firestore");
 var _login = require("./login");
 const palette = [
@@ -37179,6 +37184,23 @@ async function getPlayerRef(playerId) {
         docId = doc.id;
     });
     return (0, _firestore.doc)((0, _login.db), `users/${userId}/players`, docId);
+}
+async function filterList(e, data, list, func) {
+    const value = e.target.value;
+    const userId = localStorage.getItem("userId");
+    if (value) {
+        const filteredElements = data.filter((el)=>el.name.toLowerCase().includes(value.toLowerCase()));
+        list.innerHTML = "";
+        if (filteredElements.length > 0) filteredElements.forEach((el)=>{
+            func(el, userId);
+        });
+        else list.innerHTML = `<p>The list is empty</p>`;
+    } else {
+        list.innerHTML = "";
+        data.forEach((el)=>{
+            func(el, userId);
+        });
+    }
 }
 
 },{"firebase/firestore":"8A4BC","./login":"47T64","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["1RB6v","8lqZg"], "8lqZg", "parcelRequire2ffc")

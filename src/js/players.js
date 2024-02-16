@@ -6,6 +6,8 @@ import {doc, updateDoc} from "firebase/firestore";
 import {query, where, getDocs} from "firebase/firestore";
 import {Notify} from "notiflix/build/notiflix-notify-aio";
 import {db} from "./login";
+import debounce from "lodash.debounce";
+import {filterList} from "./constants";
 
 const playersEl = document.querySelector(".players");
 const renameFormEl = document.querySelector("[id='rename-form']");
@@ -13,11 +15,16 @@ const hideFormEl = document.querySelector("[id='hide-form']");
 const modalSettingsOverlayEl = document.querySelector(".players-settings-modal-overlay");
 const closeLoginModalButtonEls = document.querySelectorAll(".close-player-settings-modal");
 const submitFormButtonsEl = modalSettingsOverlayEl.querySelectorAll("button[type='submit']");
+const filterLabelEl = document.querySelector(".filter-label");
+const filterEl = document.querySelector(".filter");
 
 closeLoginModalButtonEls.forEach(btn => btn.addEventListener("click", closePlayerSettingModal));
-submitFormButtonsEl.forEach(btn => btn.addEventListener("click", (e) => submitPlayerSettingsForm(e)));
+submitFormButtonsEl.forEach(btn => btn.addEventListener("click", (e ) => submitPlayerSettingsForm(e)));
 
 const playersNames = [];
+const playersData = [];
+
+filterEl.addEventListener("keydown",  debounce(e => filterList(e, playersData, playersEl, playersTemplate), 500));
 
 onAuthStateChanged(auth, async user => {
     if (user) {
@@ -25,13 +32,15 @@ onAuthStateChanged(auth, async user => {
         const q = query(getRefs(user.uid).players);
         const querySnapshot = await getDocs(q);
 
-        querySnapshot.forEach((doc) => {
+        querySnapshot.forEach(doc => {
+            filterLabelEl.classList.remove("hidden");
             const data = doc.data();
+            playersData.push(data);
             playersNames.push({
                 name: data.name.toLowerCase(),
                 id: data.id.toString()
             });
-            playersTemplate(data, user.uid)
+            playersTemplate(data, user.uid);
         });
     }
 });
@@ -57,8 +66,7 @@ async function playersTemplate(player, userId) {
             </div>
             
             <!-- Tab content -->
-            <ul id="gamesId" class="tabcontent empty">
-            </ul>
+            <ul id="gamesId" class="tabcontent empty"></ul>
             
             <div id="chartId" class="tabcontent empty">
                 <canvas></canvas>
@@ -229,6 +237,12 @@ async function renamePlayer(playerId, submitButton) {
     try {
         const playerRef = await getPlayerRef(playerId);
 
+        playersData.forEach(player => {
+            if (player.id.toString() === playerId) {
+                player.name = newName;
+            }
+        })
+
         await updateDoc(playerRef, {
             name: newName
         });
@@ -274,6 +288,12 @@ async function hidePlayer(playerId) {
 
     try {
         const playerRef = await getPlayerRef(playerId);
+
+        playersData.forEach(player => {
+            if (player.id.toString() === playerId) {
+                player.hidden = true;
+            }
+        })
 
         await updateDoc(playerRef, {
             hidden: true
