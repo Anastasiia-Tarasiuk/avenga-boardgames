@@ -12,6 +12,7 @@ import {filterList} from "./constants";
 const playersEl = document.querySelector(".players");
 const renameFormEl = document.querySelector("[id='rename-form']");
 const hideFormEl = document.querySelector("[id='hide-form']");
+const deleteFormEl = document.querySelector("[id='delete-form']");
 const modalSettingsOverlayEl = document.querySelector(".players-settings-modal-overlay");
 const closeLoginModalButtonEls = document.querySelectorAll(".close-player-settings-modal");
 const submitFormButtonsEl = modalSettingsOverlayEl.querySelectorAll("button[type='submit']");
@@ -74,8 +75,9 @@ async function playersTemplate(player, userId) {
             </div>
             
             <div id="settingsId" class="tabcontent">
-              <button class="renameButton">Rename player</button>
-              <button class="deleteButton">Hide player</button>
+              <button class="rename-button">Rename player</button>
+              <button class="hide-button">Hide player</button>
+              <button class="delete-button">Delete player</button>
             </div>
         </div>`;
 
@@ -149,8 +151,8 @@ async function getStats(playerId, userId) {
                 gameId: play.gameId
             }
 
-            stats.push(game)
-            ids.push(play.gameId)
+            stats.push(game);
+            ids.push(play.gameId);
         } else {
             stats.forEach(game => {
                 if (game.gameId  === play.gameId) {
@@ -307,23 +309,36 @@ async function hidePlayer(playerId) {
     closePlayerSettingModal();
 }
 
+async function deletePlayer(playerId) {
+    console.log(playerId)
+}
+
 function showSettingsForm(e, player, accordion) {
     const playerName = accordion.innerText;
     const button = e.target;
     modalSettingsOverlayEl.classList.remove('hidden');
 
-    if (button.classList.contains("renameButton")) {
+    if (button.classList.contains("rename-button")) {
         hideFormEl.style.display = "none";
         renameFormEl.style.display = "flex";
+        deleteFormEl.style.display = "none";
         const submitButtonEl = renameFormEl.querySelector("button[type='submit']");
         submitButtonEl.setAttribute("data-playerid", player.id);
         submitButtonEl.innerText = `Rename ${playerName}`;
-    } else {
+    } else if (button.classList.contains("hide-button")) {
         hideFormEl.style.display = "flex";
         renameFormEl.style.display = "none";
+        deleteFormEl.style.display = "none";
         const submitButtonEl = hideFormEl.querySelector("button[type='submit']");
         submitButtonEl.setAttribute("data-playerid", player.id);
         submitButtonEl.innerText = `Hide ${playerName}`;
+    } else {
+        hideFormEl.style.display = "none";
+        renameFormEl.style.display = "none";
+        deleteFormEl.style.display = "flex";
+        const submitButtonEl = deleteFormEl.querySelector("button[type='submit']");
+        submitButtonEl.setAttribute("data-playerid", player.id);
+        submitButtonEl.innerText = `Delete ${playerName}`;
     }
 }
 
@@ -337,7 +352,9 @@ function submitPlayerSettingsForm(e) {
 
     if (actionButton.dataset.action === "hide-submit-btn") {
         hidePlayer(actionButton.dataset.playerid);
-    } else {
+    } else if(actionButton.dataset.action === "rename-submit-btn")  {
         renamePlayer(actionButton.dataset.playerid, actionButton);
+    } else {
+        deletePlayer(actionButton.dataset.playerid);
     }
 }

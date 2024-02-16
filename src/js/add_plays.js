@@ -141,7 +141,7 @@ async function submitPlayerForm(e) {
 }
 
 function closePlayerModal() {
-    playerSelectEl.firstElementChild.setAttribute("selected", "");
+    playerSelectEl.selectedIndex = 0;
     addPlayerModalOverlay.classList.add('hidden');
 }
 

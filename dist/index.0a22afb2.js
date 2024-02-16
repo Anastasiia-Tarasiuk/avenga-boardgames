@@ -535,8 +535,8 @@ async function renderPlayedGames(game, userId) {
     const number = await getGameSessions(game, userId);
     const gameListItem = document.createElement("li");
     gameListItem.classList.add("game-list-item");
-    gameListItem.innerHTML = `<div><p>${game.name}</p><img class="thumbnail" src=${game.url}></div><a class="add-plays-link" href="../../partials/add_plays.html?id=${game.id}"><div class="add-plays-container"><span class="number-of-plays ">${number} </span>plays</div><span class="tooltip-text">Add your score<span></a>`;
-    playedGamesListEl.insertAdjacentElement("beforeend", gameListItem);
+    gameListItem.innerHTML = `<div><p>${game.name}</p><img class="thumbnail" src=${game.url}></div><a class="add-plays-link" href="../partials/add_plays.html?id=${game.id}"><div class="add-plays-container"><span class="number-of-plays ">${number} </span>plays</div><span class="tooltip-text">Add your score<span></a>`;
+    playedGamesListEl.insertAdjacentElement("afterbegin", gameListItem);
 }
 async function getGameSessions(game, userId) {
     const sessions = [];

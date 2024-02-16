@@ -15,10 +15,10 @@
             </a>
             <ul class="menu hidden">
                 <li>
-                    <a href="/index.html">Games</a>
+                    <a href="/index.html">My list</a>
                 </li>
                 <li>
-                    <a href="/partials/game_search.html">Search</a>
+                    <a href="/partials/game_search.html">Add game</a>
                 </li>
                 <li>
                     <a class="active-link" href="/partials/players.html">Players</a>
@@ -77,6 +77,14 @@
                     <span>Are you sure you want to hide this player from the list?</span>
                 </label>
                 <button type="submit" data-action="hide-submit-btn"></button>
+                <button type="button" class="close-player-settings-modal">X</button>
+            </form>
+
+            <form id="delete-form">
+                <label>
+                    <span>Are you sure you want to delete this player?</span>
+                </label>
+                <button type="submit" data-action="delete-submit-btn"></button>
                 <button type="button" class="close-player-settings-modal">X</button>
             </form>
         </div>

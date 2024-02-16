@@ -515,6 +515,7 @@ var _lodashDebounceDefault = parcelHelpers.interopDefault(_lodashDebounce);
 const playersEl = document.querySelector(".players");
 const renameFormEl = document.querySelector("[id='rename-form']");
 const hideFormEl = document.querySelector("[id='hide-form']");
+const deleteFormEl = document.querySelector("[id='delete-form']");
 const modalSettingsOverlayEl = document.querySelector(".players-settings-modal-overlay");
 const closeLoginModalButtonEls = document.querySelectorAll(".close-player-settings-modal");
 const submitFormButtonsEl = modalSettingsOverlayEl.querySelectorAll("button[type='submit']");
@@ -567,8 +568,9 @@ async function playersTemplate(player, userId) {
             </div>
             
             <div id="settingsId" class="tabcontent">
-              <button class="renameButton">Rename player</button>
-              <button class="deleteButton">Hide player</button>
+              <button class="rename-button">Rename player</button>
+              <button class="hide-button">Hide player</button>
+              <button class="delete-button">Delete player</button>
             </div>
         </div>`;
     const accordionEl = playerItem.querySelector(".accordion");
@@ -724,22 +726,34 @@ async function hidePlayer(playerId) {
     }
     closePlayerSettingModal();
 }
+async function deletePlayer(playerId) {
+    console.log(playerId);
+}
 function showSettingsForm(e, player, accordion) {
     const playerName = accordion.innerText;
     const button = e.target;
     modalSettingsOverlayEl.classList.remove("hidden");
-    if (button.classList.contains("renameButton")) {
+    if (button.classList.contains("rename-button")) {
         hideFormEl.style.display = "none";
         renameFormEl.style.display = "flex";
+        deleteFormEl.style.display = "none";
         const submitButtonEl = renameFormEl.querySelector("button[type='submit']");
         submitButtonEl.setAttribute("data-playerid", player.id);
         submitButtonEl.innerText = `Rename ${playerName}`;
-    } else {
+    } else if (button.classList.contains("hide-button")) {
         hideFormEl.style.display = "flex";
         renameFormEl.style.display = "none";
+        deleteFormEl.style.display = "none";
         const submitButtonEl = hideFormEl.querySelector("button[type='submit']");
         submitButtonEl.setAttribute("data-playerid", player.id);
         submitButtonEl.innerText = `Hide ${playerName}`;
+    } else {
+        hideFormEl.style.display = "none";
+        renameFormEl.style.display = "none";
+        deleteFormEl.style.display = "flex";
+        const submitButtonEl = deleteFormEl.querySelector("button[type='submit']");
+        submitButtonEl.setAttribute("data-playerid", player.id);
+        submitButtonEl.innerText = `Delete ${playerName}`;
     }
 }
 function closePlayerSettingModal() {
@@ -749,7 +763,8 @@ function submitPlayerSettingsForm(e) {
     e.preventDefault();
     const actionButton = e.target;
     if (actionButton.dataset.action === "hide-submit-btn") hidePlayer(actionButton.dataset.playerid);
-    else renamePlayer(actionButton.dataset.playerid, actionButton);
+    else if (actionButton.dataset.action === "rename-submit-btn") renamePlayer(actionButton.dataset.playerid, actionButton);
+    else deletePlayer(actionButton.dataset.playerid);
 }
 
 },{"firebase/auth":"79vzg","./login":"47T64","./pieChart":"dlNL4","./constants":"itKcQ","firebase/firestore":"8A4BC","notiflix/build/notiflix-notify-aio":"eXQLZ","lodash.debounce":"3JP5n","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"dlNL4":[function(require,module,exports) {

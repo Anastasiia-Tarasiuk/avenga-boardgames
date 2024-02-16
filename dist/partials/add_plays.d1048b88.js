@@ -617,10 +617,8 @@ async function submitPlayerForm(e) {
     } else (0, _notiflixNotifyAio.Notify).failure(`Name field shouldn't be empty`);
 }
 function closePlayerModal() {
-    console.log("asdfghgfdsadfgh");
-    console.log(123, playerSelectEl.firstElementChild);
-// playerSelectEl.firstElementChild.setAttribute("selected", "");
-// addPlayerModalOverlay.classList.add('hidden');
+    playerSelectEl.selectedIndex = 0;
+    addPlayerModalOverlay.classList.add("hidden");
 }
 async function addPlayerToPlayers(userId, player) {
     const dateId = Date.now().toString();
