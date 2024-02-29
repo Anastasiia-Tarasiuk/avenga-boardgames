@@ -675,7 +675,7 @@ function validation(email, password) {
 function logout() {
     (0, _auth.signOut)(auth).then((res)=>{
         localStorage.removeItem("userId");
-        window.location.pathname = "../gjhj.html";
+        window.location.pathname = "../../gjhj.html";
         (0, _notiflixNotifyAio.Notify).success("Successfully signed out");
     }).catch((err)=>{
         console.error(err);
