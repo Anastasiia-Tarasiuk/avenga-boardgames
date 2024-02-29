@@ -5,7 +5,7 @@
   "homepage": "https://anastasiia-tarasiuk.github.io/avenga-boardgames/",
   "scripts": {
     "start": "parcel src/*.html",
-    "build": "parcel build src/*.html --public-url /avenga-boardgames/"
+    "build": "parcel build src/index.html --public-url /avenga-boardgames/"
   },
   "repository": {
     "type": "git",
