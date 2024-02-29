@@ -2,17 +2,17 @@
   "name": "avenga-boardgames",
   "version": "2.0.0",
   "description": "",
-  "homepage": "https://anastasiia-tarasiuk.github.io/avenga-boardgames/",
+  "homepage": "https://Anastasiia-Tarasiuk.github.io/avenga-boardgames/",
   "scripts": {
     "start": "parcel src/*.html",
     "build": "parcel build src/index.html --public-url /avenga-boardgames/"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://anastasiia-tarasiuk.github.io/avenga-boardgames.git"
+    "url": "git+https://github.com/goitacademy/parcel-project-template.git"
   },
   "keywords": [],
-  "author": "Anastasiia Tarasiuk",
+  "author": "Alexander Repeta <alexander.repeta@gmail.com>",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/goitacademy/parcel-project-template/issues"
