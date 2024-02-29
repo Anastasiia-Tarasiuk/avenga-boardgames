@@ -214,7 +214,7 @@ function logout() {
     signOut(auth)
         .then(res => {
             localStorage.removeItem("userId");
-            window.location.pathname = "partials/index.html";
+            window.location.pathname = "../../gjhj.html";
             Notify.success('Successfully signed out');
         })
         .catch(err => {
