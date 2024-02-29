@@ -524,7 +524,7 @@ const filterEl = document.querySelector(".filter");
 closeLoginModalButtonEls.forEach((btn)=>btn.addEventListener("click", closePlayerSettingModal));
 submitFormButtonsEl.forEach((btn)=>btn.addEventListener("click", (e)=>submitPlayerSettingsForm(e)));
 const playersNames = [];
-const playersData = [];
+let playersData = [];
 filterEl.addEventListener("keydown", (0, _lodashDebounceDefault.default)((e)=>(0, _constants.filterList)(e, playersData, playersEl, playersTemplate), 500));
 (0, _auth.onAuthStateChanged)((0, _login.auth), async (user)=>{
     if (user) {
@@ -706,12 +706,7 @@ async function renamePlayer(playerId, submitButton) {
     closePlayerSettingModal();
 }
 async function hidePlayer(playerId) {
-    const allPlayerItems = playersEl.children;
-    [
-        ...allPlayerItems
-    ].forEach((item)=>{
-        if (item.dataset.playerItemId === playerId) item.classList.add("hidden");
-    });
+    hidePlayerFromPage(playerId);
     try {
         const playerRef = await (0, _constants.getPlayerRef)(playerId);
         playersData.forEach((player)=>{
@@ -727,7 +722,16 @@ async function hidePlayer(playerId) {
     closePlayerSettingModal();
 }
 async function deletePlayer(playerId) {
-    console.log(playerId);
+    hidePlayerFromPage(playerId);
+    try {
+        const playerRef = await (0, _constants.getPlayerRef)(playerId);
+        playersData = playersData.filter((player)=>player.id.toString() !== playerId);
+        await (0, _firestore.deleteDoc)(playerRef);
+        (0, _notiflixNotifyAio.Notify).success("The player is deleted successfully");
+    } catch (e) {
+        console.error("Error removing document: ", e);
+    }
+    closePlayerSettingModal();
 }
 function showSettingsForm(e, player, accordion) {
     const playerName = accordion.innerText;
@@ -765,6 +769,14 @@ function submitPlayerSettingsForm(e) {
     if (actionButton.dataset.action === "hide-submit-btn") hidePlayer(actionButton.dataset.playerid);
     else if (actionButton.dataset.action === "rename-submit-btn") renamePlayer(actionButton.dataset.playerid, actionButton);
     else deletePlayer(actionButton.dataset.playerid);
+}
+function hidePlayerFromPage(playerId) {
+    const allPlayerItems = playersEl.children;
+    [
+        ...allPlayerItems
+    ].forEach((item)=>{
+        if (item.dataset.playerItemId === playerId) item.classList.add("hidden");
+    });
 }
 
 },{"firebase/auth":"79vzg","./login":"47T64","./pieChart":"dlNL4","./constants":"itKcQ","firebase/firestore":"8A4BC","notiflix/build/notiflix-notify-aio":"eXQLZ","lodash.debounce":"3JP5n","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"dlNL4":[function(require,module,exports) {

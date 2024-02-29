@@ -2,8 +2,7 @@ import {onAuthStateChanged} from "firebase/auth";
 import {auth} from "./login";
 import {PieChart} from "./pieChart";
 import {COLORS as colors, getPlayerRef, getRefs} from "./constants";
-import {doc, updateDoc} from "firebase/firestore";
-import {query, where, getDocs} from "firebase/firestore";
+import {query, where, getDocs, doc, updateDoc, deleteDoc} from "firebase/firestore";
 import {Notify} from "notiflix/build/notiflix-notify-aio";
 import {db} from "./login";
 import debounce from "lodash.debounce";
@@ -23,7 +22,7 @@ closeLoginModalButtonEls.forEach(btn => btn.addEventListener("click", closePlaye
 submitFormButtonsEl.forEach(btn => btn.addEventListener("click", (e ) => submitPlayerSettingsForm(e)));
 
 const playersNames = [];
-const playersData = [];
+let playersData = [];
 
 filterEl.addEventListener("keydown",  debounce(e => filterList(e, playersData, playersEl, playersTemplate), 500));
 
@@ -280,13 +279,7 @@ async function renamePlayer(playerId, submitButton) {
 }
 
 async function hidePlayer(playerId) {
-    const allPlayerItems = playersEl.children;
-
-    [...allPlayerItems].forEach(item => {
-        if (item.dataset.playerItemId === playerId) {
-            item.classList.add("hidden");
-        }
-    })
+    hidePlayerFromPage(playerId);
 
     try {
         const playerRef = await getPlayerRef(playerId);
@@ -310,7 +303,18 @@ async function hidePlayer(playerId) {
 }
 
 async function deletePlayer(playerId) {
-    console.log(playerId)
+    hidePlayerFromPage(playerId);
+
+    try {
+        const playerRef = await getPlayerRef(playerId);
+        playersData = playersData.filter(player => player.id.toString() !== playerId);
+        await deleteDoc(playerRef);
+        Notify.success('The player is deleted successfully');
+    } catch (e) {
+        console.error("Error removing document: ", e);
+    }
+
+    closePlayerSettingModal();
 }
 
 function showSettingsForm(e, player, accordion) {
@@ -357,4 +361,14 @@ function submitPlayerSettingsForm(e) {
     } else {
         deletePlayer(actionButton.dataset.playerid);
     }
+}
+
+function hidePlayerFromPage(playerId) {
+    const allPlayerItems = playersEl.children;
+
+    [...allPlayerItems].forEach(item => {
+        if (item.dataset.playerItemId === playerId) {
+            item.classList.add("hidden");
+        }
+    })
 }
