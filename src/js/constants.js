@@ -274,9 +274,7 @@ export async function getPlayerRef(playerId) {
     const userId = localStorage.getItem("userId");
     let docId;
 
-    const q = userId === playerId
-        ? query(getRefs(userId).players, where("id", "==", playerId))
-        : query(getRefs(userId).players, where("id", "==", Number(playerId)));
+    const q = getPlayerQueryById(userId, playerId);
 
     const querySnapshot = await getDocs(q);
 
@@ -309,4 +307,10 @@ export async function filterList(e, data, list, func) {
             func(el, userId);
         })
     }
+}
+
+export function getPlayerQueryById(userId, playerId) {
+    return (userId === playerId
+        ? query(getRefs(userId).players, where("id", "==", playerId))
+        : query(getRefs(userId).players, where("id", "==", Number(playerId))));
 }

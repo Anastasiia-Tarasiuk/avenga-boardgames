@@ -36908,6 +36908,7 @@ parcelHelpers.export(exports, "COLORS", ()=>COLORS);
 parcelHelpers.export(exports, "getRefs", ()=>getRefs);
 parcelHelpers.export(exports, "getPlayerRef", ()=>getPlayerRef);
 parcelHelpers.export(exports, "filterList", ()=>filterList);
+parcelHelpers.export(exports, "getPlayerQueryById", ()=>getPlayerQueryById);
 var _firestore = require("firebase/firestore");
 var _login = require("./login");
 const palette = [
@@ -37178,7 +37179,7 @@ function getRefs(userId) {
 async function getPlayerRef(playerId) {
     const userId = localStorage.getItem("userId");
     let docId;
-    const q = userId === playerId ? (0, _firestore.query)(getRefs(userId).players, (0, _firestore.where)("id", "==", playerId)) : (0, _firestore.query)(getRefs(userId).players, (0, _firestore.where)("id", "==", Number(playerId)));
+    const q = getPlayerQueryById(userId, playerId);
     const querySnapshot = await (0, _firestore.getDocs)(q);
     querySnapshot.forEach((doc)=>{
         docId = doc.id;
@@ -37201,6 +37202,9 @@ async function filterList(e, data, list, func) {
             func(el, userId);
         });
     }
+}
+function getPlayerQueryById(userId, playerId) {
+    return userId === playerId ? (0, _firestore.query)(getRefs(userId).players, (0, _firestore.where)("id", "==", playerId)) : (0, _firestore.query)(getRefs(userId).players, (0, _firestore.where)("id", "==", Number(playerId)));
 }
 
 },{"firebase/firestore":"8A4BC","./login":"47T64","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["1RB6v","8lqZg"], "8lqZg", "parcelRequire2ffc")

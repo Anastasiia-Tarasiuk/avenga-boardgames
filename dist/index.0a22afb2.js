@@ -507,9 +507,9 @@ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 var _auth = require("firebase/auth");
 var _login = require("./login");
 var _firestore = require("firebase/firestore");
-var _constants = require("./constants");
 var _lodashDebounce = require("lodash.debounce");
 var _lodashDebounceDefault = parcelHelpers.interopDefault(_lodashDebounce);
+var _constants = require("./constants");
 const playedGamesListEl = document.querySelector(".played-games");
 const addGameButtonEl = document.querySelector(".add-game");
 const filterLabelEl = document.querySelector(".filter-label");
@@ -532,10 +532,11 @@ filterEl.addEventListener("keydown", (0, _lodashDebounceDefault.default)((e)=>(0
     }
 });
 async function renderPlayedGames(game, userId) {
+    const scoreList = await createWinnersList(await getWinners(game.id, userId), userId);
     const number = await getGameSessions(game, userId);
     const gameListItem = document.createElement("li");
     gameListItem.classList.add("game-list-item");
-    gameListItem.innerHTML = `<div><p>${game.name}</p><img class="thumbnail" src=${game.url}></div><a class="add-plays-link" href="../partials/add_plays.html?id=${game.id}"><div class="add-plays-container"><span class="number-of-plays ">${number} </span>plays</div><span class="tooltip-text">Add your score<span></a>`;
+    gameListItem.innerHTML = `<div class="truncate-container"><p class="truncate-name">${game.name}</p><img class="thumbnail" src=${game.url}></div><div class="winners-container"><p>Best score:</p>${scoreList}</div><div class="plays-container"><a class="add-plays-link" href="../partials/add_plays.html?id=${game.id}"><div class="add-plays-container"><span class="number-of-plays ">${number} </span>plays</div><span class="tooltip-text">Add your score<span></a></div>`;
     playedGamesListEl.insertAdjacentElement("afterbegin", gameListItem);
 }
 async function getGameSessions(game, userId) {
@@ -546,6 +547,44 @@ async function getGameSessions(game, userId) {
         if (!sessions.includes(doc.data().sessionId)) sessions.push(doc.data().sessionId);
     });
     return sessions.length;
+}
+async function getWinners(gameId, userId) {
+    const bestScore = [];
+    const q = (0, _firestore.query)((0, _constants.getRefs)(userId).plays, (0, _firestore.where)("gameId", "==", gameId));
+    const querySnapshot = await (0, _firestore.getDocs)(q);
+    querySnapshot.forEach((doc)=>{
+        const playStats = doc.data();
+        bestScore.push({
+            score: Number(playStats.score),
+            player: playStats.playerId
+        });
+    });
+    bestScore.sort(compare);
+    return bestScore;
+}
+function compare(a, b) {
+    if (a.score > b.score) return -1;
+    if (a.score < b.score) return 1;
+    return 0;
+}
+async function createWinnersList(scoreArray, userId) {
+    const list = document.createElement("ul");
+    list.classList.add("winners");
+    for(let i = 0; i < 3; i++){
+        const item = document.createElement("li");
+        if (scoreArray[i]) {
+            const q = (0, _constants.getPlayerQueryById)(userId, scoreArray[i].player);
+            const querySnapshot = await (0, _firestore.getDocs)(q);
+            querySnapshot.forEach((doc)=>{
+                item.innerHTML = `<p class="winner-data">${doc.data().name} <span>${scoreArray[i].score}</span></p>`;
+            });
+            list.appendChild(item);
+        } else {
+            item.innerHTML = `<p class="winner-data">Unoccupied</p>`;
+            list.appendChild(item);
+        }
+    }
+    return list.outerHTML;
 }
 
 },{"firebase/auth":"79vzg","./login":"47T64","firebase/firestore":"8A4BC","./constants":"itKcQ","lodash.debounce":"3JP5n","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"3JP5n":[function(require,module,exports) {

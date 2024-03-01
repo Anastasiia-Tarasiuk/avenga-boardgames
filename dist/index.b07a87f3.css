@@ -309,11 +309,7 @@ form#signup-form .confirm .svg-icon {
   margin-bottom: 10px;
 }
 
-.played-games li:nth-child(2n+1) {
-  background-color: #ccc;
-}
-
-.played-games li:nth-child(2n) {
+.played-games li {
   background-color: #eee;
 }
 
@@ -352,16 +348,47 @@ form#signup-form .confirm .svg-icon {
   padding: 10px;
 }
 
-.add-plays-link {
-  position: absolute;
-  right: 30px;
-}
-
 .add-plays-link:hover .tooltip-text {
   visibility: visible;
   width: 87px;
   top: 50px;
   left: -10px;
+}
+
+.truncate-container {
+  width: 150px;
+  margin-right: 20px;
+}
+
+.truncate-name {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.plays-container {
+  margin-left: 20px;
+  position: relative;
+}
+
+.winners-container > p {
+  margin-bottom: 10px;
+}
+
+.winners li:before {
+  content: "";
+  width: 24px;
+  height: 24px;
+  fill: #ff0;
+  float: left;
+  background-image: url("medal.777812e7.svg");
+  background-repeat: no-repeat;
+  background-size: 24px 24px;
+  display: inline-block;
+}
+
+.winner-data {
+  white-space: nowrap;
 }
 
 .plays {

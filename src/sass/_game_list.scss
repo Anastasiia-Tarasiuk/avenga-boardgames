@@ -3,11 +3,7 @@
     margin-bottom: 10px;
 }
 
-.played-games li:nth-child(odd){
-    background-color: #ccc;
-}
-
-.played-games li:nth-child(even){
+.played-games li{
     background-color: #eee;
 }
 
@@ -46,14 +42,45 @@
     border-radius: 5px;
 }
 
-.add-plays-link {
-    position: absolute;
-    right: 30px;
-}
-
 .add-plays-link:hover .tooltip-text {
     visibility: visible;
     top: 50px;
     left: -10px;
     width: 87px;
+}
+
+.truncate-container {
+    width: 150px;
+    margin-right: 20px;
+}
+
+.truncate-name {
+    text-overflow: ellipsis;
+    white-space:nowrap;
+    overflow:hidden;
+}
+
+.plays-container {
+    margin-left: 20px;
+    position: relative;
+}
+
+.winners-container > p {
+    margin-bottom: 10px;
+}
+
+.winners li:before{
+    content: "";
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background-repeat: no-repeat;
+    background-size: 24px 24px;
+    fill: yellow;
+    background-image: url("../images/medal.svg");
+    float: left;
+}
+
+.winner-data {
+    white-space:nowrap;
 }
