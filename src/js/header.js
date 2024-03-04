@@ -1,11 +1,22 @@
 import {onAuthStateChanged} from "firebase/auth";
-import {doc, getDocs, query, updateDoc} from "firebase/firestore";
+import {doc, updateDoc} from "firebase/firestore";
 import {auth, db} from "./login";
-import {getRefs} from "./constants";
 
 const checkbox = document.querySelector(".header-checkbox");
 const themeEl = document.querySelector(".switch");
 const body = document.querySelector("body");
+
+const theme = localStorage.getItem("theme");
+
+if (theme) {
+    if (theme === "light") {
+        checkbox.setAttribute("checked", "");
+        body.classList.add("light");
+    } else {
+        body.classList.add("dark");
+        checkbox.removeAttribute("checked");
+    }
+}
 
 checkbox.addEventListener("click", e => setTheme(e));
 function setTheme(e) {
@@ -26,22 +37,7 @@ function setTheme(e) {
 
 onAuthStateChanged(auth, async user => {
     if (user) {
-        const q = query(getRefs(user.uid).user);
-        const querySnapshot = await getDocs(q);
-
-        // TODO remove logic empty
-        if (!querySnapshot.empty) {
-            querySnapshot.forEach(doc => {
-                if (doc.data().theme === "light") {
-                    checkbox.setAttribute("checked", "");
-                    body.classList.add("light");
-                } else {
-                    body.classList.add("dark");
-                }
-
-                themeEl.classList.remove("hidden");
-            });
-        }
+        themeEl.classList.remove("hidden");
     }
 });
 
@@ -53,6 +49,7 @@ async function setChangedThemeToStore(theme) {
         await updateDoc(userRef, {
             theme: `${theme}`
         });
+        localStorage.setItem("theme", `${theme}`);
     } catch (e) {
         console.error("Error changing theme: ", e);
     }

@@ -504,9 +504,10 @@ function hmrAcceptRun(bundle, id) {
 
 },{}],"8lqZg":[function(require,module,exports) {
 var _login = require("./js/login");
+var _header = require("./js/header");
 var _constants = require("./js/constants");
 
-},{"./js/login":"47T64","./js/constants":"itKcQ"}],"47T64":[function(require,module,exports) {
+},{"./js/login":"47T64","./js/constants":"itKcQ","./js/header":"bvS82"}],"47T64":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "auth", ()=>auth);
@@ -540,6 +541,8 @@ const loginFormEl = document.querySelector("[id='login-form']");
 const signupFormEl = document.querySelector("[id='signup-form']");
 const googleButtonEls = document.querySelectorAll(".google-button");
 const closeLoginModalButtonEls = document.querySelectorAll(".close-login-modal");
+const body = document.querySelector("body");
+const slider = document.querySelector(".header-checkbox");
 if (modalOverlayEl) {
     const submitFormButtonsEl = modalOverlayEl.querySelectorAll("button[type='submit']");
     submitFormButtonsEl.forEach((btn)=>btn.addEventListener("click", (e)=>submitLoginForm(e)));
@@ -592,6 +595,7 @@ function submitLoginForm(e) {
         (0, _auth.signInWithEmailAndPassword)(auth, email, password).then((userCredential)=>{
             (0, _notiflixNotifyAio.Notify).success(`Successfully signed in`);
             localStorage.setItem("userId", userCredential.user.uid);
+            setThemeToLocalStorage(userCredential.user.uid);
             closeLoginModal();
         }).catch((error)=>{
             console.error(error);
@@ -609,6 +613,7 @@ function submitLoginForm(e) {
             const user = userCredential.user;
             localStorage.setItem("userId", user.uid);
             setUserDataToStorage(user);
+            setThemeToLocalStorage(user.uid);
             closeLoginModal();
         }).catch((error)=>{
             console.error(error);
@@ -631,6 +636,7 @@ function loginWithGoogle(e) {
             setUserDataToStorage(user);
         }
         localStorage.setItem("userId", user.uid);
+        setThemeToLocalStorage(user.uid);
         closeLoginModal();
     }).catch((error)=>{
         // Handle Errors here.
@@ -675,6 +681,7 @@ function validation(email, password) {
 function logout() {
     (0, _auth.signOut)(auth).then((res)=>{
         localStorage.removeItem("userId");
+        localStorage.removeItem("theme");
         window.location.pathname = "../../index.html";
         (0, _notiflixNotifyAio.Notify).success("Successfully signed out");
     }).catch((err)=>{
@@ -708,6 +715,29 @@ function seePassword(e) {
     } else {
         icon.classList.add("visible");
         input.setAttribute("type", "text");
+    }
+}
+async function setThemeToLocalStorage(userId) {
+    const q = (0, _firestore.query)((0, _constants.getRefs)(userId).user);
+    const querySnapshot = await (0, _firestore.getDocs)(q);
+    // TODO remove logic empty
+    if (!querySnapshot.empty) querySnapshot.forEach((doc)=>{
+        localStorage.setItem("theme", doc.data().theme);
+        if (doc.data().theme === "light") {
+            slider.setAttribute("checked", "");
+            body.classList.add("light");
+            body.classList.remove("dark");
+        } else {
+            slider.removeAttribute("checked");
+            body.classList.remove("light");
+            body.classList.add("dark");
+        }
+    });
+    else {
+        localStorage.setItem("theme", "light");
+        slider.setAttribute("checked", "");
+        body.classList.add("light");
+        body.classList.remove("dark");
     }
 }
 
@@ -37208,6 +37238,54 @@ function getPlayerQueryById(userId, playerId) {
     return userId === playerId ? (0, _firestore.query)(getRefs(userId).players, (0, _firestore.where)("id", "==", playerId)) : (0, _firestore.query)(getRefs(userId).players, (0, _firestore.where)("id", "==", Number(playerId)));
 }
 
-},{"firebase/firestore":"8A4BC","./login":"47T64","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["1RB6v","8lqZg"], "8lqZg", "parcelRequire2ffc")
+},{"firebase/firestore":"8A4BC","./login":"47T64","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"bvS82":[function(require,module,exports) {
+var _auth = require("firebase/auth");
+var _firestore = require("firebase/firestore");
+var _login = require("./login");
+const checkbox = document.querySelector(".header-checkbox");
+const themeEl = document.querySelector(".switch");
+const body = document.querySelector("body");
+const theme = localStorage.getItem("theme");
+if (theme) {
+    if (theme === "light") {
+        checkbox.setAttribute("checked", "");
+        body.classList.add("light");
+    } else {
+        body.classList.add("dark");
+        checkbox.removeAttribute("checked");
+    }
+}
+checkbox.addEventListener("click", (e)=>setTheme(e));
+function setTheme(e) {
+    const slider = e.currentTarget;
+    if (slider.hasAttribute("checked")) {
+        slider.removeAttribute("checked");
+        body.classList.remove("light");
+        body.classList.add("dark");
+        setChangedThemeToStore("dark");
+    } else {
+        slider.setAttribute("checked", "");
+        body.classList.add("light");
+        body.classList.remove("dark");
+        setChangedThemeToStore("light");
+    }
+}
+(0, _auth.onAuthStateChanged)((0, _login.auth), async (user)=>{
+    if (user) themeEl.classList.remove("hidden");
+});
+async function setChangedThemeToStore(theme1) {
+    const userId = localStorage.getItem("userId");
+    const userRef = (0, _firestore.doc)((0, _login.db), `users/${userId}/user`, userId);
+    try {
+        await (0, _firestore.updateDoc)(userRef, {
+            theme: `${theme1}`
+        });
+        localStorage.setItem("theme", `${theme1}`);
+    } catch (e) {
+        console.error("Error changing theme: ", e);
+    }
+}
+
+},{"firebase/auth":"79vzg","firebase/firestore":"8A4BC","./login":"47T64"}]},["1RB6v","8lqZg"], "8lqZg", "parcelRequire2ffc")
 
 //# sourceMappingURL=index.975ef6c8.js.map

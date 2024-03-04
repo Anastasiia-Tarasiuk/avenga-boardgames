@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup} from "firebase/auth";
-import {getFirestore, doc, setDoc} from "firebase/firestore";
+import {getFirestore, doc, setDoc, query, getDocs} from "firebase/firestore";
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import {getRefs} from "./constants";
 
@@ -31,6 +31,8 @@ const loginFormEl = document.querySelector("[id='login-form']");
 const signupFormEl = document.querySelector("[id='signup-form']");
 const googleButtonEls = document.querySelectorAll(".google-button");
 const closeLoginModalButtonEls = document.querySelectorAll(".close-login-modal");
+const body = document.querySelector("body");
+const slider = document.querySelector(".header-checkbox");
 
 if (modalOverlayEl) {
     const submitFormButtonsEl = modalOverlayEl.querySelectorAll("button[type='submit']");
@@ -38,7 +40,6 @@ if (modalOverlayEl) {
     const seePasswordEl = modalOverlayEl.querySelectorAll(".svg-icon");
     seePasswordEl.forEach(icon => icon.addEventListener("click", e => seePassword(e)));
 }
-
 
 loginButtonEl.addEventListener("click", (e) => showModal(e));
 signupButtonEl.addEventListener("click", (e) => showModal(e));
@@ -100,6 +101,7 @@ function submitLoginForm(e) {
             .then((userCredential) => {
                 Notify.success(`Successfully signed in`);
                 localStorage.setItem("userId", userCredential.user.uid);
+                setThemeToLocalStorage(userCredential.user.uid);
                 closeLoginModal();
             })
             .catch((error) => {
@@ -122,6 +124,7 @@ function submitLoginForm(e) {
                 const user = userCredential.user;
                 localStorage.setItem("userId", user.uid);
                 setUserDataToStorage(user);
+                setThemeToLocalStorage(user.uid);
                 closeLoginModal();
             })
             .catch((error) => {
@@ -152,6 +155,7 @@ function loginWithGoogle(e) {
             }
 
             localStorage.setItem("userId", user.uid);
+            setThemeToLocalStorage(user.uid);
 
             closeLoginModal();
 
@@ -214,6 +218,7 @@ function logout() {
     signOut(auth)
         .then(res => {
             localStorage.removeItem("userId");
+            localStorage.removeItem("theme");
             window.location.pathname = "../../index.html";
             Notify.success('Successfully signed out');
         })
@@ -253,5 +258,31 @@ function seePassword(e) {
     } else {
         icon.classList.add("visible");
         input.setAttribute("type", "text");
+    }
+}
+
+async function setThemeToLocalStorage(userId) {
+    const q = query(getRefs(userId).user);
+    const querySnapshot = await getDocs(q);
+
+    // TODO remove logic empty
+    if (!querySnapshot.empty) {
+        querySnapshot.forEach(doc => {
+            localStorage.setItem("theme", doc.data().theme);
+            if (doc.data().theme === "light") {
+                slider.setAttribute("checked", "");
+                body.classList.add("light");
+                body.classList.remove("dark");
+            } else {
+                slider.removeAttribute("checked");
+                body.classList.remove("light");
+                body.classList.add("dark");
+            }
+        });
+    } else {
+        localStorage.setItem("theme", "light");
+        slider.setAttribute("checked", "");
+        body.classList.add("light");
+        body.classList.remove("dark");
     }
 }
