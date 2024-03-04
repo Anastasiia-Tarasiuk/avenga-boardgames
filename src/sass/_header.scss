@@ -27,6 +27,7 @@
 
 .container {
     padding: 20px;
+
 }
 
 header .container {
@@ -35,5 +36,5 @@ header .container {
 }
 
 header {
-    background-color: #ccc;
+    background-color: $secondary-color;
 }

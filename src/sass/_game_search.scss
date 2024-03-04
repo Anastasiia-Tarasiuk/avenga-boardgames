@@ -5,7 +5,7 @@
 }
 
 .game-list li:nth-child(odd) {
-    background-color: #ccc;
+    background-color: $secondary-color;
 }
 
 .game-list li:not(:last-child) {

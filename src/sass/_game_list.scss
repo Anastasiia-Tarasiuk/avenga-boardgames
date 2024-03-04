@@ -1,10 +1,12 @@
+
+
 .played-games li:not(:last-child),
 .players li:not(:last-child) {
     margin-bottom: 10px;
 }
 
 .played-games li{
-    background-color: #eee;
+    background-color: $primary-color;
 }
 
 .number-of-plays {
@@ -37,7 +39,7 @@
 
 .add-plays-container {
     padding: 10px;
-    background-color: #67ba04;
+    background-color: $accent-color;
     height: 40px;
     border-radius: 5px;
 }

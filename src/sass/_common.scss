@@ -1,5 +1,15 @@
 @import '~node_modules/modern-normalize/modern-normalize.css';
 
+.light {
+    color: $text-color-light;
+    background-color: $background-color-light;
+}
+
+.dark {
+    color: $text-color-dark;
+    background-color: $background-color-dark;
+}
+
 ul {
     padding: 0;
     margin: 0;
@@ -27,7 +37,7 @@ button {
 }
 
 .active-link {
-    color: #67ba04;
+    color: $accent-color;
     text-decoration: underline;
 }
 
@@ -50,3 +60,37 @@ button {
     left: 341px;
 }
 
+.switch.label {
+    align-self: center;
+    position: relative;
+}
+
+.switch.label .slider {
+    background-color: black;
+}
+
+.switch.label input:checked + .slider {
+    background-color: $accent-color;
+}
+
+.switch.label:before,
+.switch.label:after, {
+    content: "";
+    position: absolute;
+    top: 0px;
+    left: -35px;
+    width: 30px;
+    height: 30px;
+    background-repeat: no-repeat;
+    background-size: 30px 30px;
+}
+
+.switch.label:before {
+    left: -35px;
+    background-image: url("../images/moon.png");
+}
+
+.switch.label:after {
+    left: 60px;
+    background-image: url("../images/sun.svg");
+}

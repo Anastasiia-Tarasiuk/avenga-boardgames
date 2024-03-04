@@ -113,6 +113,16 @@ summary {
   display: list-item;
 }
 
+.light {
+  color: #000;
+  background-color: #fff;
+}
+
+.dark {
+  color: #fff;
+  background-color: #000;
+}
+
 ul {
   margin: 0;
   padding: 0;
@@ -160,6 +170,40 @@ button {
   position: absolute;
   top: 116px;
   left: 341px;
+}
+
+.switch.label {
+  align-self: center;
+  position: relative;
+}
+
+.switch.label .slider {
+  background-color: #000;
+}
+
+.switch.label input:checked + .slider {
+  background-color: #67ba04;
+}
+
+.switch.label:before, .switch.label:after {
+  content: "";
+  width: 30px;
+  height: 30px;
+  background-repeat: no-repeat;
+  background-size: 30px 30px;
+  position: absolute;
+  top: 0;
+  left: -35px;
+}
+
+.switch.label:before {
+  background-image: url("moon.ea79a236.png");
+  left: -35px;
+}
+
+.switch.label:after {
+  background-image: url("sun.9f320bcf.svg");
+  left: 60px;
 }
 
 .logo {

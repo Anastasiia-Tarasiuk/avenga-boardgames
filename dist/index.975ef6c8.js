@@ -675,7 +675,7 @@ function validation(email, password) {
 function logout() {
     (0, _auth.signOut)(auth).then((res)=>{
         localStorage.removeItem("userId");
-        window.location.pathname = "../../gjhj.html";
+        window.location.pathname = "../../index.html";
         (0, _notiflixNotifyAio.Notify).success("Successfully signed out");
     }).catch((err)=>{
         console.error(err);
@@ -687,7 +687,8 @@ async function setUserDataToStorage(user) {
         await (0, _firestore.setDoc)((0, _firestore.doc)((0, _constants.getRefs)(user.uid).user, user.uid), {
             id: user.uid,
             email: user.email,
-            name: user.displayName || "User"
+            name: user.displayName || "User",
+            theme: "light"
         });
         await (0, _firestore.setDoc)((0, _firestore.doc)((0, _constants.getRefs)(user.uid).players), {
             id: user.uid,
@@ -1983,8 +1984,8 @@ parcelHelpers.export(exports, "validateCallback", ()=>validateCallback);
 parcelHelpers.export(exports, "validateContextObject", ()=>validateContextObject);
 parcelHelpers.export(exports, "validateIndexedDBOpenable", ()=>validateIndexedDBOpenable);
 parcelHelpers.export(exports, "validateNamespace", ()=>validateNamespace);
-var process = require("process");
 var global = arguments[3];
+var process = require("process");
 /**
  * @license
  * Copyright 2017 Google LLC

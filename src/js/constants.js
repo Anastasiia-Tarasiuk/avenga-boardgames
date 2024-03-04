@@ -269,7 +269,6 @@ export function getRefs(userId) {
  })
 }
 
-
 export async function getPlayerRef(playerId) {
     const userId = localStorage.getItem("userId");
     let docId;

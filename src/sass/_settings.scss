@@ -21,7 +21,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #ccc;
+  background-color: $secondary-color;
   -webkit-transition: .4s;
   transition: .4s;
 }
@@ -39,11 +39,11 @@
 }
 
 input:checked + .slider {
-  background-color: #67ba04;
+  background-color: $accent-color;
 }
 
 input:focus + .slider {
-  box-shadow: 0 0 1px #67ba04;
+  box-shadow: 0 0 1px $accent-color;
 }
 
 input:checked + .slider:before {
@@ -64,7 +64,7 @@ input:checked + .slider:before {
 .players-manager li{
   display: flex;
   justify-content: space-between;
-  background-color: #eee;
+  background-color: $primary-color;
   padding: 15px;
 }
 

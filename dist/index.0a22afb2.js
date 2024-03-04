@@ -587,7 +587,7 @@ async function createWinnersList(scoreArray, userId) {
     return list.outerHTML;
 }
 
-},{"firebase/auth":"79vzg","./login":"47T64","firebase/firestore":"8A4BC","./constants":"itKcQ","lodash.debounce":"3JP5n","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"3JP5n":[function(require,module,exports) {
+},{"firebase/auth":"79vzg","./login":"47T64","firebase/firestore":"8A4BC","lodash.debounce":"3JP5n","./constants":"itKcQ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"3JP5n":[function(require,module,exports) {
 var global = arguments[3];
 /**
  * lodash (Custom Build) <https://lodash.com/>

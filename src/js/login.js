@@ -214,7 +214,7 @@ function logout() {
     signOut(auth)
         .then(res => {
             localStorage.removeItem("userId");
-            window.location.pathname = "../../gjhj.html";
+            window.location.pathname = "../../index.html";
             Notify.success('Successfully signed out');
         })
         .catch(err => {
@@ -229,6 +229,7 @@ async function setUserDataToStorage(user) {
             id: user.uid,
             email: user.email,
             name: user.displayName || "User",
+            theme: "light",
         })
 
         await setDoc(doc(getRefs(user.uid).players), {
@@ -246,7 +247,6 @@ function seePassword(e) {
     const icon = e.currentTarget;
     const input = icon.nextElementSibling;
 
-
     if (icon.classList.contains("visible")) {
         icon.classList.remove("visible");
         input.setAttribute("type", "password");
@@ -254,5 +254,4 @@ function seePassword(e) {
         icon.classList.add("visible");
         input.setAttribute("type", "text");
     }
-
 }

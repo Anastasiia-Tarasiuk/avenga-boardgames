@@ -1,7 +1,7 @@
 .login-modal-overlay form,
 .add-player-modal-overlay form,
 .players-settings-modal-overlay form {
-    background-color: #ccc;
+    background-color: $secondary-color;
     display: flex;
     width: 300px;
     height: 400px;
@@ -68,7 +68,7 @@
 
 .svg-icon {
     position: absolute;
-    fill: #ccc;
+    fill: $secondary-color;
     height: 30px;
     width: 30px;
 }

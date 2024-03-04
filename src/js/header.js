@@ -1,0 +1,59 @@
+import {onAuthStateChanged} from "firebase/auth";
+import {doc, getDocs, query, updateDoc} from "firebase/firestore";
+import {auth, db} from "./login";
+import {getRefs} from "./constants";
+
+const checkbox = document.querySelector(".header-checkbox");
+const themeEl = document.querySelector(".switch");
+const body = document.querySelector("body");
+
+checkbox.addEventListener("click", e => setTheme(e));
+function setTheme(e) {
+    const slider = e.currentTarget;
+
+    if (slider.hasAttribute("checked")) {
+        slider.removeAttribute("checked");
+        body.classList.remove("light");
+        body.classList.add("dark");
+        setChangedThemeToStore("dark");
+    } else {
+        slider.setAttribute("checked", "");
+        body.classList.add("light");
+        body.classList.remove("dark");
+        setChangedThemeToStore("light");
+    }
+}
+
+onAuthStateChanged(auth, async user => {
+    if (user) {
+        const q = query(getRefs(user.uid).user);
+        const querySnapshot = await getDocs(q);
+
+        // TODO remove logic empty
+        if (!querySnapshot.empty) {
+            querySnapshot.forEach(doc => {
+                if (doc.data().theme === "light") {
+                    checkbox.setAttribute("checked", "");
+                    body.classList.add("light");
+                } else {
+                    body.classList.add("dark");
+                }
+
+                themeEl.classList.remove("hidden");
+            });
+        }
+    }
+});
+
+async function setChangedThemeToStore(theme) {
+    const userId = localStorage.getItem("userId");
+    const userRef = doc(db, `users/${userId}/user`, userId);
+
+    try {
+        await updateDoc(userRef, {
+            theme: `${theme}`
+        });
+    } catch (e) {
+        console.error("Error changing theme: ", e);
+    }
+}
