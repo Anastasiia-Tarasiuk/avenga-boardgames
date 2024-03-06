@@ -243,6 +243,7 @@ async function setUserDataToStorage(user) {
             hidden: false,
         })
 
+        // await setDoc(doc(getRefs(user.uid).favourites), {})
     } catch (e) {
         console.error("Error adding document: ", e);
     }

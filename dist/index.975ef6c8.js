@@ -702,6 +702,7 @@ async function setUserDataToStorage(user) {
             name: user.displayName || "You",
             hidden: false
         });
+    // await setDoc(doc(getRefs(user.uid).favourites), {})
     } catch (e) {
         console.error("Error adding document: ", e);
     }
@@ -36940,8 +36941,14 @@ parcelHelpers.export(exports, "getRefs", ()=>getRefs);
 parcelHelpers.export(exports, "getPlayerRef", ()=>getPlayerRef);
 parcelHelpers.export(exports, "filterList", ()=>filterList);
 parcelHelpers.export(exports, "getPlayerQueryById", ()=>getPlayerQueryById);
+parcelHelpers.export(exports, "isGameInFavourites", ()=>isGameInFavourites);
+parcelHelpers.export(exports, "toggleFavourites", ()=>toggleFavourites);
+parcelHelpers.export(exports, "addToFavourites", ()=>addToFavourites);
+parcelHelpers.export(exports, "removeFromFavourites", ()=>removeFromFavourites);
+parcelHelpers.export(exports, "handleTabsClick", ()=>handleTabsClick);
 var _firestore = require("firebase/firestore");
 var _login = require("./login");
+var _notiflixNotifyAio = require("notiflix/build/notiflix-notify-aio");
 const palette = [
     "#F44336",
     "#FFEBEE",
@@ -37204,7 +37211,8 @@ function getRefs(userId) {
         games: (0, _firestore.collection)((0, _login.db), `users/${userId}/games`),
         plays: (0, _firestore.collection)((0, _login.db), `users/${userId}/plays`),
         players: (0, _firestore.collection)((0, _login.db), `users/${userId}/players`),
-        user: (0, _firestore.collection)((0, _login.db), `users/${userId}/user`)
+        user: (0, _firestore.collection)((0, _login.db), `users/${userId}/user`),
+        favourites: (0, _firestore.collection)((0, _login.db), `users/${userId}/favourites`)
     };
 }
 async function getPlayerRef(playerId) {
@@ -37237,8 +37245,61 @@ async function filterList(e, data, list, func) {
 function getPlayerQueryById(userId, playerId) {
     return userId === playerId ? (0, _firestore.query)(getRefs(userId).players, (0, _firestore.where)("id", "==", playerId)) : (0, _firestore.query)(getRefs(userId).players, (0, _firestore.where)("id", "==", Number(playerId)));
 }
+async function isGameInFavourites(id, userId) {
+    const q = (0, _firestore.query)(getRefs(userId).favourites, (0, _firestore.where)("id", "==", id));
+    const querySnapshot = await (0, _firestore.getDocs)(q);
+    if (querySnapshot.empty) return false;
+    else return true;
+}
+function toggleFavourites(e, { id , name , url  }, userId) {
+    const input = e.currentTarget;
+    if (input.checked) addToFavourites(id, name, url, userId);
+    else removeFromFavourites(id, userId);
+}
+async function addToFavourites(id, name, url, userId) {
+    try {
+        if (await isGameInFavourites(id)) (0, _notiflixNotifyAio.Notify).failure("The game is already in favourites");
+        else {
+            await (0, _firestore.addDoc)(getRefs(userId).favourites, {
+                id,
+                name,
+                url
+            });
+            (0, _notiflixNotifyAio.Notify).success("The game is added to favourites");
+        }
+    } catch (e) {
+        console.error("Error adding document: ", e);
+    }
+}
+async function removeFromFavourites(id, userId) {
+    try {
+        let docId = null;
+        const q = (0, _firestore.query)(getRefs(userId).favourites, (0, _firestore.where)("id", "==", id));
+        const querySnapshot = await (0, _firestore.getDocs)(q);
+        querySnapshot.forEach((doc)=>{
+            docId = doc.id;
+        });
+        await (0, _firestore.deleteDoc)((0, _firestore.doc)(getRefs(userId).favourites, docId));
+        (0, _notiflixNotifyAio.Notify).success("The game is removed from favourites");
+    } catch (e) {
+        console.error("Error deleting document: ", e);
+    }
+}
+function handleTabsClick(e, tab, parent) {
+    const tabcontent = parent.querySelectorAll(".tabcontent");
+    const tablinks = parent.querySelectorAll(".tablinks");
+    for(let i = 0; i < tabcontent.length; i++)tabcontent[i].style.display = "none";
+    for(let i1 = 0; i1 < tablinks.length; i1++)tablinks[i1].className = tablinks[i1].className.replace("active", "");
+    const activeTab = parent.querySelector(`#${tab}`);
+    activeTab.style.display = "block";
+    [
+        ...parent.children
+    ].forEach((el)=>el.classList.remove("active-tab"));
+    activeTab.classList.add("active-tab");
+    e.currentTarget.className += " active";
+}
 
-},{"firebase/firestore":"8A4BC","./login":"47T64","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"bvS82":[function(require,module,exports) {
+},{"firebase/firestore":"8A4BC","./login":"47T64","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","notiflix/build/notiflix-notify-aio":"eXQLZ"}],"bvS82":[function(require,module,exports) {
 var _auth = require("firebase/auth");
 var _firestore = require("firebase/firestore");
 var _login = require("./login");

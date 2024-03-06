@@ -4,8 +4,9 @@
     padding: 10px;
 }
 
-.game-list li:nth-child(odd) {
-    background-color: $secondary-color;
+.game-list li {
+    background-color: $primary-color;
+    color: $text-color-light;
 }
 
 .game-list li:not(:last-child) {
@@ -29,4 +30,20 @@
 
 .add-game-button img {
     width: 30px;
+}
+
+.game-name {
+    display: block;
+    margin-left: 25px;
+}
+
+.search-icon {
+    position: absolute;
+    height: 25px;
+    width: 25px;
+    top: 114px;
+    left: 179px;
+    stroke: $text-color-light;
+    stroke-width: 1.5;
+    fill: transparent;
 }

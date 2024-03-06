@@ -1,5 +1,6 @@
-import {collection, doc, getDocs, query, where} from "firebase/firestore";
+import {addDoc, collection, deleteDoc, doc, getDocs, query, where} from "firebase/firestore";
 import {db} from "./login";
+import {Notify} from "notiflix/build/notiflix-notify-aio";
 
 const palette = [
     '#F44336',
@@ -266,6 +267,7 @@ export function getRefs(userId) {
         plays: collection(db, `users/${userId}/plays`),
         players: collection(db, `users/${userId}/players`),
         user: collection(db, `users/${userId}/user`),
+        favourites: collection(db, `users/${userId}/favourites`),
  })
 }
 
@@ -312,4 +314,73 @@ export function getPlayerQueryById(userId, playerId) {
     return (userId === playerId
         ? query(getRefs(userId).players, where("id", "==", playerId))
         : query(getRefs(userId).players, where("id", "==", Number(playerId))));
+}
+export async function isGameInFavourites(id, userId) {
+    const q = query(getRefs(userId).favourites, where("id", "==", id));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+export function toggleFavourites(e, {id, name, url}, userId) {
+    const input = e.currentTarget;
+
+    if (input.checked) {
+        addToFavourites(id, name, url, userId);
+    } else {
+        removeFromFavourites(id, userId);
+    }
+}
+
+export async function addToFavourites(id, name, url, userId) {
+    try {
+        if (await isGameInFavourites(id)) {
+            Notify.failure('The game is already in favourites');
+        } else {
+            await addDoc(getRefs(userId).favourites, {id, name, url});
+            Notify.success('The game is added to favourites');
+        }
+    } catch (e) {
+        console.error("Error adding document: ", e);
+    }
+}
+
+export async function removeFromFavourites(id, userId) {
+    try {
+        let docId = null;
+        const q = query(getRefs(userId).favourites, where("id", "==", id));
+        const querySnapshot = await getDocs(q);
+
+        querySnapshot.forEach(doc => {
+            docId = doc.id;
+        });
+
+        await deleteDoc(doc(getRefs(userId).favourites, docId));
+        Notify.success('The game is removed from favourites');
+    } catch (e) {
+        console.error("Error deleting document: ", e);
+    }
+}
+
+export function handleTabsClick(e, tab, parent) {
+    const tabcontent = parent.querySelectorAll(".tabcontent");
+    const tablinks = parent.querySelectorAll(".tablinks");
+
+    for (let i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+
+    for (let i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace("active", "");
+    }
+
+    const activeTab = parent.querySelector(`#${tab}`);
+    activeTab.style.display = "block";
+    [...parent.children].forEach(el => el.classList.remove("active-tab"));
+    activeTab.classList.add("active-tab");
+    e.currentTarget.className += " active";
 }

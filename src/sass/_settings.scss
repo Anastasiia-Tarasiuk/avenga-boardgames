@@ -13,7 +13,7 @@
   height: 0;
 }
 
-/* The slider */
+/* The slider label = switch span = slider */
 .slider {
   position: absolute;
   cursor: pointer;
@@ -61,13 +61,26 @@ input:checked + .slider:before {
   border-radius: 50%;
 }
 
-.players-manager li{
+.setting-panel li{
   display: flex;
   justify-content: space-between;
   background-color: $primary-color;
+  color: $text-color-light;
   padding: 15px;
 }
 
-.players-manager li:not(:last-child) {
+.setting-panel li:not(:last-child) {
+  margin-bottom: 10px;
+}
+
+.tabcontent {
+  height: 100%;
+}
+
+.tabcontent.default {
+  min-height: 205px;
+}
+
+.settings-item:not(:last-child) {
   margin-bottom: 10px;
 }

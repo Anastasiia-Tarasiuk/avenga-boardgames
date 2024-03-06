@@ -1,4 +1,6 @@
-
+.played-games {
+    color: $text-color-light;
+}
 
 .played-games li:not(:last-child),
 .players li:not(:last-child) {
@@ -24,6 +26,7 @@
     visibility: hidden;
     position: absolute;
     background-color: #fff;
+    color: #000;
 }
 
 .add-game:hover .tooltip-text {
@@ -31,6 +34,12 @@
     top: 40px;
     left: -30px;
     width: 94px;
+}
+
+.truncate-name:hover .tooltip-text {
+    visibility: visible;
+    left: 55px;
+    font-size: inherit;
 }
 
 .add-game img {
@@ -57,6 +66,8 @@
 }
 
 .truncate-name {
+    display: block;
+    margin-left: 25px;
     text-overflow: ellipsis;
     white-space:nowrap;
     overflow:hidden;
@@ -85,4 +96,37 @@
 
 .winner-data {
     white-space:nowrap;
+}
+
+.favourite-lable {
+    position: relative;
+}
+
+.favourite-input {
+    position: absolute;
+    opacity: 0;
+    z-index: 2;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.favourite-input:checked + .favourite-svg {
+    fill: $accent-color;
+}
+
+.favourite-svg {
+    fill: transparent;
+    stroke: black;
+    width: 17px;
+    height: 17px;
+    -webkit-transition: .4s;
+    transition: .4s;
+
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }

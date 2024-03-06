@@ -638,12 +638,7 @@ async function getStats(playerId, userId) {
 }
 function toggleTabs(e, tab, parent, pieChartData, selector) {
     if (tab === "chartId") createChart(selector, pieChartData);
-    const tabcontent = parent.querySelectorAll(".tabcontent");
-    const tablinks = parent.querySelectorAll(".tablinks");
-    for(let i = 0; i < tabcontent.length; i++)tabcontent[i].style.display = "none";
-    for(let i1 = 0; i1 < tablinks.length; i1++)tablinks[i1].className = tablinks[i1].className.replace("active", "");
-    parent.querySelector(`#${tab}`).style.display = "block";
-    e.currentTarget.className += " active";
+    (0, _constants.handleTabsClick)(e, tab, parent);
 }
 function createChart(parent, data) {
     const pieChart = {};

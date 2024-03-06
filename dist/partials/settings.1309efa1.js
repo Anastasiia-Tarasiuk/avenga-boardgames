@@ -511,40 +511,92 @@ var _login = require("./login");
 var _notiflixNotifyAio = require("notiflix/build/notiflix-notify-aio");
 var _lodashDebounce = require("lodash.debounce");
 var _lodashDebounceDefault = parcelHelpers.interopDefault(_lodashDebounce);
-const playersListEl = document.querySelector(".players-manager");
+const panelEl = document.querySelector(".setting-panel");
+const favouritesButtonEl = document.querySelector(".favourites-button");
+const playersButtonEl = document.querySelector(".players-button");
+const favouritesListEl = document.querySelector("#favouritesId");
+const playersListEl = document.querySelector("#playersId");
 const filterLabelEl = document.querySelector(".filter-label");
 const filterEl = document.querySelector(".filter");
 const playersData = [];
-filterEl.addEventListener("keydown", (0, _lodashDebounceDefault.default)((e)=>(0, _constants.filterList)(e, playersData, playersListEl, renderPlayersSettings), 500));
-(0, _auth.onAuthStateChanged)((0, _login.auth), async (user)=>{
+const favoritesData = [];
+filterEl.addEventListener("keydown", (0, _lodashDebounceDefault.default)((e)=>getActiveTab(e), 500));
+favouritesButtonEl.addEventListener("click", (e)=>(0, _constants.handleTabsClick)(e, "favouritesId", panelEl));
+playersButtonEl.addEventListener("click", (e)=>(0, _constants.handleTabsClick)(e, "playersId", panelEl));
+favouritesButtonEl.click();
+function getActiveTab(e) {
+    const activeTab = document.querySelector(".active-tab");
+    if (activeTab === favouritesListEl) (0, _constants.filterList)(e, favoritesData, favouritesListEl, renderFavouritesSettings);
+    else (0, _constants.filterList)(e, playersData, playersListEl, renderPlayersSettings);
+}
+(0, _auth.onAuthStateChanged)((0, _login.auth), (user)=>{
     if (user) {
-        const q = (0, _firestore.query)((0, _constants.getRefs)(user.uid).players);
-        const querySnapshot = await (0, _firestore.getDocs)(q);
-        if (!querySnapshot.empty) {
-            playersListEl.innerHTML = "";
-            filterLabelEl.classList.remove("hidden");
-            querySnapshot.forEach((doc)=>{
-                playersData.push(doc.data());
-                renderPlayersSettings(doc.data());
-            });
-        }
+        panelEl.classList.remove("hidden");
+        filterLabelEl.classList.remove("hidden");
+        handlePlayersSection(user.uid);
+        handleFavouritesSection(user.uid);
     }
 });
+async function handlePlayersSection(userId) {
+    const q = (0, _firestore.query)((0, _constants.getRefs)(userId).players);
+    const querySnapshot = await (0, _firestore.getDocs)(q);
+    if (!querySnapshot.empty) {
+        playersListEl.innerHTML = "";
+        playersListEl.classList.remove("default");
+        querySnapshot.forEach((doc)=>{
+            playersData.push(doc.data());
+            renderPlayersSettings(doc.data());
+        });
+    }
+}
+async function handleFavouritesSection(userId) {
+    const q = (0, _firestore.query)((0, _constants.getRefs)(userId).favourites);
+    const querySnapshot = await (0, _firestore.getDocs)(q);
+    if (!querySnapshot.empty) {
+        favouritesListEl.innerHTML = "";
+        favouritesListEl.classList.remove("default");
+        querySnapshot.forEach((doc)=>{
+            favoritesData.push(doc.data());
+            renderFavouritesSettings(doc.data());
+        });
+    }
+}
 function renderPlayersSettings(player) {
     const playerItem = document.createElement("li");
+    playerItem.dataset.id = player.id;
     const playerName = document.createElement("p");
     playerName.innerHTML = player.name;
     playerItem.appendChild(playerName);
     playerItem.appendChild(createSwitcher(player));
     playersListEl.insertAdjacentElement("beforeend", playerItem);
+    const checkbox = playerItem.querySelector(".slider-checkbox");
+    checkbox.addEventListener("click", (e)=>changePlayerVisibility(e, playerItem.dataset.id));
 }
-function createSwitcher(player) {
+function renderFavouritesSettings(favourite) {
+    const favouriteItem = document.createElement("li");
+    favouriteItem.dataset.id = favourite.id;
+    favouriteItem.classList.add("settings-item");
+    const favouriteContainer = document.createElement("div");
+    const favouriteName = document.createElement("p");
+    favouriteName.innerHTML = favourite.name;
+    const favouriteImage = document.createElement("img");
+    favouriteImage.src = favourite.url;
+    favouriteImage.classList.add("thumbnail");
+    favouriteContainer.appendChild(favouriteName);
+    favouriteContainer.appendChild(favouriteImage);
+    favouriteItem.appendChild(favouriteContainer);
+    favouriteItem.appendChild(createSwitcher(favourite));
+    favouritesListEl.insertAdjacentElement("beforeend", favouriteItem);
+    const checkbox = favouriteItem.querySelector(".slider-checkbox");
+    checkbox.addEventListener("change", (e)=>changeFavourites(e, favouriteItem.dataset.id));
+}
+function createSwitcher(item) {
     const label = document.createElement("label");
     label.classList.add("switch");
     const checkbox = document.createElement("input");
+    checkbox.classList.add("slider-checkbox");
     checkbox.setAttribute("type", "checkbox");
-    if (!player.hidden) checkbox.setAttribute("checked", "");
-    checkbox.addEventListener("click", (e)=>changePlayerVisibility(e, player.id));
+    if (!item.hidden) checkbox.setAttribute("checked", "");
     const slider = document.createElement("span");
     slider.classList.add("slider", "round");
     label.appendChild(checkbox);
@@ -552,6 +604,7 @@ function createSwitcher(player) {
     return label;
 }
 async function changePlayerVisibility(e, playerId) {
+    e.stopPropagation();
     const checkbox = e.currentTarget;
     try {
         const playerRef = await (0, _constants.getPlayerRef)(playerId);
@@ -565,6 +618,20 @@ async function changePlayerVisibility(e, playerId) {
     } catch (e1) {
         console.error("Error adding document: ", e1);
     }
+}
+function changeFavourites(e, favouriteId) {
+    e.stopPropagation();
+    const favouriteItem = document.querySelector(`li[data-id = "${favouriteId}"]`);
+    const userId = localStorage.getItem("userId");
+    (0, _constants.removeFromFavourites)(favouriteId, userId);
+    setTimeout(()=>{
+        favouriteItem.remove();
+        if (favouritesListEl.innerHTML.length === 0) {
+            favouritesListEl.classList.add("default");
+            favouritesListEl.innerHTML = "Favourite games are going to be here";
+        }
+        favouritesListEl.classList.remove("default");
+    }, 500);
 }
 
 },{"firebase/firestore":"8A4BC","./constants":"itKcQ","firebase/auth":"79vzg","./login":"47T64","notiflix/build/notiflix-notify-aio":"eXQLZ","lodash.debounce":"3JP5n","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"3JP5n":[function(require,module,exports) {

@@ -1,7 +1,7 @@
 import {onAuthStateChanged} from "firebase/auth";
 import {auth} from "./login";
 import {PieChart} from "./pieChart";
-import {COLORS as colors, getPlayerRef, getRefs} from "./constants";
+import {COLORS as colors, getPlayerRef, getRefs, handleTabsClick} from "./constants";
 import {query, where, getDocs, doc, updateDoc, deleteDoc} from "firebase/firestore";
 import {Notify} from "notiflix/build/notiflix-notify-aio";
 import {db} from "./login";
@@ -171,19 +171,7 @@ function toggleTabs(e, tab, parent, pieChartData, selector) {
         createChart(selector, pieChartData);
     }
 
-    const tabcontent = parent.querySelectorAll(".tabcontent");
-    const tablinks = parent.querySelectorAll(".tablinks");
-
-    for (let i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-    }
-
-    for (let i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace("active", "");
-    }
-
-    parent.querySelector(`#${tab}`).style.display = "block";
-    e.currentTarget.className += " active";
+    handleTabsClick(e, tab, parent);
 }
 
 function createChart(parent, data) {
