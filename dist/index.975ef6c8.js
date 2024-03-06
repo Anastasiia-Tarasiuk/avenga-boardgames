@@ -506,8 +506,9 @@ function hmrAcceptRun(bundle, id) {
 var _login = require("./js/login");
 var _header = require("./js/header");
 var _constants = require("./js/constants");
+var _spinCss = require("spin.js/spin.css");
 
-},{"./js/login":"47T64","./js/constants":"itKcQ","./js/header":"bvS82"}],"47T64":[function(require,module,exports) {
+},{"./js/login":"47T64","./js/constants":"itKcQ","./js/header":"bvS82","spin.js/spin.css":"8KK6V"}],"47T64":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "auth", ()=>auth);
@@ -36936,6 +36937,7 @@ var global = arguments[3];
 },{}],"itKcQ":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "opts", ()=>opts);
 parcelHelpers.export(exports, "COLORS", ()=>COLORS);
 parcelHelpers.export(exports, "getRefs", ()=>getRefs);
 parcelHelpers.export(exports, "getPlayerRef", ()=>getPlayerRef);
@@ -37205,6 +37207,26 @@ const palette = [
     "#37474F",
     "#263238"
 ];
+const opts = {
+    lines: 13,
+    length: 38,
+    width: 17,
+    radius: 45,
+    scale: 1,
+    corners: 1,
+    speed: 1,
+    rotate: 0,
+    animation: "spinner-line-fade-default",
+    direction: 1,
+    color: "#67ba04",
+    fadeColor: "transparent",
+    top: "50%",
+    left: "50%",
+    shadow: "0 0 1px transparent",
+    zIndex: 2000000000,
+    className: "spinner",
+    position: "absolute"
+};
 const COLORS = palette.sort(()=>Math.random() > 0.5 ? 1 : -1);
 function getRefs(userId) {
     return {
@@ -37347,6 +37369,6 @@ async function setChangedThemeToStore(theme1) {
     }
 }
 
-},{"firebase/auth":"79vzg","firebase/firestore":"8A4BC","./login":"47T64"}]},["1RB6v","8lqZg"], "8lqZg", "parcelRequire2ffc")
+},{"firebase/auth":"79vzg","firebase/firestore":"8A4BC","./login":"47T64"}],"8KK6V":[function() {},{}]},["1RB6v","8lqZg"], "8lqZg", "parcelRequire2ffc")
 
 //# sourceMappingURL=index.975ef6c8.js.map

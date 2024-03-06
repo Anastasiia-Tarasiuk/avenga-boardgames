@@ -609,7 +609,7 @@ form#signup-form .confirm .svg-icon {
   transform: rotate(0deg);
 }
 
-.tabcontent {
+.players.tabcontent {
   height: 205px;
 }
 
@@ -691,7 +691,7 @@ input:checked + .slider:before {
   margin-bottom: 10px;
 }
 
-.tabcontent {
+.settings.tabcontent {
   height: 100%;
 }
 
@@ -701,6 +701,48 @@ input:checked + .slider:before {
 
 .settings-item:not(:last-child) {
   margin-bottom: 10px;
+}
+
+@keyframes spinner-line-fade-more {
+  0%, 100% {
+    opacity: 0;
+  }
+
+  1% {
+    opacity: 1;
+  }
+}
+
+@keyframes spinner-line-fade-quick {
+  0%, 39%, 100% {
+    opacity: .25;
+  }
+
+  40% {
+    opacity: 1;
+  }
+}
+
+@keyframes spinner-line-fade-default {
+  0%, 100% {
+    opacity: .22;
+  }
+
+  1% {
+    opacity: 1;
+  }
+}
+
+@keyframes spinner-line-shrink {
+  0%, 25%, 100% {
+    opacity: .25;
+    transform: scale(.5);
+  }
+
+  26% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /*# sourceMappingURL=index.b07a87f3.css.map */

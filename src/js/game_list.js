@@ -3,15 +3,21 @@ import {auth} from "./login";
 import {getDocs, query, where} from "firebase/firestore";
 import debounce from "lodash.debounce";
 import {toggleFavourites, filterList, getPlayerQueryById, getRefs, isGameInFavourites} from "./constants";
+import {Spinner} from 'spin.js';
+import {opts} from "./constants";
 
 const playedGamesListEl = document.querySelector(".played-games");
 const addGameButtonEl = document.querySelector(".add-game");
 const filterLabelEl = document.querySelector(".filter-label");
 const filterEl = document.querySelector(".filter");
+const target = document.querySelector('.container');
 
 const gameData = [];
 
 filterEl.addEventListener("keydown",  debounce(e => filterList(e, gameData, playedGamesListEl, renderPlayedGames), 500));
+
+const spinner = new Spinner(opts).spin(target);
+const tempContainer = document.createElement("div");
 
 onAuthStateChanged(auth, async user => {
     if (user) {
@@ -20,18 +26,18 @@ onAuthStateChanged(auth, async user => {
         const querySnapshot = await getDocs(q);
 
         if (!querySnapshot.empty) {
-            playedGamesListEl.innerHTML = "";
+            const length = querySnapshot.docs.length;
             filterLabelEl.classList.remove("hidden");
 
-            querySnapshot.forEach(doc => {
+            querySnapshot.forEach(doc=> {
                 gameData.push(doc.data());
-                renderPlayedGames(doc.data(), user.uid);
+                renderPlayedGames(doc.data(), user.uid, length);
             });
         }
     }
 });
 
-async function renderPlayedGames(game, userId) {
+async function renderPlayedGames(game, userId, length) {
     const scoreList = await createWinnersList(await getWinners(game.id, userId), userId);
     const number = await getGameSessions(game, userId);
     const gameListItem = document.createElement("li");
@@ -44,7 +50,13 @@ async function renderPlayedGames(game, userId) {
     }
 
     favoriteEl.addEventListener("change", e => toggleFavourites(e, game, userId));
-    playedGamesListEl.insertAdjacentElement("beforeend", gameListItem);
+
+    tempContainer.insertAdjacentElement("beforeend", gameListItem);
+
+    if (length === tempContainer.childNodes.length) {
+        tempContainer.childNodes.forEach(item => playedGamesListEl.appendChild(item));
+        target.removeChild(spinner.el);
+    }
 }
 
 async function getGameSessions(game, userId) {

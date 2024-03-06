@@ -66,14 +66,14 @@ async function playersTemplate(player, userId) {
             </div>
             
             <!-- Tab content -->
-            <ul id="gamesId" class="tabcontent empty"></ul>
+            <ul id="gamesId" class="tabcontent players empty"></ul>
             
-            <div id="chartId" class="tabcontent empty">
+            <div id="chartId" class="tabcontent players empty">
                 <canvas></canvas>
                 <div class="legend"></div>
             </div>
             
-            <div id="settingsId" class="tabcontent">
+            <div id="settingsId" class="tabcontent players">
               <button class="rename-button">Rename player</button>
               <button class="hide-button">Hide player</button>
               <button class="delete-button">Delete player</button>
