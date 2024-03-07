@@ -4,6 +4,8 @@ import {onAuthStateChanged} from "firebase/auth";
 import {auth} from "./login";
 import {Notify} from "notiflix/build/notiflix-notify-aio";
 import debounce from "lodash.debounce";
+import {Spinner} from 'spin.js';
+import {opts} from "./constants";
 
 const panelEl = document.querySelector(".setting-panel");
 const favouritesButtonEl = document.querySelector(".favourites-button");
@@ -12,6 +14,7 @@ const favouritesListEl = document.querySelector("#favouritesId");
 const playersListEl = document.querySelector("#playersId");
 const filterLabelEl = document.querySelector(".filter-label");
 const filterEl = document.querySelector(".filter");
+const target = document.querySelector('.container');
 
 const playersData = [];
 const favoritesData = [];
@@ -21,6 +24,9 @@ favouritesButtonEl.addEventListener("click", e => handleTabsClick(e, 'favourites
 playersButtonEl.addEventListener("click", e => handleTabsClick(e, 'playersId', panelEl));
 
 favouritesButtonEl.click();
+
+const spinner = new Spinner(opts).spin(target);
+const tempContainer = document.createElement("div");
 
 function getActiveTab(e) {
     const activeTab = document.querySelector(".active-tab");
@@ -60,12 +66,13 @@ async function handleFavouritesSection(userId) {
     const querySnapshot = await getDocs(q);
 
     if (!querySnapshot.empty) {
+        const length = querySnapshot.docs.length;
         favouritesListEl.innerHTML = "";
         favouritesListEl.classList.remove("default");
 
         querySnapshot.forEach(doc => {
             favoritesData.push(doc.data());
-            renderFavouritesSettings(doc.data());
+            renderFavouritesSettings(doc.data(), length);
         })
     }
 }
@@ -84,7 +91,7 @@ function renderPlayersSettings(player) {
     checkbox.addEventListener("click", e => changePlayerVisibility(e, playerItem.dataset.id));
 }
 
-function renderFavouritesSettings(favourite){
+function renderFavouritesSettings(favourite, length){
     const favouriteItem = document.createElement("li");
     favouriteItem.dataset.id = favourite.id;
     favouriteItem.classList.add("settings-item");
@@ -103,6 +110,10 @@ function renderFavouritesSettings(favourite){
 
     const checkbox = favouriteItem.querySelector(".slider-checkbox");
     checkbox.addEventListener("change", e => changeFavourites(e, favouriteItem.dataset.id));
+
+    if (length === favouritesListEl.childNodes.length) {
+        target.removeChild(spinner.el);
+    }
 }
 
 function createSwitcher(item) {
@@ -151,10 +162,12 @@ function changeFavourites(e, favouriteId) {
     const favouriteItem =  document.querySelector(`li[data-id = "${favouriteId}"]`)
     const userId =  localStorage.getItem("userId");
 
+    console.log(favouriteItem)
     removeFromFavourites(favouriteId, userId);
 
     setTimeout(() => {
         favouriteItem.remove();
+
         if (favouritesListEl.innerHTML.length === 0) {
             favouritesListEl.classList.add("default");
             favouritesListEl.innerHTML = "Favourite games are going to be here";

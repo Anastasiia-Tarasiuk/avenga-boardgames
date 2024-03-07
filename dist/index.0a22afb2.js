@@ -519,7 +519,6 @@ const target = document.querySelector(".container");
 const gameData = [];
 filterEl.addEventListener("keydown", (0, _lodashDebounceDefault.default)((e)=>(0, _constants.filterList)(e, gameData, playedGamesListEl, renderPlayedGames), 500));
 const spinner = new (0, _spinJs.Spinner)((0, _constants.opts)).spin(target);
-const tempContainer = document.createElement("div");
 (0, _auth.onAuthStateChanged)((0, _login.auth), async (user)=>{
     if (user) {
         addGameButtonEl.classList.remove("hidden");
@@ -527,6 +526,8 @@ const tempContainer = document.createElement("div");
         const querySnapshot = await (0, _firestore.getDocs)(q);
         if (!querySnapshot.empty) {
             const length = querySnapshot.docs.length;
+            playedGamesListEl.classList.add("hidden");
+            playedGamesListEl.innerHTML = "";
             filterLabelEl.classList.remove("hidden");
             querySnapshot.forEach((doc)=>{
                 gameData.push(doc.data());
@@ -544,9 +545,9 @@ async function renderPlayedGames(game, userId, length) {
     const favoriteEl = gameListItem.querySelector(".favourite-input");
     if (await (0, _constants.isGameInFavourites)(game.id, userId)) favoriteEl.checked = true;
     favoriteEl.addEventListener("change", (e)=>(0, _constants.toggleFavourites)(e, game, userId));
-    tempContainer.insertAdjacentElement("beforeend", gameListItem);
-    if (length === tempContainer.childNodes.length) {
-        tempContainer.childNodes.forEach((item)=>playedGamesListEl.appendChild(item));
+    playedGamesListEl.insertAdjacentElement("beforeend", gameListItem);
+    if (length === playedGamesListEl.childNodes.length) {
+        playedGamesListEl.classList.remove("hidden");
         target.removeChild(spinner.el);
     }
 }

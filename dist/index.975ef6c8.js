@@ -37256,7 +37256,12 @@ async function filterList(e, data, list, func) {
         if (filteredElements.length > 0) filteredElements.forEach((el)=>{
             func(el, userId);
         });
-        else list.innerHTML = `<p>The list is empty</p>`;
+        else {
+            const p = document.createElement("p");
+            p.classList.add("game-list-item");
+            p.innerHTML = `The list is empty`;
+            list.innerHTML = p.outerHTML;
+        }
     } else {
         list.innerHTML = "";
         data.forEach((el)=>{

@@ -320,7 +320,10 @@ export async function filterList(e, data, list, func) {
                 func(el, userId);
             })
         } else {
-            list.innerHTML = `<p>The list is empty</p>`
+            const p = document.createElement("p");
+            p.classList.add("game-list-item");
+            p.innerHTML = `The list is empty`;
+            list.innerHTML = p.outerHTML;
         }
     } else {
         list.innerHTML = "";

@@ -1,19 +1,23 @@
 import addGameImage from "../images/plus.png";
 import defaultImage from "../images/no_image.jpg";
 import convert from "xml-js";
-import {addDoc, deleteDoc, doc, getDocs, query, setDoc, where} from "firebase/firestore";
+import {addDoc, getDocs, query, where} from "firebase/firestore";
 import {Notify} from "notiflix/build/notiflix-notify-aio";
-import {getPlayerRef, getRefs, isGameInFavourites, toggleFavourites} from "./constants";
-import {db} from "./login";
+import {getRefs, isGameInFavourites, toggleFavourites} from "./constants";
+import {Spinner} from 'spin.js';
+import {opts} from "./constants";
 
 const gameListEl = document.querySelector(".game-list");
 const searchFormEl = document.querySelector(".search-form");
 const submitButtonEl = document.querySelector(".submit-button");
+const target = document.querySelector('.container');
 
 submitButtonEl.addEventListener("click", e => submitForm(e));
 
 const gameData = {};
 const userId = localStorage.getItem("userId");
+const tempContainer = document.createElement("div");
+let spinner = null;
 
 function submitForm(e) {
     e.preventDefault();
@@ -58,6 +62,7 @@ async function gameSearch(name) {
 }
 
 async function getGameByName(gamesObj) {
+    spinner = new Spinner(opts).spin(target);
     gameListEl.innerHTML = "";
     const games = gamesObj.boardgames.boardgame;
 
@@ -68,7 +73,7 @@ async function getGameByName(gamesObj) {
             const id = item._attributes.objectid;
             const {url, category, description, otherNames} = await getGameById(id);
             gameData[id] = { id, name, year, url, category, description, otherNames };
-            renderGames(gameData[id]);
+            renderGames(gameData[id], games.length);
         });
     } else {
         const name = games.name._text;
@@ -94,7 +99,7 @@ async function getGameById(id) {
     })
 }
 
-async function renderGames(obj) {
+async function renderGames(obj, length) {
     const categories = obj.category;
     const otherNames = obj.otherNames;
     let originalName = null;
@@ -145,7 +150,12 @@ async function renderGames(obj) {
     }
 
     favoriteEl.addEventListener("change", e => toggleFavourites(e, obj, userId));
-    gameListEl.insertAdjacentElement("beforeend", gameListItem);
+    tempContainer.insertAdjacentElement("beforeend", gameListItem);
+
+    if (length === tempContainer.childNodes.length) {
+        tempContainer.childNodes.forEach(item => gameListEl.appendChild(item));
+        target.removeChild(spinner.el);
+    }
 }
 
 function handleWrongSearchRequest(searchValue) {

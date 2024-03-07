@@ -17,7 +17,6 @@ const gameData = [];
 filterEl.addEventListener("keydown",  debounce(e => filterList(e, gameData, playedGamesListEl, renderPlayedGames), 500));
 
 const spinner = new Spinner(opts).spin(target);
-const tempContainer = document.createElement("div");
 
 onAuthStateChanged(auth, async user => {
     if (user) {
@@ -27,6 +26,8 @@ onAuthStateChanged(auth, async user => {
 
         if (!querySnapshot.empty) {
             const length = querySnapshot.docs.length;
+            playedGamesListEl.classList.add("hidden");
+            playedGamesListEl.innerHTML = "";
             filterLabelEl.classList.remove("hidden");
 
             querySnapshot.forEach(doc=> {
@@ -50,11 +51,10 @@ async function renderPlayedGames(game, userId, length) {
     }
 
     favoriteEl.addEventListener("change", e => toggleFavourites(e, game, userId));
+    playedGamesListEl.insertAdjacentElement("beforeend", gameListItem);
 
-    tempContainer.insertAdjacentElement("beforeend", gameListItem);
-
-    if (length === tempContainer.childNodes.length) {
-        tempContainer.childNodes.forEach(item => playedGamesListEl.appendChild(item));
+    if (length === playedGamesListEl.childNodes.length) {
+        playedGamesListEl.classList.remove("hidden");
         target.removeChild(spinner.el);
     }
 }

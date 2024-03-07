@@ -392,14 +392,11 @@ form#signup-form .confirm .svg-icon {
 }
 
 .game-list-item {
+  color: #000;
+  background-color: #eee;
   justify-content: space-between;
   padding: 10px;
   display: flex;
-}
-
-.game-list li {
-  color: #000;
-  background-color: #eee;
 }
 
 .game-list li:not(:last-child) {

@@ -7,6 +7,8 @@ import {Notify} from "notiflix/build/notiflix-notify-aio";
 import {db} from "./login";
 import debounce from "lodash.debounce";
 import {filterList} from "./constants";
+import {Spinner} from 'spin.js';
+import {opts} from "./constants";
 
 const playersEl = document.querySelector(".players");
 const renameFormEl = document.querySelector("[id='rename-form']");
@@ -17,22 +19,34 @@ const closeLoginModalButtonEls = document.querySelectorAll(".close-player-settin
 const submitFormButtonsEl = modalSettingsOverlayEl.querySelectorAll("button[type='submit']");
 const filterLabelEl = document.querySelector(".filter-label");
 const filterEl = document.querySelector(".filter");
+const target = document.querySelector('.container');
 
 closeLoginModalButtonEls.forEach(btn => btn.addEventListener("click", closePlayerSettingModal));
 submitFormButtonsEl.forEach(btn => btn.addEventListener("click", (e ) => submitPlayerSettingsForm(e)));
 
 const playersNames = [];
 let playersData = [];
+let i = 0;
+let render = false;
 
 filterEl.addEventListener("keydown",  debounce(e => filterList(e, playersData, playersEl, playersTemplate), 500));
+
+const spinner = new Spinner(opts).spin(target);
 
 onAuthStateChanged(auth, async user => {
     if (user) {
         playersEl.innerHTML = "";
         const q = query(getRefs(user.uid).players);
         const querySnapshot = await getDocs(q);
+        const length = querySnapshot.docs.length;
 
         querySnapshot.forEach(doc => {
+            i++;
+
+            if (i === length) {
+                render = true;
+            }
+
             filterLabelEl.classList.remove("hidden");
             const data = doc.data();
             playersData.push(data);
@@ -40,12 +54,12 @@ onAuthStateChanged(auth, async user => {
                 name: data.name.toLowerCase(),
                 id: data.id.toString()
             });
-            playersTemplate(data, user.uid);
+            playersTemplate(data, user.uid, render);
         });
     }
 });
 
-async function playersTemplate(player, userId) {
+async function playersTemplate(player, userId, render) {
     if (player.hidden) {
         return;
     }
@@ -92,7 +106,7 @@ async function playersTemplate(player, userId) {
     playerItem.querySelector(".chartPie").addEventListener("click", e => toggleTabs(e, 'chartId', playerItem, pieChartData, chartList));
     playerItem.querySelector(".settings").addEventListener("click", e => toggleTabs(e, 'settingsId', playerItem));
 
-   stats.map(async game => {
+    stats.map(async game => {
         const q = query(getRefs(userId).games, where("id", "==", game.gameId));
         const querySnapshot = await getDocs(q);
 
@@ -119,6 +133,10 @@ async function playersTemplate(player, userId) {
 
     playersEl.insertAdjacentElement("beforeend", playerItem);
     playersEl.querySelectorAll("#defaultOpen").forEach(item => item.click());
+
+    if (render) {
+        target.removeChild(spinner.el);
+    }
 }
 
 function toggleAccordion(e) {

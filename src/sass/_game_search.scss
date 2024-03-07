@@ -2,12 +2,14 @@
     display: flex;
     justify-content: space-between;
     padding: 10px;
-}
-
-.game-list li {
     background-color: $primary-color;
     color: $text-color-light;
 }
+
+//.game-list li {
+//    background-color: $primary-color;
+//    color: $text-color-light;
+//}
 
 .game-list li:not(:last-child) {
     margin-bottom: 10px;
