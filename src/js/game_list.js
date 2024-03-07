@@ -28,7 +28,6 @@ onAuthStateChanged(auth, async user => {
             const length = querySnapshot.docs.length;
             playedGamesListEl.classList.add("hidden");
             playedGamesListEl.innerHTML = "";
-            filterLabelEl.classList.remove("hidden");
 
             querySnapshot.forEach(doc=> {
                 gameData.push(doc.data());
@@ -54,6 +53,7 @@ async function renderPlayedGames(game, userId, length) {
     playedGamesListEl.insertAdjacentElement("beforeend", gameListItem);
 
     if (length === playedGamesListEl.childNodes.length) {
+        filterLabelEl.classList.remove("hidden");
         playedGamesListEl.classList.remove("hidden");
         target.removeChild(spinner.el);
     }

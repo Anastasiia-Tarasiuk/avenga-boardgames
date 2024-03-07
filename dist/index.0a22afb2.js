@@ -528,7 +528,6 @@ const spinner = new (0, _spinJs.Spinner)((0, _constants.opts)).spin(target);
             const length = querySnapshot.docs.length;
             playedGamesListEl.classList.add("hidden");
             playedGamesListEl.innerHTML = "";
-            filterLabelEl.classList.remove("hidden");
             querySnapshot.forEach((doc)=>{
                 gameData.push(doc.data());
                 renderPlayedGames(doc.data(), user.uid, length);
@@ -547,6 +546,7 @@ async function renderPlayedGames(game, userId, length) {
     favoriteEl.addEventListener("change", (e)=>(0, _constants.toggleFavourites)(e, game, userId));
     playedGamesListEl.insertAdjacentElement("beforeend", gameListItem);
     if (length === playedGamesListEl.childNodes.length) {
+        filterLabelEl.classList.remove("hidden");
         playedGamesListEl.classList.remove("hidden");
         target.removeChild(spinner.el);
     }

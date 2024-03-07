@@ -40,8 +40,6 @@ function getActiveTab(e) {
 
 onAuthStateChanged(auth,  user => {
     if (user) {
-        panelEl.classList.remove("hidden");
-        filterLabelEl.classList.remove("hidden");
         handlePlayersSection(user.uid);
         handleFavouritesSection(user.uid);
     }
@@ -113,6 +111,8 @@ function renderFavouritesSettings(favourite, length){
 
     if (length === favouritesListEl.childNodes.length) {
         target.removeChild(spinner.el);
+        filterLabelEl.classList.remove("hidden");
+        panelEl.classList.remove("hidden");
     }
 }
 

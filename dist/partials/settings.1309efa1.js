@@ -535,8 +535,6 @@ function getActiveTab(e) {
 }
 (0, _auth.onAuthStateChanged)((0, _login.auth), (user)=>{
     if (user) {
-        panelEl.classList.remove("hidden");
-        filterLabelEl.classList.remove("hidden");
         handlePlayersSection(user.uid);
         handleFavouritesSection(user.uid);
     }
@@ -594,7 +592,11 @@ function renderFavouritesSettings(favourite, length) {
     favouritesListEl.insertAdjacentElement("beforeend", favouriteItem);
     const checkbox = favouriteItem.querySelector(".slider-checkbox");
     checkbox.addEventListener("change", (e)=>changeFavourites(e, favouriteItem.dataset.id));
-    if (length === favouritesListEl.childNodes.length) target.removeChild(spinner.el);
+    if (length === favouritesListEl.childNodes.length) {
+        target.removeChild(spinner.el);
+        filterLabelEl.classList.remove("hidden");
+        panelEl.classList.remove("hidden");
+    }
 }
 function createSwitcher(item) {
     const label = document.createElement("label");

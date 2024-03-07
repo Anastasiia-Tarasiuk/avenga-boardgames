@@ -537,10 +537,10 @@ const spinner = new (0, _spinJs.Spinner)((0, _constants.opts)).spin(target);
         const q = (0, _firestore.query)((0, _constants.getRefs)(user.uid).players);
         const querySnapshot = await (0, _firestore.getDocs)(q);
         const length = querySnapshot.docs.length;
+        playersEl.classList.add("hidden");
         querySnapshot.forEach((doc)=>{
             i++;
             if (i === length) render = true;
-            filterLabelEl.classList.remove("hidden");
             const data = doc.data();
             playersData.push(data);
             playersNames.push({
@@ -610,7 +610,11 @@ async function playersTemplate(player, userId, render1) {
     });
     playersEl.insertAdjacentElement("beforeend", playerItem);
     playersEl.querySelectorAll("#defaultOpen").forEach((item)=>item.click());
-    if (render1) target.removeChild(spinner.el);
+    if (render1) {
+        target.removeChild(spinner.el);
+        filterLabelEl.classList.remove("hidden");
+        playersEl.classList.remove("hidden");
+    }
 }
 function toggleAccordion(e) {
     const button = e.currentTarget;

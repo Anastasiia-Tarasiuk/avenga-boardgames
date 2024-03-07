@@ -40,6 +40,8 @@ onAuthStateChanged(auth, async user => {
         const querySnapshot = await getDocs(q);
         const length = querySnapshot.docs.length;
 
+        playersEl.classList.add("hidden");
+
         querySnapshot.forEach(doc => {
             i++;
 
@@ -47,7 +49,6 @@ onAuthStateChanged(auth, async user => {
                 render = true;
             }
 
-            filterLabelEl.classList.remove("hidden");
             const data = doc.data();
             playersData.push(data);
             playersNames.push({
@@ -136,6 +137,8 @@ async function playersTemplate(player, userId, render) {
 
     if (render) {
         target.removeChild(spinner.el);
+        filterLabelEl.classList.remove("hidden");
+        playersEl.classList.remove("hidden");
     }
 }
 
