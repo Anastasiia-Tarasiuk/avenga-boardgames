@@ -438,6 +438,10 @@ form#signup-form .confirm .svg-icon {
   left: 179px;
 }
 
+.category span:not(:last-child) {
+  margin-right: 10px;
+}
+
 .played-games {
   color: #000;
 }

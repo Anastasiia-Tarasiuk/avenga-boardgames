@@ -6,11 +6,6 @@
     color: $text-color-light;
 }
 
-//.game-list li {
-//    background-color: $primary-color;
-//    color: $text-color-light;
-//}
-
 .game-list li:not(:last-child) {
     margin-bottom: 10px;
 }
@@ -48,4 +43,8 @@
     stroke: $text-color-light;
     stroke-width: 1.5;
     fill: transparent;
+}
+
+.category span:not(:last-child) {
+    margin-right: 10px;
 }

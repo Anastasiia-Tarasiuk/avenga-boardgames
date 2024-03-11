@@ -540,10 +540,9 @@ async function renderPlayedGames(game, length) {
     const playSnapshot = await getPlaysSnapshot(game.id);
     const playData = getDataFromPlaySnapshot(playSnapshot);
     const scoreList = await createWinnersList(playData.bestScore);
-    const number = playData.sessions.length;
     const gameListItem = document.createElement("li");
     gameListItem.classList.add("game-list-item");
-    gameListItem.innerHTML = `<div class="truncate-container"><lable class="favourite-lable"><input class="favourite-input" type="checkbox"/><svg class="favourite-svg" viewBox="0 0 122.88 107.41"><path d="M60.83,17.19C68.84,8.84,74.45,1.62,86.79,0.21c23.17-2.66,44.48,21.06,32.78,44.41 c-3.33,6.65-10.11,14.56-17.61,22.32c-8.23,8.52-17.34,16.87-23.72,23.2l-17.4,17.26L46.46,93.56C29.16,76.9,0.95,55.93,0.02,29.95 C-0.63,11.75,13.73,0.09,30.25,0.3C45.01,0.5,51.22,7.84,60.83,17.19L60.83,17.19L60.83,17.19z"/></svg></lable><p class="truncate-name">${game.name}<span class="tooltip-text">${game.name}<span></p><img class="thumbnail" src=${game.url}></div><div class="winners-container"><p>Best score:</p>${scoreList}</div><div class="plays-container"><a class="add-plays-link" href="../partials/add_plays.html?id=${game.id}"><div class="add-plays-container"><span class="number-of-plays ">${number} </span>plays</div><span class="tooltip-text">Add your score<span></a></div>`;
+    gameListItem.innerHTML = `<div class="truncate-container"><lable class="favourite-lable"><input class="favourite-input" type="checkbox"/><svg class="favourite-svg" viewBox="0 0 122.88 107.41"><path d="M60.83,17.19C68.84,8.84,74.45,1.62,86.79,0.21c23.17-2.66,44.48,21.06,32.78,44.41 c-3.33,6.65-10.11,14.56-17.61,22.32c-8.23,8.52-17.34,16.87-23.72,23.2l-17.4,17.26L46.46,93.56C29.16,76.9,0.95,55.93,0.02,29.95 C-0.63,11.75,13.73,0.09,30.25,0.3C45.01,0.5,51.22,7.84,60.83,17.19L60.83,17.19L60.83,17.19z"/></svg></lable><p class="truncate-name">${game.name}<span class="tooltip-text">${game.name}<span></p><img class="thumbnail" src=${game.url}></div><div class="winners-container"><p>Best score:</p>${scoreList}</div><div class="plays-container"><a class="add-plays-link" href="../partials/add_plays.html?id=${game.id}"><div class="add-plays-container"><span class="number-of-plays ">${playData.sessions.length} </span>plays</div><span class="tooltip-text">Add your score<span></a></div>`;
     const favoriteEl = gameListItem.querySelector(".favourite-input");
     if (await (0, _constants.isGameInFavourites)(game.id, userId)) favoriteEl.checked = true;
     favoriteEl.addEventListener("change", (e)=>(0, _constants.toggleFavourites)(e, game, userId));
@@ -555,7 +554,7 @@ async function renderPlayedGames(game, length) {
     }
 }
 function getDataFromPlaySnapshot(querySnapshot) {
-    const bestScore = [];
+    let bestScore = [];
     const sessions = [];
     querySnapshot.forEach((doc)=>{
         const playStats = doc.data();
@@ -565,6 +564,7 @@ function getDataFromPlaySnapshot(querySnapshot) {
             player: playStats.playerId
         });
     });
+    bestScore = bestScore.sort(compare);
     return {
         bestScore,
         sessions

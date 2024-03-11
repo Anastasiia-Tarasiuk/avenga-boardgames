@@ -521,7 +521,6 @@ const target = document.querySelector(".container");
 submitButtonEl.addEventListener("click", (e)=>submitForm(e));
 const gameData = {};
 const userId = localStorage.getItem("userId");
-const tempContainer = document.createElement("div");
 let spinner = null;
 function submitForm(e) {
     e.preventDefault();
@@ -554,39 +553,16 @@ async function gameSearch(name) {
 }
 async function getGameByName(gamesObj) {
     spinner = new (0, _spinJs.Spinner)((0, _constants.opts)).spin(target);
+    submitButtonEl.setAttribute("disabled", "true");
     gameListEl.innerHTML = "";
     const games = gamesObj.boardgames.boardgame;
     if (games.length) games.forEach(async (item)=>{
-        const name = item.name._text;
-        const year = item.yearpublished?._text || "";
-        const id = item._attributes.objectid;
-        const { url , category , description , otherNames  } = await getGameById(id);
-        gameData[id] = {
-            id,
-            name,
-            year,
-            url,
-            category,
-            description,
-            otherNames
-        };
+        const id = await handleGameData(item);
         renderGames(gameData[id], games.length);
     });
     else {
-        const name = games.name._text;
-        const year = games.yearpublished._text || "";
-        const id = games._attributes.objectid;
-        const { url , category , description , otherNames  } = await getGameById(id);
-        gameData[id] = {
-            id,
-            name,
-            year,
-            url,
-            category,
-            description,
-            otherNames
-        };
-        renderGames(gameData[id]);
+        const id = await handleGameData(games);
+        renderGames(gameData[id], 1);
     }
 }
 async function getGameById(id) {
@@ -596,17 +572,17 @@ async function getGameById(id) {
         url: data.boardgames.boardgame.image?._text || (0, _noImageJpgDefault.default),
         category: data.boardgames.boardgame.boardgamesubdomain || [],
         description: data.boardgames.boardgame.description._text,
-        otherNames: data.boardgames.boardgame.name,
-        favourite: false
+        otherNames: data.boardgames.boardgame.name
     };
 }
 async function renderGames(obj, length) {
     const categories = obj.category;
     const otherNames = obj.otherNames;
-    let originalName = null;
+    obj.originalName = null;
     const gameListItem = document.createElement("li");
     gameListItem.classList.add("game-list-item");
     const categoriesEl = document.createElement("p");
+    categoriesEl.classList.add("category");
     categoriesEl.innerHTML = "Category: ";
     if (Array.isArray(categories)) {
         if (categories.length === 0) categoriesEl.innerHTML = "No category";
@@ -622,82 +598,58 @@ async function renderGames(obj, length) {
     }
     if (Array.isArray(otherNames)) otherNames.forEach((nameObj)=>{
         if (nameObj._attributes.primary) {
-            originalName = nameObj._text;
+            obj.originalName = nameObj._text;
             return;
         }
     });
-    else originalName = otherNames._text;
-    obj.originalName = originalName;
+    else obj.originalName = otherNames._text;
     gameListItem.setAttribute("data-id", obj.id);
-    gameListItem.innerHTML = `<div class="thumb"><lable class="favourite-lable"><input class="favourite-input" type="checkbox"/><svg class="favourite-svg" viewBox="0 0 122.88 107.41"><path d="M60.83,17.19C68.84,8.84,74.45,1.62,86.79,0.21c23.17-2.66,44.48,21.06,32.78,44.41 c-3.33,6.65-10.11,14.56-17.61,22.32c-8.23,8.52-17.34,16.87-23.72,23.2l-17.4,17.26L46.46,93.56C29.16,76.9,0.95,55.93,0.02,29.95 C-0.63,11.75,13.73,0.09,30.25,0.3C45.01,0.5,51.22,7.84,60.83,17.19L60.83,17.19L60.83,17.19z"/></svg></lable><p class="game-name">${obj.name}</p><img class="thumbnail" src=${obj.url}><p>Original name: ${originalName}</p></div><button class="add-game-button" type="button"><img src=${0, _plusPngDefault.default}></button>`;
+    gameListItem.innerHTML = `<div class="thumb"><lable class="favourite-lable"><input class="favourite-input" type="checkbox"/><svg class="favourite-svg" viewBox="0 0 122.88 107.41"><path d="M60.83,17.19C68.84,8.84,74.45,1.62,86.79,0.21c23.17-2.66,44.48,21.06,32.78,44.41 c-3.33,6.65-10.11,14.56-17.61,22.32c-8.23,8.52-17.34,16.87-23.72,23.2l-17.4,17.26L46.46,93.56C29.16,76.9,0.95,55.93,0.02,29.95 C-0.63,11.75,13.73,0.09,30.25,0.3C45.01,0.5,51.22,7.84,60.83,17.19L60.83,17.19L60.83,17.19z"/></svg></lable><p class="game-name">${obj.name}</p><img class="thumbnail" src=${obj.url}><p>Original name: ${obj.originalName}</p></div><button class="add-game-button" type="button"><img src=${0, _plusPngDefault.default}></button>`;
     gameListItem.querySelector(".thumb").insertAdjacentElement("beforeend", categoriesEl);
     const addGameButtonEl = gameListItem.querySelector(".add-game-button");
     addGameButtonEl.addEventListener("click", (e)=>addGameToGames(e, obj));
     const favoriteEl = gameListItem.querySelector(".favourite-input");
     if (await (0, _constants.isGameInFavourites)(obj.id, userId)) favoriteEl.checked = true;
     favoriteEl.addEventListener("change", (e)=>(0, _constants.toggleFavourites)(e, obj, userId));
-    tempContainer.insertAdjacentElement("beforeend", gameListItem);
-    if (length === tempContainer.childNodes.length) {
-        tempContainer.childNodes.forEach((item)=>gameListEl.appendChild(item));
+    gameListEl.insertAdjacentElement("beforeend", gameListItem);
+    if (length === gameListEl.childNodes.length) {
         target.removeChild(spinner.el);
+        submitButtonEl.removeAttribute("disabled");
     }
 }
 function handleWrongSearchRequest(searchValue) {
     gameListEl.innerHTML = `<p>There is no game called <span>"${searchValue}"</span></p>`;
 }
 async function addGameToGames(_, game) {
-    const userId1 = localStorage.getItem("userId");
+    console.log(game);
+    console.log(userId);
     try {
-        const q = (0, _firestore.query)((0, _constants.getRefs)(userId1).games, (0, _firestore.where)("id", "==", game.id));
+        const q = (0, _firestore.query)((0, _constants.getRefs)(userId).games, (0, _firestore.where)("id", "==", game.id));
         const querySnapshot = await (0, _firestore.getDocs)(q);
         if (querySnapshot.empty) {
-            await (0, _firestore.addDoc)((0, _constants.getRefs)(userId1).games, game);
+            await (0, _firestore.addDoc)((0, _constants.getRefs)(userId).games, game);
             (0, _notiflixNotifyAio.Notify).success("The game is added successfully");
         } else (0, _notiflixNotifyAio.Notify).failure("The game is already in the list");
     } catch (e) {
         console.error("Error adding document: ", e);
     }
-} // async function addToFavourites(e, {id, name, url}) {
- //     const input = e.currentTarget;
- //
- //     if (input.checked) {
- //         try {
- //             if (await isGameInFavourites(id)) {
- //                 Notify.failure('The game is already in favourites');
- //             } else {
- //                 await addDoc(getRefs(userId).favourites, {id, name, url});
- //                 Notify.success('The game is added to favourites');
- //             }
- //         } catch (e) {
- //             console.error("Error adding document: ", e);
- //         }
- //     } else {
- //         try {
- //             let docId = null;
- //             const q = query(getRefs(userId).favourites, where("id", "==", id));
- //             const querySnapshot = await getDocs(q);
- //
- //             querySnapshot.forEach(doc => {
- //                 docId = doc.id;
- //             });
- //
- //             await deleteDoc(doc(getRefs(userId).favourites, docId));
- //             Notify.success('The game is removed from favourites');
- //         } catch (e) {
- //             console.error("Error deleting document: ", e);
- //         }
- //     }
- // }
- // async function isGameInFavourites(id) {
- //     const q = query(getRefs(userId).favourites, where("id", "==", id));
- //     const querySnapshot = await getDocs(q);
- //
- //     if (querySnapshot.empty) {
- //         return false;
- //     } else {
- //         return true;
- //     }
- // }
+}
+async function handleGameData(game) {
+    const name = game.name._text;
+    const year = game.yearpublished?._text || "";
+    const id = game._attributes.objectid;
+    const { url , category , description , otherNames  } = await getGameById(id);
+    gameData[id] = {
+        id,
+        name,
+        year,
+        url,
+        category,
+        description,
+        otherNames
+    };
+    return id;
+}
 
 },{"../images/plus.png":"bFEW6","../images/no_image.jpg":"uA0id","xml-js":"6mugM","firebase/firestore":"8A4BC","notiflix/build/notiflix-notify-aio":"eXQLZ","./constants":"itKcQ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","spin.js":"iZQ5x"}],"bFEW6":[function(require,module,exports) {
 module.exports = require("./helpers/bundle-url").getBundleURL("eglpp") + "../plus.516f8977.png" + "?" + Date.now();
