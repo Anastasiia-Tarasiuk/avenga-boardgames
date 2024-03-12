@@ -304,7 +304,21 @@ export async function getPlayerRef(playerId) {
         docId = doc.id;
     });
 
-    return  doc(db, `users/${userId}/players`, docId);
+    return  doc(getRefs(userId).players, docId);
+}
+
+export async function getGameRef(gameId) {
+    const userId = localStorage.getItem("userId");
+    let docId;
+
+    const q = query(getRefs(userId).games, where("id", "==", gameId));
+    const querySnapshot = await getDocs(q);
+
+    querySnapshot.forEach(( doc) => {
+        docId = doc.id;
+    });
+
+    return  doc(getRefs(userId).games, docId);
 }
 
 export async function filterList(e, data, list, func) {

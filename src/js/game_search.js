@@ -94,7 +94,8 @@ async function getGameById(id) {
         url: boardgames.boardgame.image?._text || defaultImage,
         category: boardgames.boardgame.boardgamesubdomain || [],
         description: boardgames.boardgame.description._text,
-        otherNames: boardgames.boardgame.name
+        otherNames: boardgames.boardgame.name,
+        hidden: false
     })
 }
 
@@ -180,7 +181,7 @@ async function handleGameData(game) {
     const name = game.name._text;
     const year = game.yearpublished?._text || "";
     const id = game._attributes.objectid;
-    const {url, category, description, otherNames} = await getGameById(id);
-    gameData[id] = { id, name, year, url, category, description, otherNames };
+    const {url, category, description, otherNames, hidden} = await getGameById(id);
+    gameData[id] = { id, name, year, url, category, description, otherNames, hidden };
     return id;
 }

@@ -527,8 +527,6 @@ closeLoginModalButtonEls.forEach((btn)=>btn.addEventListener("click", (e)=>(0, _
 submitFormButtonsEl.forEach((btn)=>btn.addEventListener("click", (e)=>submitPlayerSettingsForm(e)));
 const playersNames = [];
 let playersData = [];
-let i = 0;
-let show = false;
 const userId = localStorage.getItem("userId");
 filterEl.addEventListener("keydown", (0, _lodashDebounceDefault.default)((e)=>(0, _constants.filterList)(e, playersData, playersEl, playersTemplate), 500));
 const spinner = new (0, _spinJs.Spinner)((0, _constants.opts)).spin(target);
@@ -538,6 +536,8 @@ const spinner = new (0, _spinJs.Spinner)((0, _constants.opts)).spin(target);
         const q = (0, _firestore.query)((0, _constants.getRefs)(user.uid).players);
         const querySnapshot = await (0, _firestore.getDocs)(q);
         const length = querySnapshot.docs.length;
+        let i = 0;
+        let show = false;
         playersEl.classList.add("hidden");
         querySnapshot.forEach((doc)=>{
             i++;
@@ -552,13 +552,13 @@ const spinner = new (0, _spinJs.Spinner)((0, _constants.opts)).spin(target);
         });
     }
 });
-async function playersTemplate(player, userId1, show1) {
-    if (player.hidden) return;
-    const pieChartData = [];
-    const playerItem = document.createElement("li");
-    playerItem.setAttribute("data-player-item-id", player.id);
-    const stats = await getStats(player.id, userId1);
-    playerItem.innerHTML = `   
+async function playersTemplate(player, userId1, show) {
+    if (!player.hidden) {
+        const pieChartData = [];
+        const playerItem = document.createElement("li");
+        playerItem.setAttribute("data-player-item-id", player.id);
+        const stats = await getStats(player.id, userId1);
+        playerItem.innerHTML = `   
         <button class="accordion">${player.name}</button>
         <div class="panel">
             <!-- Tab links -->
@@ -582,36 +582,37 @@ async function playersTemplate(player, userId1, show1) {
               <button class="delete-button">Delete player</button>
             </div>
         </div>`;
-    const accordionEl = playerItem.querySelector(".accordion");
-    const gameList = playerItem.querySelector("#gamesId");
-    const chartList = playerItem.querySelector("#chartId");
-    const settingsList = playerItem.querySelector("#settingsId");
-    settingsList.querySelectorAll("button").forEach((button)=>button.addEventListener("click", (e)=>showSettingsForm(e, player, accordionEl)));
-    accordionEl.addEventListener("click", (e)=>toggleAccordion(e));
-    playerItem.querySelector(".games").addEventListener("click", (e)=>toggleTabs(e, "gamesId", playerItem));
-    playerItem.querySelector(".chartPie").addEventListener("click", (e)=>toggleTabs(e, "chartId", playerItem, pieChartData, chartList));
-    playerItem.querySelector(".settings").addEventListener("click", (e)=>toggleTabs(e, "settingsId", playerItem));
-    stats.map(async (game)=>{
-        const q = (0, _firestore.query)((0, _constants.getRefs)(userId1).games, (0, _firestore.where)("id", "==", game.gameId));
-        const querySnapshot = await (0, _firestore.getDocs)(q);
-        querySnapshot.forEach((doc)=>{
-            const data = doc.data();
-            const averageScore = Math.round(game.sumOfScore / game.numberOfPlays);
-            const gameListItem = document.createElement("li");
-            gameListItem.classList.add("game-list-item");
-            gameListItem.innerHTML = `<div><p>${data.name}</p><img class="thumbnail" src=${data.url}><p>Best score: ${game.bestScore}</p><p>Average score: ${averageScore}</p><p>Plays: ${game.numberOfPlays}</p></div>`;
-            gameList.insertAdjacentElement("beforeend", gameListItem);
-            if (gameList.classList.contains("empty")) gameList.classList.remove("empty");
-            const pieChartGameData = {
-                name: data.name,
-                plays: game.numberOfPlays
-            };
-            pieChartData.push(pieChartGameData);
+        const accordionEl = playerItem.querySelector(".accordion");
+        const gameList = playerItem.querySelector("#gamesId");
+        const chartList = playerItem.querySelector("#chartId");
+        const settingsList = playerItem.querySelector("#settingsId");
+        settingsList.querySelectorAll("button").forEach((button)=>button.addEventListener("click", (e)=>showSettingsForm(e, player, accordionEl)));
+        accordionEl.addEventListener("click", (e)=>toggleAccordion(e));
+        playerItem.querySelector(".games").addEventListener("click", (e)=>toggleTabs(e, "gamesId", playerItem));
+        playerItem.querySelector(".chartPie").addEventListener("click", (e)=>toggleTabs(e, "chartId", playerItem, pieChartData, chartList));
+        playerItem.querySelector(".settings").addEventListener("click", (e)=>toggleTabs(e, "settingsId", playerItem));
+        stats.map(async (game)=>{
+            const q = (0, _firestore.query)((0, _constants.getRefs)(userId1).games, (0, _firestore.where)("id", "==", game.gameId));
+            const querySnapshot = await (0, _firestore.getDocs)(q);
+            querySnapshot.forEach((doc)=>{
+                const data = doc.data();
+                const averageScore = Math.round(game.sumOfScore / game.numberOfPlays);
+                const gameListItem = document.createElement("li");
+                gameListItem.classList.add("game-list-item");
+                gameListItem.innerHTML = `<div><p>${data.name}</p><img class="thumbnail" src=${data.url}><p>Best score: ${game.bestScore}</p><p>Average score: ${averageScore}</p><p>Plays: ${game.numberOfPlays}</p></div>`;
+                gameList.insertAdjacentElement("beforeend", gameListItem);
+                if (gameList.classList.contains("empty")) gameList.classList.remove("empty");
+                const pieChartGameData = {
+                    name: data.name,
+                    plays: game.numberOfPlays
+                };
+                pieChartData.push(pieChartGameData);
+            });
         });
-    });
-    playersEl.insertAdjacentElement("beforeend", playerItem);
-    playersEl.querySelectorAll("#defaultOpen").forEach((item)=>item.click());
-    if (show1) {
+        playersEl.insertAdjacentElement("beforeend", playerItem);
+        playersEl.querySelectorAll("#defaultOpen").forEach((item)=>item.click());
+    }
+    if (show) {
         target.removeChild(spinner.el);
         filterLabelEl.classList.remove("hidden");
         playersEl.classList.remove("hidden");

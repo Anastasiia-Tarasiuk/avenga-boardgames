@@ -514,30 +514,35 @@ var _lodashDebounceDefault = parcelHelpers.interopDefault(_lodashDebounce);
 var _spinJs = require("spin.js");
 const panelEl = document.querySelector(".setting-panel");
 const favouritesButtonEl = document.querySelector(".favourites-button");
+const gamesButtonEl = document.querySelector(".games-button");
 const playersButtonEl = document.querySelector(".players-button");
 const favouritesListEl = document.querySelector("#favouritesId");
 const playersListEl = document.querySelector("#playersId");
+const gamesListEl = document.querySelector("#gamesId");
 const filterLabelEl = document.querySelector(".filter-label");
 const filterEl = document.querySelector(".filter");
 const target = document.querySelector(".container");
 const defaultTextEl = document.querySelector(".default-text");
 const playersData = [];
 const favoritesData = [];
+const gamesData = [];
 filterEl.addEventListener("keydown", (0, _lodashDebounceDefault.default)((e)=>getActiveTab(e), 500));
 favouritesButtonEl.addEventListener("click", (e)=>(0, _constants.handleTabsClick)(e, "favouritesId", panelEl));
 playersButtonEl.addEventListener("click", (e)=>(0, _constants.handleTabsClick)(e, "playersId", panelEl));
+gamesButtonEl.addEventListener("click", (e)=>(0, _constants.handleTabsClick)(e, "gamesId", panelEl));
 favouritesButtonEl.click();
 const spinner = new (0, _spinJs.Spinner)((0, _constants.opts)).spin(target);
 function getActiveTab(e) {
     const activeTab = document.querySelector(".active-tab");
     if (activeTab === favouritesListEl) (0, _constants.filterList)(e, favoritesData, favouritesListEl, renderFavouritesSettings);
-    else (0, _constants.filterList)(e, playersData, playersListEl, renderPlayersSettings);
+    else if (activeTab === playersListEl) (0, _constants.filterList)(e, playersData, playersListEl, renderPlayersSettings);
 }
 (0, _auth.onAuthStateChanged)((0, _login.auth), (user)=>{
     if (user) {
         defaultTextEl.classList.add("hidden");
         handlePlayersSection(user.uid);
         handleFavouritesSection(user.uid);
+        handleGamesSection(user.uid);
     }
 });
 async function handlePlayersSection(userId) {
@@ -569,6 +574,20 @@ async function handleFavouritesSection(userId) {
         panelEl.classList.remove("hidden");
     }
 }
+async function handleGamesSection(userId) {
+    const q = (0, _firestore.query)((0, _constants.getRefs)(userId).games);
+    const querySnapshot = await (0, _firestore.getDocs)(q);
+    if (!querySnapshot.empty) {
+        gamesListEl.innerHTML = "";
+        gamesListEl.classList.remove("default");
+        querySnapshot.forEach((doc)=>{
+            gamesData.push(doc.data());
+            const gamesItem = createGameTemplate(doc.data(), gamesListEl);
+            const checkbox = gamesItem.querySelector(".slider-checkbox");
+            checkbox.addEventListener("change", (e)=>changeGameVisibility(e, gamesItem.dataset.id));
+        });
+    }
+}
 function renderPlayersSettings(player) {
     const playerItem = document.createElement("li");
     playerItem.dataset.id = player.id;
@@ -581,20 +600,7 @@ function renderPlayersSettings(player) {
     checkbox.addEventListener("click", (e)=>changePlayerVisibility(e, playerItem.dataset.id));
 }
 function renderFavouritesSettings(favourite, length) {
-    const favouriteItem = document.createElement("li");
-    favouriteItem.dataset.id = favourite.id;
-    favouriteItem.classList.add("settings-item");
-    const favouriteContainer = document.createElement("div");
-    const favouriteName = document.createElement("p");
-    favouriteName.innerHTML = favourite.name;
-    const favouriteImage = document.createElement("img");
-    favouriteImage.src = favourite.url;
-    favouriteImage.classList.add("thumbnail");
-    favouriteContainer.appendChild(favouriteName);
-    favouriteContainer.appendChild(favouriteImage);
-    favouriteItem.appendChild(favouriteContainer);
-    favouriteItem.appendChild(createSwitcher(favourite));
-    favouritesListEl.insertAdjacentElement("beforeend", favouriteItem);
+    const favouriteItem = createGameTemplate(favourite, favouritesListEl);
     const checkbox = favouriteItem.querySelector(".slider-checkbox");
     checkbox.addEventListener("change", (e)=>changeFavourites(e, favouriteItem.dataset.id));
     if (length === favouritesListEl.childNodes.length) {
@@ -636,7 +642,6 @@ function changeFavourites(e, favouriteId) {
     e.stopPropagation();
     const favouriteItem = document.querySelector(`li[data-id = "${favouriteId}"]`);
     const userId = localStorage.getItem("userId");
-    console.log(favouriteItem);
     (0, _constants.removeFromFavourites)(favouriteId, userId);
     setTimeout(()=>{
         favouriteItem.remove();
@@ -646,6 +651,39 @@ function changeFavourites(e, favouriteId) {
         }
         favouritesListEl.classList.remove("default");
     }, 500);
+}
+function createGameTemplate(data, list) {
+    const item = document.createElement("li");
+    item.dataset.id = data.id;
+    item.classList.add("settings-item");
+    const container = document.createElement("div");
+    const name = document.createElement("p");
+    name.innerHTML = data.name;
+    const image = document.createElement("img");
+    image.src = data.url;
+    image.classList.add("thumbnail");
+    container.appendChild(name);
+    container.appendChild(image);
+    item.appendChild(container);
+    item.appendChild(createSwitcher(data));
+    list.insertAdjacentElement("beforeend", item);
+    return item;
+}
+async function changeGameVisibility(e, gameId) {
+    e.stopPropagation();
+    const checkbox = e.currentTarget;
+    try {
+        const gameRef = await (0, _constants.getGameRef)(gameId);
+        gamesData.forEach((game)=>{
+            if (game.id === gameId) game.hidden = !checkbox.checked;
+        });
+        await (0, _firestore.updateDoc)(gameRef, {
+            hidden: !checkbox.checked
+        });
+        (0, _notiflixNotifyAio.Notify).success("The game visibility was changed successfully");
+    } catch (e2) {
+        console.error("Error adding document: ", e2);
+    }
 }
 
 },{"firebase/firestore":"8A4BC","./constants":"itKcQ","firebase/auth":"79vzg","./login":"47T64","notiflix/build/notiflix-notify-aio":"eXQLZ","lodash.debounce":"3JP5n","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","spin.js":"iZQ5x"}],"3JP5n":[function(require,module,exports) {

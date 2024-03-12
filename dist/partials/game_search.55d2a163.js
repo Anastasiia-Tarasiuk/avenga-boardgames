@@ -579,7 +579,8 @@ async function getGameById(id) {
         url: boardgames.boardgame.image?._text || (0, _noImageJpgDefault.default),
         category: boardgames.boardgame.boardgamesubdomain || [],
         description: boardgames.boardgame.description._text,
-        otherNames: boardgames.boardgame.name
+        otherNames: boardgames.boardgame.name,
+        hidden: false
     };
 }
 async function renderGames(obj, length) {
@@ -642,7 +643,7 @@ async function handleGameData(game) {
     const name = game.name._text;
     const year = game.yearpublished?._text || "";
     const id = game._attributes.objectid;
-    const { url , category , description , otherNames  } = await getGameById(id);
+    const { url , category , description , otherNames , hidden  } = await getGameById(id);
     gameData[id] = {
         id,
         name,
@@ -650,7 +651,8 @@ async function handleGameData(game) {
         url,
         category,
         description,
-        otherNames
+        otherNames,
+        hidden
     };
     return id;
 }

@@ -23,8 +23,7 @@ submitFormButtonsEl.forEach(btn => btn.addEventListener("click", e => submitPlay
 
 const playersNames = [];
 let playersData = [];
-let i = 0;
-let show = false;
+
 const userId = localStorage.getItem("userId");
 
 filterEl.addEventListener("keydown",  debounce(e => filterList(e, playersData, playersEl, playersTemplate), 500));
@@ -37,6 +36,8 @@ onAuthStateChanged(auth, async user => {
         const q = query(getRefs(user.uid).players);
         const querySnapshot = await getDocs(q);
         const length = querySnapshot.docs.length;
+        let i = 0;
+        let show = false;
 
         playersEl.classList.add("hidden");
 
@@ -54,21 +55,20 @@ onAuthStateChanged(auth, async user => {
                 id: data.id.toString()
             });
             playersTemplate(data, user.uid, show);
+
+
         });
     }
 });
 
 async function playersTemplate(player, userId, show) {
-    if (player.hidden) {
-        return;
-    }
+    if (!player.hidden) {
+        const pieChartData = [];
+        const playerItem = document.createElement("li");
+        playerItem.setAttribute("data-player-item-id", player.id);
+        const stats = await getStats(player.id, userId);
 
-    const pieChartData = [];
-    const playerItem = document.createElement("li");
-    playerItem.setAttribute("data-player-item-id", player.id);
-    const stats = await getStats(player.id, userId);
-
-    playerItem.innerHTML = `   
+        playerItem.innerHTML = `   
         <button class="accordion">${player.name}</button>
         <div class="panel">
             <!-- Tab links -->
@@ -93,44 +93,45 @@ async function playersTemplate(player, userId, show) {
             </div>
         </div>`;
 
-    const accordionEl =  playerItem.querySelector(".accordion");
-    const gameList = playerItem.querySelector("#gamesId");
-    const chartList = playerItem.querySelector("#chartId");
-    const settingsList = playerItem.querySelector("#settingsId");
+        const accordionEl = playerItem.querySelector(".accordion");
+        const gameList = playerItem.querySelector("#gamesId");
+        const chartList = playerItem.querySelector("#chartId");
+        const settingsList = playerItem.querySelector("#settingsId");
 
-    settingsList.querySelectorAll("button").forEach(button => button.addEventListener("click", e => showSettingsForm(e, player, accordionEl)));
-    accordionEl.addEventListener("click", e => toggleAccordion(e));
-    playerItem.querySelector(".games").addEventListener("click", e => toggleTabs(e, 'gamesId', playerItem));
-    playerItem.querySelector(".chartPie").addEventListener("click", e => toggleTabs(e, 'chartId', playerItem, pieChartData, chartList));
-    playerItem.querySelector(".settings").addEventListener("click", e => toggleTabs(e, 'settingsId', playerItem));
+        settingsList.querySelectorAll("button").forEach(button => button.addEventListener("click", e => showSettingsForm(e, player, accordionEl)));
+        accordionEl.addEventListener("click", e => toggleAccordion(e));
+        playerItem.querySelector(".games").addEventListener("click", e => toggleTabs(e, 'gamesId', playerItem));
+        playerItem.querySelector(".chartPie").addEventListener("click", e => toggleTabs(e, 'chartId', playerItem, pieChartData, chartList));
+        playerItem.querySelector(".settings").addEventListener("click", e => toggleTabs(e, 'settingsId', playerItem));
 
-    stats.map(async game => {
-        const q = query(getRefs(userId).games, where("id", "==", game.gameId));
-        const querySnapshot = await getDocs(q);
+        stats.map(async game => {
+            const q = query(getRefs(userId).games, where("id", "==", game.gameId));
+            const querySnapshot = await getDocs(q);
 
-        querySnapshot.forEach(doc => {
-            const data = doc.data();
-            const averageScore = Math.round(game.sumOfScore/game.numberOfPlays);
-            const gameListItem = document.createElement("li");
-            gameListItem.classList.add("game-list-item");
-            gameListItem.innerHTML =`<div><p>${data.name}</p><img class="thumbnail" src=${data.url}><p>Best score: ${game.bestScore}</p><p>Average score: ${averageScore}</p><p>Plays: ${game.numberOfPlays}</p></div>`
-            gameList.insertAdjacentElement("beforeend", gameListItem);
+            querySnapshot.forEach(doc => {
+                const data = doc.data();
+                const averageScore = Math.round(game.sumOfScore / game.numberOfPlays);
+                const gameListItem = document.createElement("li");
+                gameListItem.classList.add("game-list-item");
+                gameListItem.innerHTML = `<div><p>${data.name}</p><img class="thumbnail" src=${data.url}><p>Best score: ${game.bestScore}</p><p>Average score: ${averageScore}</p><p>Plays: ${game.numberOfPlays}</p></div>`
+                gameList.insertAdjacentElement("beforeend", gameListItem);
 
-            if (gameList.classList.contains("empty")) {
-                gameList.classList.remove("empty");
-            }
+                if (gameList.classList.contains("empty")) {
+                    gameList.classList.remove("empty");
+                }
 
-            const pieChartGameData = {
-                name: data.name,
-                plays: game.numberOfPlays,
-            }
+                const pieChartGameData = {
+                    name: data.name,
+                    plays: game.numberOfPlays,
+                }
 
-            pieChartData.push(pieChartGameData);
+                pieChartData.push(pieChartGameData);
+            })
         })
-    })
 
-    playersEl.insertAdjacentElement("beforeend", playerItem);
-    playersEl.querySelectorAll("#defaultOpen").forEach(item => item.click());
+        playersEl.insertAdjacentElement("beforeend", playerItem);
+        playersEl.querySelectorAll("#defaultOpen").forEach(item => item.click());
+    }
 
     if (show) {
         target.removeChild(spinner.el);

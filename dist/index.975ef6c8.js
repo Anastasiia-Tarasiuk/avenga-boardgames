@@ -36941,6 +36941,7 @@ parcelHelpers.export(exports, "opts", ()=>opts);
 parcelHelpers.export(exports, "COLORS", ()=>COLORS);
 parcelHelpers.export(exports, "getRefs", ()=>getRefs);
 parcelHelpers.export(exports, "getPlayerRef", ()=>getPlayerRef);
+parcelHelpers.export(exports, "getGameRef", ()=>getGameRef);
 parcelHelpers.export(exports, "filterList", ()=>filterList);
 parcelHelpers.export(exports, "getPlayerQueryById", ()=>getPlayerQueryById);
 parcelHelpers.export(exports, "isGameInFavourites", ()=>isGameInFavourites);
@@ -37246,7 +37247,17 @@ async function getPlayerRef(playerId) {
     querySnapshot.forEach((doc)=>{
         docId = doc.id;
     });
-    return (0, _firestore.doc)((0, _login.db), `users/${userId}/players`, docId);
+    return (0, _firestore.doc)(getRefs(userId).players, docId);
+}
+async function getGameRef(gameId) {
+    const userId = localStorage.getItem("userId");
+    let docId;
+    const q = (0, _firestore.query)(getRefs(userId).games, (0, _firestore.where)("id", "==", gameId));
+    const querySnapshot = await (0, _firestore.getDocs)(q);
+    querySnapshot.forEach((doc)=>{
+        docId = doc.id;
+    });
+    return (0, _firestore.doc)(getRefs(userId).games, docId);
 }
 async function filterList(e, data, list, func) {
     const value = e.target.value;
