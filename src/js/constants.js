@@ -408,3 +408,7 @@ export function handleTabsClick(e, tab, parent) {
     activeTab.classList.add("active-tab");
     e.currentTarget.className += " active";
 }
+
+export function closeModal(modal) {
+    modal.classList.add("hidden");
+}

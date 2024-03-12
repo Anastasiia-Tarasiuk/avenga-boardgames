@@ -319,6 +319,7 @@ header a {
 .login-modal-overlay form, .add-player-modal-overlay form, .players-settings-modal-overlay form {
   width: 300px;
   height: 400px;
+  color: #000;
   background-color: #ccc;
   border: 1px solid #000;
   flex-direction: column;
@@ -348,7 +349,7 @@ header a {
   display: block;
 }
 
-#login-form label, #signup-form label, #add-player-form label, #rename-form label, #hide-form label {
+#login-form label, #signup-form label, #add-player-form label, #rename-form label, #delete-form label, #hide-form label {
   margin-bottom: 20px;
 }
 
@@ -440,10 +441,6 @@ form#signup-form .confirm .svg-icon {
 
 .category span:not(:last-child) {
   margin-right: 10px;
-}
-
-.played-games {
-  color: #000;
 }
 
 .played-games li:not(:last-child), .players li:not(:last-child) {

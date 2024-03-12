@@ -15,6 +15,7 @@ const playersListEl = document.querySelector("#playersId");
 const filterLabelEl = document.querySelector(".filter-label");
 const filterEl = document.querySelector(".filter");
 const target = document.querySelector('.container');
+const defaultTextEl = document.querySelector(".default-text");
 
 const playersData = [];
 const favoritesData = [];
@@ -26,7 +27,6 @@ playersButtonEl.addEventListener("click", e => handleTabsClick(e, 'playersId', p
 favouritesButtonEl.click();
 
 const spinner = new Spinner(opts).spin(target);
-const tempContainer = document.createElement("div");
 
 function getActiveTab(e) {
     const activeTab = document.querySelector(".active-tab");
@@ -40,6 +40,7 @@ function getActiveTab(e) {
 
 onAuthStateChanged(auth,  user => {
     if (user) {
+        defaultTextEl.classList.add("hidden");
         handlePlayersSection(user.uid);
         handleFavouritesSection(user.uid);
     }
@@ -72,6 +73,10 @@ async function handleFavouritesSection(userId) {
             favoritesData.push(doc.data());
             renderFavouritesSettings(doc.data(), length);
         })
+    } else {
+        target.removeChild(spinner.el);
+        filterLabelEl.classList.remove("hidden");
+        panelEl.classList.remove("hidden");
     }
 }
 

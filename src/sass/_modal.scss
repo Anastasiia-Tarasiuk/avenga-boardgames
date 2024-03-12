@@ -12,6 +12,7 @@
     left: 50%;
     transform: translate(-50%,-50%);
     border: 1px solid black;
+    color: black;
 }
 
 .add-player-modal-overlay form,
@@ -42,6 +43,7 @@
 #signup-form label,
 #add-player-form label,
 #rename-form label,
+#delete-form label,
 #hide-form label {
     margin-bottom: 20px;
 }

@@ -553,7 +553,7 @@ if (modalOverlayEl) {
 loginButtonEl.addEventListener("click", (e)=>showModal(e));
 signupButtonEl.addEventListener("click", (e)=>showModal(e));
 logoutButtonEl.addEventListener("click", logout);
-closeLoginModalButtonEls.forEach((btn)=>btn.addEventListener("click", closeLoginModal));
+closeLoginModalButtonEls.forEach((btn)=>btn.addEventListener("click", (e)=>(0, _constants.closeModal)(modalOverlayEl)));
 googleButtonEls.forEach((btn)=>btn.addEventListener("click", (e)=>loginWithGoogle(e)));
 (0, _auth.onAuthStateChanged)(auth, (user)=>{
     if (user) showMenu();
@@ -569,9 +569,6 @@ function showModal(e) {
         signupFormEl.style.display = "flex";
         loginFormEl.style.display = "none";
     }
-}
-function closeLoginModal() {
-    modalOverlayEl.classList.add("hidden");
 }
 function submitLoginForm(e) {
     e.preventDefault();
@@ -596,8 +593,9 @@ function submitLoginForm(e) {
         (0, _auth.signInWithEmailAndPassword)(auth, email, password).then((userCredential)=>{
             (0, _notiflixNotifyAio.Notify).success(`Successfully signed in`);
             localStorage.setItem("userId", userCredential.user.uid);
+            localStorage.setItem("logout", false);
             setThemeToLocalStorage(userCredential.user.uid);
-            closeLoginModal();
+            (0, _constants.closeModal)(modalOverlayEl);
         }).catch((error)=>{
             console.error(error);
             (0, _notiflixNotifyAio.Notify).failure("Sorry, something went wrong");
@@ -615,7 +613,7 @@ function submitLoginForm(e) {
             localStorage.setItem("userId", user.uid);
             setUserDataToStorage(user);
             setThemeToLocalStorage(user.uid);
-            closeLoginModal();
+            (0, _constants.closeModal)(modalOverlayEl);
         }).catch((error)=>{
             console.error(error);
             (0, _notiflixNotifyAio.Notify).failure("Sorry, something went wrong");
@@ -637,8 +635,9 @@ function loginWithGoogle(e) {
             setUserDataToStorage(user);
         }
         localStorage.setItem("userId", user.uid);
+        localStorage.setItem("logout", false);
         setThemeToLocalStorage(user.uid);
-        closeLoginModal();
+        (0, _constants.closeModal)(modalOverlayEl);
     }).catch((error)=>{
         // Handle Errors here.
         const errorCode = error.code;
@@ -683,6 +682,7 @@ function logout() {
     (0, _auth.signOut)(auth).then((res)=>{
         localStorage.removeItem("userId");
         localStorage.removeItem("theme");
+        localStorage.setItem("logout", true);
         window.location.pathname = "../../index.html";
         (0, _notiflixNotifyAio.Notify).success("Successfully signed out");
     }).catch((err)=>{
@@ -36948,6 +36948,7 @@ parcelHelpers.export(exports, "toggleFavourites", ()=>toggleFavourites);
 parcelHelpers.export(exports, "addToFavourites", ()=>addToFavourites);
 parcelHelpers.export(exports, "removeFromFavourites", ()=>removeFromFavourites);
 parcelHelpers.export(exports, "handleTabsClick", ()=>handleTabsClick);
+parcelHelpers.export(exports, "closeModal", ()=>closeModal);
 var _firestore = require("firebase/firestore");
 var _login = require("./login");
 var _notiflixNotifyAio = require("notiflix/build/notiflix-notify-aio");
@@ -37324,6 +37325,9 @@ function handleTabsClick(e, tab, parent) {
     ].forEach((el)=>el.classList.remove("active-tab"));
     activeTab.classList.add("active-tab");
     e.currentTarget.className += " active";
+}
+function closeModal(modal) {
+    modal.classList.add("hidden");
 }
 
 },{"firebase/firestore":"8A4BC","./login":"47T64","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","notiflix/build/notiflix-notify-aio":"eXQLZ"}],"bvS82":[function(require,module,exports) {

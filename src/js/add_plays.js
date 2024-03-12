@@ -3,7 +3,8 @@ import {auth} from "./login";
 import {Notify} from "notiflix/build/notiflix-notify-aio";
 import {doc, getDocs, query, setDoc, where} from "firebase/firestore";
 import debounce from 'lodash.debounce';
-import {getRefs} from "./constants";
+import {getRefs, closeModal, opts} from "./constants";
+import {Spinner} from 'spin.js';
 
 const gameToScoreEl = document.querySelector(".game-to-score");
 const addPlayerModalOverlay = document.querySelector(".add-player-modal-overlay");
@@ -12,14 +13,19 @@ const playerSelectEl = document.querySelector("#player-select");
 const closePlayerModalButtonEl = document.querySelector(".close-player-modal");
 const playsEl = document.querySelector(".plays");
 const dateEl = document.querySelector(".date");
+const selectEl = document.querySelector(".select");
+const target = document.querySelector('.container');
 
 playerSelectEl.addEventListener('change', e => addNewPlayer(e));
-closePlayerModalButtonEl.addEventListener("click", closePlayerModal);
+closePlayerModalButtonEl.addEventListener("click", e => closeModal(addPlayerModalOverlay));
 submitFormButtonEl.addEventListener("click", (e) => submitPlayerForm(e));
 
 const searchParams = new URLSearchParams(window.location.search);
 const id = searchParams.get('id');
 const sessionId = Date.now();
+
+
+const spinner = new Spinner(opts).spin(target);
 
 onAuthStateChanged(auth, async user => {
     if (user) {
@@ -52,6 +58,8 @@ async function renderPlayers(userId) {
     querySnapshot.forEach((doc) => {
         createPlayer(doc.data())
     });
+    selectEl.classList.remove("hidden");
+    target.removeChild(spinner.el);
 }
 
 function createPlayer(player) {
@@ -131,18 +139,13 @@ async function submitPlayerForm(e) {
             addPlayerToPlayers(userId, player);
             renderPlayers(userId);
             form.reset();
-            closePlayerModal();
+            closeModal(addPlayerModalOverlay)
         } else {
             Notify.failure(`Player with name ${name} already exists`);
         }
     } else {
         Notify.failure(`Name field shouldn't be empty`);
     }
-}
-
-function closePlayerModal() {
-    playerSelectEl.selectedIndex = 0;
-    addPlayerModalOverlay.classList.add('hidden');
 }
 
 async function addPlayerToPlayers(userId, player) {

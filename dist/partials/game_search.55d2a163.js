@@ -514,6 +514,8 @@ var _firestore = require("firebase/firestore");
 var _notiflixNotifyAio = require("notiflix/build/notiflix-notify-aio");
 var _constants = require("./constants");
 var _spinJs = require("spin.js");
+var _auth = require("firebase/auth");
+var _login = require("./login");
 const gameListEl = document.querySelector(".game-list");
 const searchFormEl = document.querySelector(".search-form");
 const submitButtonEl = document.querySelector(".submit-button");
@@ -521,7 +523,13 @@ const target = document.querySelector(".container");
 submitButtonEl.addEventListener("click", (e)=>submitForm(e));
 const gameData = {};
 const userId = localStorage.getItem("userId");
-let spinner = null;
+let spinner = new (0, _spinJs.Spinner)((0, _constants.opts)).spin(target);
+(0, _auth.onAuthStateChanged)((0, _login.auth), async (user)=>{
+    if (user) {
+        target.removeChild(spinner.el);
+        submitButtonEl.removeAttribute("disabled");
+    }
+});
 function submitForm(e) {
     e.preventDefault();
     const formData = new FormData(searchFormEl, submitButtonEl);
@@ -647,7 +655,7 @@ async function handleGameData(game) {
     return id;
 }
 
-},{"../images/plus.png":"bFEW6","../images/no_image.jpg":"uA0id","xml-js":"6mugM","firebase/firestore":"8A4BC","notiflix/build/notiflix-notify-aio":"eXQLZ","./constants":"itKcQ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","spin.js":"iZQ5x"}],"bFEW6":[function(require,module,exports) {
+},{"../images/plus.png":"bFEW6","../images/no_image.jpg":"uA0id","xml-js":"6mugM","firebase/firestore":"8A4BC","notiflix/build/notiflix-notify-aio":"eXQLZ","./constants":"itKcQ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","spin.js":"iZQ5x","firebase/auth":"79vzg","./login":"47T64"}],"bFEW6":[function(require,module,exports) {
 module.exports = require("./helpers/bundle-url").getBundleURL("eglpp") + "../plus.516f8977.png" + "?" + Date.now();
 
 },{"./helpers/bundle-url":"lgJ39"}],"lgJ39":[function(require,module,exports) {

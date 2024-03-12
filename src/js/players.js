@@ -1,14 +1,11 @@
 import {onAuthStateChanged} from "firebase/auth";
 import {auth} from "./login";
 import {PieChart} from "./pieChart";
-import {COLORS as colors, getPlayerRef, getRefs, handleTabsClick} from "./constants";
+import {COLORS as colors, getPlayerRef, getRefs, handleTabsClick, closeModal,filterList, opts} from "./constants";
 import {query, where, getDocs, doc, updateDoc, deleteDoc} from "firebase/firestore";
 import {Notify} from "notiflix/build/notiflix-notify-aio";
-import {db} from "./login";
 import debounce from "lodash.debounce";
-import {filterList} from "./constants";
 import {Spinner} from 'spin.js';
-import {opts} from "./constants";
 
 const playersEl = document.querySelector(".players");
 const renameFormEl = document.querySelector("[id='rename-form']");
@@ -21,13 +18,14 @@ const filterLabelEl = document.querySelector(".filter-label");
 const filterEl = document.querySelector(".filter");
 const target = document.querySelector('.container');
 
-closeLoginModalButtonEls.forEach(btn => btn.addEventListener("click", closePlayerSettingModal));
-submitFormButtonsEl.forEach(btn => btn.addEventListener("click", (e ) => submitPlayerSettingsForm(e)));
+closeLoginModalButtonEls.forEach(btn => btn.addEventListener("click", e => closeModal(modalSettingsOverlayEl)));
+submitFormButtonsEl.forEach(btn => btn.addEventListener("click", e => submitPlayerSettingsForm(e)));
 
 const playersNames = [];
 let playersData = [];
 let i = 0;
-let render = false;
+let show = false;
+const userId = localStorage.getItem("userId");
 
 filterEl.addEventListener("keydown",  debounce(e => filterList(e, playersData, playersEl, playersTemplate), 500));
 
@@ -46,7 +44,7 @@ onAuthStateChanged(auth, async user => {
             i++;
 
             if (i === length) {
-                render = true;
+                show = true;
             }
 
             const data = doc.data();
@@ -55,12 +53,12 @@ onAuthStateChanged(auth, async user => {
                 name: data.name.toLowerCase(),
                 id: data.id.toString()
             });
-            playersTemplate(data, user.uid, render);
+            playersTemplate(data, user.uid, show);
         });
     }
 });
 
-async function playersTemplate(player, userId, render) {
+async function playersTemplate(player, userId, show) {
     if (player.hidden) {
         return;
     }
@@ -96,12 +94,11 @@ async function playersTemplate(player, userId, render) {
         </div>`;
 
     const accordionEl =  playerItem.querySelector(".accordion");
-
     const gameList = playerItem.querySelector("#gamesId");
     const chartList = playerItem.querySelector("#chartId");
     const settingsList = playerItem.querySelector("#settingsId");
-    settingsList.addEventListener("click", e => showSettingsForm(e, player, accordionEl));
 
+    settingsList.querySelectorAll("button").forEach(button => button.addEventListener("click", e => showSettingsForm(e, player, accordionEl)));
     accordionEl.addEventListener("click", e => toggleAccordion(e));
     playerItem.querySelector(".games").addEventListener("click", e => toggleTabs(e, 'gamesId', playerItem));
     playerItem.querySelector(".chartPie").addEventListener("click", e => toggleTabs(e, 'chartId', playerItem, pieChartData, chartList));
@@ -135,7 +132,7 @@ async function playersTemplate(player, userId, render) {
     playersEl.insertAdjacentElement("beforeend", playerItem);
     playersEl.querySelectorAll("#defaultOpen").forEach(item => item.click());
 
-    if (render) {
+    if (show) {
         target.removeChild(spinner.el);
         filterLabelEl.classList.remove("hidden");
         playersEl.classList.remove("hidden");
@@ -198,10 +195,9 @@ function toggleTabs(e, tab, parent, pieChartData, selector) {
 function createChart(parent, data) {
     const pieChart = {};
 
-    if (data.length !== 0) {
+    if (data.length) {
         data.forEach(game => {
             pieChart[game.name] = game.plays;
-
         })
 
         if (parent.classList.contains("empty")) {
@@ -210,12 +206,7 @@ function createChart(parent, data) {
 
         const canvas = parent.querySelector("canvas");
         const legend = parent.querySelector(".legend");
-        const options = {
-            canvas,
-            pieChart,
-            colors,
-            legend
-        }
+        const options = {canvas, pieChart, colors, legend}
         legend.innerHTML = "";
         const gamesPieChart = new PieChart(options);
         gamesPieChart.drawSlices();
@@ -226,7 +217,6 @@ function createChart(parent, data) {
 async function renamePlayer(playerId, submitButton) {
     const allPlayerItems = playersEl.children;
     const formData = new FormData(renameFormEl, submitButton);
-    const userId = localStorage.getItem("userId");
     let newName = null;
 
     for (const [_, value] of formData) {
@@ -267,7 +257,7 @@ async function renamePlayer(playerId, submitButton) {
 
         // if player is user
         if (userId === playerId) {
-            const userRef = doc(db, `users/${userId}/user`, userId);
+            const userRef = doc(getRefs(userId).user, userId);
 
             await updateDoc(userRef, {
                 name: newName
@@ -284,7 +274,7 @@ async function renamePlayer(playerId, submitButton) {
     })
 
     renameFormEl.reset();
-    closePlayerSettingModal();
+    closeModal(modalSettingsOverlayEl);
 }
 
 async function hidePlayer(playerId) {
@@ -308,7 +298,7 @@ async function hidePlayer(playerId) {
         console.error("Error adding document: ", e);
     }
 
-    closePlayerSettingModal();
+    closeModal(modalSettingsOverlayEl);
 }
 
 async function deletePlayer(playerId) {
@@ -323,7 +313,7 @@ async function deletePlayer(playerId) {
         console.error("Error removing document: ", e);
     }
 
-    closePlayerSettingModal();
+    closeModal(modalSettingsOverlayEl);
 }
 
 function showSettingsForm(e, player, accordion) {
@@ -353,10 +343,6 @@ function showSettingsForm(e, player, accordion) {
         submitButtonEl.setAttribute("data-playerid", player.id);
         submitButtonEl.innerText = `Delete ${playerName}`;
     }
-}
-
-function closePlayerSettingModal() {
-    modalSettingsOverlayEl.classList.add('hidden');
 }
 
 function submitPlayerSettingsForm(e) {

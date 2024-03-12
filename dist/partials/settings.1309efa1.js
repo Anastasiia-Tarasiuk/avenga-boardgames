@@ -520,6 +520,7 @@ const playersListEl = document.querySelector("#playersId");
 const filterLabelEl = document.querySelector(".filter-label");
 const filterEl = document.querySelector(".filter");
 const target = document.querySelector(".container");
+const defaultTextEl = document.querySelector(".default-text");
 const playersData = [];
 const favoritesData = [];
 filterEl.addEventListener("keydown", (0, _lodashDebounceDefault.default)((e)=>getActiveTab(e), 500));
@@ -527,7 +528,6 @@ favouritesButtonEl.addEventListener("click", (e)=>(0, _constants.handleTabsClick
 playersButtonEl.addEventListener("click", (e)=>(0, _constants.handleTabsClick)(e, "playersId", panelEl));
 favouritesButtonEl.click();
 const spinner = new (0, _spinJs.Spinner)((0, _constants.opts)).spin(target);
-const tempContainer = document.createElement("div");
 function getActiveTab(e) {
     const activeTab = document.querySelector(".active-tab");
     if (activeTab === favouritesListEl) (0, _constants.filterList)(e, favoritesData, favouritesListEl, renderFavouritesSettings);
@@ -535,6 +535,7 @@ function getActiveTab(e) {
 }
 (0, _auth.onAuthStateChanged)((0, _login.auth), (user)=>{
     if (user) {
+        defaultTextEl.classList.add("hidden");
         handlePlayersSection(user.uid);
         handleFavouritesSection(user.uid);
     }
@@ -562,6 +563,10 @@ async function handleFavouritesSection(userId) {
             favoritesData.push(doc.data());
             renderFavouritesSettings(doc.data(), length);
         });
+    } else {
+        target.removeChild(spinner.el);
+        filterLabelEl.classList.remove("hidden");
+        panelEl.classList.remove("hidden");
     }
 }
 function renderPlayersSettings(player) {

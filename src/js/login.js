@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup} from "firebase/auth";
 import {getFirestore, doc, setDoc, query, getDocs} from "firebase/firestore";
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
-import {getRefs} from "./constants";
+import {getRefs, closeModal} from "./constants";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDfHEoFiYmKRqd8-ktFcO7zg3QLGxAViQc",
@@ -44,7 +44,7 @@ if (modalOverlayEl) {
 loginButtonEl.addEventListener("click", (e) => showModal(e));
 signupButtonEl.addEventListener("click", (e) => showModal(e));
 logoutButtonEl.addEventListener("click", logout);
-closeLoginModalButtonEls.forEach(btn => btn.addEventListener("click", closeLoginModal));
+closeLoginModalButtonEls.forEach(btn => btn.addEventListener("click", e => closeModal(modalOverlayEl)));
 googleButtonEls.forEach(btn => btn.addEventListener("click", (e) => loginWithGoogle(e)));
 
 onAuthStateChanged(auth, (user) => {
@@ -66,10 +66,6 @@ function showModal(e) {
         signupFormEl.style.display = "flex";
         loginFormEl.style.display = "none";
     }
-}
-
-function closeLoginModal() {
-    modalOverlayEl.classList.add('hidden');
 }
 
 function submitLoginForm(e) {
@@ -101,8 +97,9 @@ function submitLoginForm(e) {
             .then((userCredential) => {
                 Notify.success(`Successfully signed in`);
                 localStorage.setItem("userId", userCredential.user.uid);
+                localStorage.setItem("logout", false);
                 setThemeToLocalStorage(userCredential.user.uid);
-                closeLoginModal();
+                closeModal(modalOverlayEl);
             })
             .catch((error) => {
                 console.error(error);
@@ -125,7 +122,7 @@ function submitLoginForm(e) {
                 localStorage.setItem("userId", user.uid);
                 setUserDataToStorage(user);
                 setThemeToLocalStorage(user.uid);
-                closeLoginModal();
+                closeModal(modalOverlayEl);
             })
             .catch((error) => {
                 console.error(error);
@@ -155,9 +152,10 @@ function loginWithGoogle(e) {
             }
 
             localStorage.setItem("userId", user.uid);
+            localStorage.setItem("logout", false);
             setThemeToLocalStorage(user.uid);
 
-            closeLoginModal();
+            closeModal(modalOverlayEl);
 
         })
         .catch((error) => {
@@ -219,6 +217,7 @@ function logout() {
         .then(res => {
             localStorage.removeItem("userId");
             localStorage.removeItem("theme");
+            localStorage.setItem("logout", true);
             window.location.pathname = "../../index.html";
             Notify.success('Successfully signed out');
         })

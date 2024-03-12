@@ -6,6 +6,8 @@ import {Notify} from "notiflix/build/notiflix-notify-aio";
 import {getRefs, isGameInFavourites, toggleFavourites} from "./constants";
 import {Spinner} from 'spin.js';
 import {opts} from "./constants";
+import {onAuthStateChanged} from "firebase/auth";
+import {auth} from "./login";
 
 const gameListEl = document.querySelector(".game-list");
 const searchFormEl = document.querySelector(".search-form");
@@ -16,7 +18,15 @@ submitButtonEl.addEventListener("click", e => submitForm(e));
 
 const gameData = {};
 const userId = localStorage.getItem("userId");
-let spinner = null;
+let spinner = new Spinner(opts).spin(target);
+
+
+onAuthStateChanged(auth, async user => {
+    if (user) {
+        target.removeChild(spinner.el);
+        submitButtonEl.removeAttribute("disabled");
+    }
+})
 
 function submitForm(e) {
     e.preventDefault();
