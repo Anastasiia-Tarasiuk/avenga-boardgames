@@ -566,7 +566,8 @@ function getDataFromPlaySnapshot(querySnapshot) {
         if (!sessions.includes(playStats.sessionId)) sessions.push(playStats.sessionId);
         bestScore.push({
             score: Number(playStats.score),
-            player: playStats.playerId
+            player: playStats.playerId,
+            date: new Date(Date.parse(playStats.date)).toLocaleDateString()
         });
     });
     bestScore = bestScore.sort(compare);
@@ -586,6 +587,7 @@ async function createWinnersList(scoreArray, userId) {
     for(let i = 0; i < 3; i++){
         const item = document.createElement("li");
         if (scoreArray[i]) {
+            console.log(scoreArray[i].date);
             const q = (0, _constants.getPlayerQueryById)(userId, scoreArray[i].player);
             const querySnapshot = await (0, _firestore.getDocs)(q);
             querySnapshot.forEach((doc)=>{
@@ -602,6 +604,9 @@ async function createWinnersList(scoreArray, userId) {
 async function getPlaysSnapshot(gameId, userId) {
     const q = (0, _firestore.query)((0, _constants.getRefs)(userId).plays, (0, _firestore.where)("gameId", "==", gameId));
     return await (0, _firestore.getDocs)(q);
+}
+function convertUTCDateToLocalDate(date) {
+    console.log(new Date(date).toLocaleDateString());
 }
 
 },{"firebase/auth":"79vzg","./login":"47T64","firebase/firestore":"8A4BC","lodash.debounce":"3JP5n","./constants":"itKcQ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","spin.js":"iZQ5x"}],"3JP5n":[function(require,module,exports) {

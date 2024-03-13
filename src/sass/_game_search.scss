@@ -45,6 +45,31 @@
     fill: transparent;
 }
 
-.category span:not(:last-child) {
-    margin-right: 10px;
+.category span:not(:last-child)::after {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background-repeat: no-repeat;
+    background-size: 10px 10px;
+    background-image: url("../images/circle.png");
+}
+
+.description-button {
+    border: none;
+    padding: 0;
+    color: $accent-color;
+}
+
+.description-container {
+    padding: 10px;
+    overflow-y: auto;
+}
+
+.description-container img {
+    width: 100%;
+}
+
+.game-list .thumbnail {
+    cursor: zoom-in;
 }

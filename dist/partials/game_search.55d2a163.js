@@ -520,7 +520,10 @@ const gameListEl = document.querySelector(".game-list");
 const searchFormEl = document.querySelector(".search-form");
 const submitButtonEl = document.querySelector(".submit-button");
 const target = document.querySelector(".container");
+const searchModalOverlay = document.querySelector(".search-modal-overlay");
+const closeSearchModalButtonEl = document.querySelector(".close-search-modal");
 submitButtonEl.addEventListener("click", (e)=>submitForm(e));
+closeSearchModalButtonEl.addEventListener("click", (e)=>(0, _constants.closeModal)(searchModalOverlay));
 const gameData = {};
 const userId = localStorage.getItem("userId");
 let spinner = new (0, _spinJs.Spinner)((0, _constants.opts)).spin(target);
@@ -575,10 +578,11 @@ async function getGameByName(games) {
 async function getGameById(id) {
     const url = `https://boardgamegeek.com/xmlapi/boardgame/${id}`;
     const { boardgames  } = await fetchAPI(url);
+    console.log(boardgames);
     return {
         url: boardgames.boardgame.image?._text || (0, _noImageJpgDefault.default),
-        category: boardgames.boardgame.boardgamesubdomain || [],
-        description: boardgames.boardgame.description._text,
+        category: boardgames.boardgame.boardgamecategory || [],
+        description: boardgames.boardgame.description._text || "No description",
         otherNames: boardgames.boardgame.name,
         hidden: false
     };
@@ -604,6 +608,9 @@ async function renderGames(obj, length) {
         span.innerHTML = categories._text;
         categoriesEl.insertAdjacentElement("beforeend", span);
     }
+    const descriptionButton = document.createElement("button");
+    descriptionButton.innerHTML = "Read description";
+    descriptionButton.classList.add("description-button");
     if (Array.isArray(otherNames)) otherNames.forEach((nameObj)=>{
         if (nameObj._attributes.primary) {
             obj.originalName = nameObj._text;
@@ -612,9 +619,13 @@ async function renderGames(obj, length) {
     });
     else obj.originalName = otherNames._text;
     gameListItem.setAttribute("data-id", obj.id);
-    gameListItem.innerHTML = `<div class="thumb"><lable class="favourite-lable"><input class="favourite-input" type="checkbox"/><svg class="favourite-svg" viewBox="0 0 122.88 107.41"><path d="M60.83,17.19C68.84,8.84,74.45,1.62,86.79,0.21c23.17-2.66,44.48,21.06,32.78,44.41 c-3.33,6.65-10.11,14.56-17.61,22.32c-8.23,8.52-17.34,16.87-23.72,23.2l-17.4,17.26L46.46,93.56C29.16,76.9,0.95,55.93,0.02,29.95 C-0.63,11.75,13.73,0.09,30.25,0.3C45.01,0.5,51.22,7.84,60.83,17.19L60.83,17.19L60.83,17.19z"/></svg></lable><p class="game-name">${obj.name}</p><img class="thumbnail" src=${obj.url}><p>Original name: ${obj.originalName}</p>${categoriesEl.outerHTML}</div><button class="add-game-button" type="button"><img src=${0, _plusPngDefault.default}></button>`;
+    gameListItem.innerHTML = `<div class="thumb"><lable class="favourite-lable"><input class="favourite-input" type="checkbox"/><svg class="favourite-svg" viewBox="0 0 122.88 107.41"><path d="M60.83,17.19C68.84,8.84,74.45,1.62,86.79,0.21c23.17-2.66,44.48,21.06,32.78,44.41 c-3.33,6.65-10.11,14.56-17.61,22.32c-8.23,8.52-17.34,16.87-23.72,23.2l-17.4,17.26L46.46,93.56C29.16,76.9,0.95,55.93,0.02,29.95 C-0.63,11.75,13.73,0.09,30.25,0.3C45.01,0.5,51.22,7.84,60.83,17.19L60.83,17.19L60.83,17.19z"/></svg></lable><p class="game-name">${obj.name}</p><img class="thumbnail" src=${obj.url}><p>Original name: ${obj.originalName}</p>${categoriesEl.outerHTML}${descriptionButton.outerHTML}</div><button class="add-game-button" type="button"><img src=${0, _plusPngDefault.default}></button>`;
     const addGameButtonEl = gameListItem.querySelector(".add-game-button");
-    addGameButtonEl.addEventListener("click", (e)=>addGameToGames(e, obj));
+    addGameButtonEl.addEventListener("click", (e)=>addGameToGames(obj));
+    const descriptionButtonEl = gameListItem.querySelector(".description-button");
+    descriptionButtonEl.addEventListener("click", (e)=>showDescription(obj.description));
+    const imageEl = gameListItem.querySelector(".thumbnail");
+    imageEl.addEventListener("click", (e)=>showImage(obj.url));
     const favoriteEl = gameListItem.querySelector(".favourite-input");
     if (await (0, _constants.isGameInFavourites)(obj.id, userId)) favoriteEl.checked = true;
     favoriteEl.addEventListener("change", (e)=>(0, _constants.toggleFavourites)(e, obj, userId));
@@ -627,7 +638,7 @@ async function renderGames(obj, length) {
 function handleWrongSearchRequest(searchValue) {
     gameListEl.innerHTML = `<p>There is no game called <span>"${searchValue}"</span></p>`;
 }
-async function addGameToGames(_, game) {
+async function addGameToGames(game) {
     try {
         const q = (0, _firestore.query)((0, _constants.getRefs)(userId).games, (0, _firestore.where)("id", "==", game.id));
         const querySnapshot = await (0, _firestore.getDocs)(q);
@@ -655,6 +666,16 @@ async function handleGameData(game) {
         hidden
     };
     return id;
+}
+function showDescription(text) {
+    searchModalOverlay.classList.remove("hidden");
+    document.querySelector(".description-container").innerHTML = text;
+}
+function showImage(url) {
+    searchModalOverlay.classList.remove("hidden");
+    const container = document.querySelector(".description-container");
+    container.innerHTML = `<img src=${url}>`;
+// document.querySelector(".description-container").innerHTML = text;
 }
 
 },{"../images/plus.png":"bFEW6","../images/no_image.jpg":"uA0id","xml-js":"6mugM","firebase/firestore":"8A4BC","notiflix/build/notiflix-notify-aio":"eXQLZ","./constants":"itKcQ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","spin.js":"iZQ5x","firebase/auth":"79vzg","./login":"47T64"}],"bFEW6":[function(require,module,exports) {

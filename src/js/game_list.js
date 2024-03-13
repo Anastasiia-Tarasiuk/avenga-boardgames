@@ -87,7 +87,8 @@ function getDataFromPlaySnapshot(querySnapshot) {
 
         bestScore.push({
             score: Number(playStats.score),
-            player: playStats.playerId
+            player: playStats.playerId,
+            date: new Date(Date.parse(playStats.date)).toLocaleDateString()
         })
     });
 
@@ -116,6 +117,7 @@ async function createWinnersList(scoreArray, userId) {
         const item = document.createElement("li");
 
         if (scoreArray[i]) {
+            console.log(scoreArray[i].date)
             const q = getPlayerQueryById(userId, scoreArray[i].player);
             const querySnapshot = await getDocs(q);
             querySnapshot.forEach(doc => {
@@ -134,4 +136,9 @@ async function createWinnersList(scoreArray, userId) {
 async function getPlaysSnapshot(gameId, userId) {
     const q = query(getRefs(userId).plays, where("gameId", "==", gameId));
     return await getDocs(q);
+}
+
+function convertUTCDateToLocalDate(date) {
+    console.log(new Date(date).toLocaleDateString());
+
 }

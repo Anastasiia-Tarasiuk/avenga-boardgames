@@ -1,6 +1,7 @@
 .login-modal-overlay form,
 .add-player-modal-overlay form,
-.players-settings-modal-overlay form {
+.players-settings-modal-overlay form,
+.search-modal-overlay form {
     background-color: $secondary-color;
     display: flex;
     width: 300px;
@@ -20,8 +21,14 @@
     height: 170px;
 }
 
+.search-modal-overlay form {
+    width: 70%;
+    height: 70%;
+}
+
 .add-player-modal-overlay,
-.players-settings-modal-overlay {
+.players-settings-modal-overlay,
+.search-modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -50,7 +57,8 @@
 
 .close-login-modal,
 .close-player-modal,
-.close-player-settings-modal {
+.close-player-settings-modal,
+.close-search-modal {
     position: absolute;
     right: 10px;
     top: 10px;
