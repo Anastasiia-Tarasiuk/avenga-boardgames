@@ -92,7 +92,6 @@ async function getGameByName(games) {
 async function getGameById(id) {
     const url = `https://boardgamegeek.com/xmlapi/boardgame/${id}`;
     const {boardgames} = await fetchAPI(url);
-    console.log(boardgames)
 
     return ({
         url: boardgames.boardgame.image?._text || defaultImage,

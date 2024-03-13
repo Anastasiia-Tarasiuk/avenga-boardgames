@@ -578,7 +578,6 @@ async function getGameByName(games) {
 async function getGameById(id) {
     const url = `https://boardgamegeek.com/xmlapi/boardgame/${id}`;
     const { boardgames  } = await fetchAPI(url);
-    console.log(boardgames);
     return {
         url: boardgames.boardgame.image?._text || (0, _noImageJpgDefault.default),
         category: boardgames.boardgame.boardgamecategory || [],
@@ -678,7 +677,7 @@ function showImage(url) {
 // document.querySelector(".description-container").innerHTML = text;
 }
 
-},{"../images/plus.png":"bFEW6","../images/no_image.jpg":"uA0id","xml-js":"6mugM","firebase/firestore":"8A4BC","notiflix/build/notiflix-notify-aio":"eXQLZ","./constants":"itKcQ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","spin.js":"iZQ5x","firebase/auth":"79vzg","./login":"47T64"}],"bFEW6":[function(require,module,exports) {
+},{"../images/plus.png":"bFEW6","../images/no_image.jpg":"uA0id","xml-js":"6mugM","firebase/firestore":"8A4BC","notiflix/build/notiflix-notify-aio":"eXQLZ","./constants":"itKcQ","spin.js":"iZQ5x","firebase/auth":"79vzg","./login":"47T64","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"bFEW6":[function(require,module,exports) {
 module.exports = require("./helpers/bundle-url").getBundleURL("eglpp") + "../plus.516f8977.png" + "?" + Date.now();
 
 },{"./helpers/bundle-url":"lgJ39"}],"lgJ39":[function(require,module,exports) {

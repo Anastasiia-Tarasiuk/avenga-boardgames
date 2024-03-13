@@ -785,7 +785,7 @@ function hidePlayerFromPage(playerId) {
     });
 }
 
-},{"firebase/auth":"79vzg","./login":"47T64","./pieChart":"dlNL4","./constants":"itKcQ","firebase/firestore":"8A4BC","notiflix/build/notiflix-notify-aio":"eXQLZ","lodash.debounce":"3JP5n","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","spin.js":"iZQ5x"}],"dlNL4":[function(require,module,exports) {
+},{"firebase/auth":"79vzg","./login":"47T64","./pieChart":"dlNL4","./constants":"itKcQ","firebase/firestore":"8A4BC","notiflix/build/notiflix-notify-aio":"eXQLZ","lodash.debounce":"3JP5n","spin.js":"iZQ5x","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"dlNL4":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "PieChart", ()=>PieChart);

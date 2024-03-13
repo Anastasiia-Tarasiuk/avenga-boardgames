@@ -508,7 +508,7 @@ var _header = require("./js/header");
 var _constants = require("./js/constants");
 var _spinCss = require("spin.js/spin.css");
 
-},{"./js/login":"47T64","./js/constants":"itKcQ","./js/header":"bvS82","spin.js/spin.css":"8KK6V"}],"47T64":[function(require,module,exports) {
+},{"./js/login":"47T64","./js/header":"bvS82","./js/constants":"itKcQ","spin.js/spin.css":"8KK6V"}],"47T64":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "auth", ()=>auth);
@@ -37341,7 +37341,7 @@ function closeModal(modal) {
     modal.classList.add("hidden");
 }
 
-},{"firebase/firestore":"8A4BC","./login":"47T64","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","notiflix/build/notiflix-notify-aio":"eXQLZ"}],"bvS82":[function(require,module,exports) {
+},{"firebase/firestore":"8A4BC","./login":"47T64","notiflix/build/notiflix-notify-aio":"eXQLZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"bvS82":[function(require,module,exports) {
 var _auth = require("firebase/auth");
 var _firestore = require("firebase/firestore");
 var _login = require("./login");
