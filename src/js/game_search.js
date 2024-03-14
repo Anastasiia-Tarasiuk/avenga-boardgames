@@ -207,8 +207,4 @@ function showImage(url) {
     searchModalOverlay.classList.remove("hidden");
     const container = document.querySelector(".description-container")
     container.innerHTML = `<img src=${url}>`;
-
-
-
-    // document.querySelector(".description-container").innerHTML = text;
 }
