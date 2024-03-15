@@ -18,6 +18,7 @@
 
 .search-form {
     margin-bottom: 20px;
+    position: relative;
 }
 
 .add-game-button {
@@ -38,8 +39,8 @@
     position: absolute;
     height: 25px;
     width: 25px;
-    top: 114px;
-    left: 179px;
+    top: 0px;
+    left: 155px;
     stroke: $text-color-light;
     stroke-width: 1.5;
     fill: transparent;

@@ -12,19 +12,16 @@
 }
 
 .add-game {
-    position: fixed;
-    bottom: 20px;
-    right: 110px;
-
-    @media screen and (min-width: 1024px) {
-        display: none;
-    }
+    position: absolute;
+    top: 20px;
+    right: 20px;
 }
 
 .tooltip-text {
     display: none;
 
     @media screen and (min-width: 1024px) {
+        display: inline;
         font-size: 12px;
         visibility: hidden;
         position: absolute;
@@ -38,8 +35,8 @@
     @media screen and (min-width: 1024px) {
         visibility: visible;
         top: 40px;
-        left: -30px;
-        width: 94px;
+        right: 0;
+        width: 58px;
     }
 }
 

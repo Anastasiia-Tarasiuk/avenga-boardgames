@@ -157,6 +157,7 @@ button {
 .filter-label {
   margin-bottom: 20px;
   display: block;
+  position: relative;
 }
 
 .filter {
@@ -168,8 +169,8 @@ button {
   width: 20px;
   fill: #000;
   position: absolute;
-  top: 116px;
-  left: 341px;
+  top: 3px;
+  left: 320px;
 }
 
 .switch.label {
@@ -277,6 +278,10 @@ button {
   }
 }
 
+.top-container {
+  display: flex;
+}
+
 .logo {
   width: 50px;
 }
@@ -318,6 +323,7 @@ button {
 }
 
 .container {
+  margin: 0 auto;
   padding: 20px;
 }
 
@@ -342,6 +348,10 @@ button {
 header .container {
   justify-content: space-between;
   display: flex;
+}
+
+main .container {
+  position: relative;
 }
 
 header {
@@ -499,6 +509,7 @@ form#signup-form .confirm .svg-icon {
 
 .search-form {
   margin-bottom: 20px;
+  position: relative;
 }
 
 .add-game-button {
@@ -522,8 +533,8 @@ form#signup-form .confirm .svg-icon {
   stroke-width: 1.5px;
   fill: #0000;
   position: absolute;
-  top: 114px;
-  left: 179px;
+  top: 0;
+  left: 155px;
 }
 
 .category span:not(:last-child):after {
@@ -568,15 +579,9 @@ form#signup-form .confirm .svg-icon {
 }
 
 .add-game {
-  position: fixed;
-  bottom: 20px;
-  right: 110px;
-}
-
-@media screen and (min-width: 1024px) {
-  .add-game {
-    display: none;
-  }
+  position: absolute;
+  top: 20px;
+  right: 20px;
 }
 
 .tooltip-text {
@@ -590,6 +595,7 @@ form#signup-form .confirm .svg-icon {
     cursor: default;
     background-color: #fff;
     font-size: 12px;
+    display: inline;
     position: absolute;
   }
 }
@@ -597,9 +603,9 @@ form#signup-form .confirm .svg-icon {
 @media screen and (min-width: 1024px) {
   .add-game:hover .tooltip-text {
     visibility: visible;
-    width: 94px;
+    width: 58px;
     top: 40px;
-    left: -30px;
+    right: 0;
   }
 }
 

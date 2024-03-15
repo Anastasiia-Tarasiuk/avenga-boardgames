@@ -39,6 +39,7 @@
 }
 
 .container {
+    margin: 0 auto;
     padding: 20px;
 
     @media screen and (min-width: 480px) {
@@ -57,6 +58,10 @@
 header .container {
     display: flex;
     justify-content: space-between;
+}
+
+main .container {
+    position: relative;
 }
 
 header {
