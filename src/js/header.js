@@ -5,6 +5,7 @@ import {auth, db} from "./login";
 const checkbox = document.querySelector(".header-checkbox");
 const themeEl = document.querySelector(".switch");
 const body = document.querySelector("body");
+const burgerEl = document.querySelector(".burger-button");
 
 const theme = localStorage.getItem("theme");
 
@@ -19,6 +20,7 @@ if (theme) {
 }
 
 checkbox.addEventListener("click", e => setTheme(e));
+burgerEl.addEventListener("click", e => showModalMenu(e));
 function setTheme(e) {
     const slider = e.currentTarget;
 
@@ -52,5 +54,17 @@ async function setChangedThemeToStore(theme) {
         localStorage.setItem("theme", `${theme}`);
     } catch (e) {
         console.error("Error changing theme: ", e);
+    }
+}
+
+function showModalMenu(e) {
+    const burger = e.currentTarget;
+
+    if (body.clientWidth < 768) {
+        if (burger.classList.contains("is-open")) {
+            burger.classList.remove("is-open");
+        } else {
+            burger.classList.add("is-open");
+        }
     }
 }

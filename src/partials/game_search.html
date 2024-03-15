@@ -17,31 +17,39 @@
                 <input type="checkbox" class="header-checkbox">
                 <span class="slider round"></span>
             </label>
-            <ul class="menu hidden">
-                <li>
-                    <a href="../index.html">My list</a>
-                </li>
-                <li>
-                    <a class="active-link" href="../partials/game_search.html">Add game</a>
-                </li>
-                <li>
-                    <a href="../partials/players.html">Players</a>
-                </li>
-                <li>
-                    <a href="../partials/settings.html">Settings</a>
-                </li>
-                <li>
-                    <button class="logout-button">Log out</button>
-                </li>
-            </ul>
-            <ul class="login-menu hidden">
-                <li>
-                    <button class="signin-button">Sing in</button>
-                </li>
-                <li>
-                    <button class="signup-button">Sign up</button>
-                </li>
-            </ul>
+            <button class="burger-button" type="button">
+                <svg width="24" height="16">
+                    <use class="burger-menu" href="../images/sprite.svg#burger"></use>
+                    <use class="burger-close" href="../images/sprite.svg#burger-close"></use>
+                </svg>
+            </button>
+            <div class="menu-container">
+                <ul class="menu hidden">
+                    <li>
+                        <a href="../index.html">My list</a>
+                    </li>
+                    <li>
+                        <a class="active-link" href="../partials/game_search.html">Add game</a>
+                    </li>
+                    <li>
+                        <a href="../partials/players.html">Players</a>
+                    </li>
+                    <li>
+                        <a href="../partials/settings.html">Settings</a>
+                    </li>
+                    <li>
+                        <button class="logout-button">Log out</button>
+                    </li>
+                </ul>
+                <ul class="login-menu hidden">
+                    <li>
+                        <button class="signin-button">Sing in</button>
+                    </li>
+                    <li>
+                        <button class="signup-button">Sign up</button>
+                    </li>
+                </ul>
+            </div>
         </div>
     </header>
     <main>

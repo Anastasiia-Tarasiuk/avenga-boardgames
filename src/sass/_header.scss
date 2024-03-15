@@ -5,16 +5,30 @@
 .menu,
 .login-menu {
     display: flex;
+    flex-direction: column;
+    font-size: 24px;
+
+    @media screen and (min-width: 768px) {
+        flex-direction: row;
+        font-size: 16px;
+    }
 }
 
 .menu li,
 .login-menu li {
-    align-self: center;
+    @media screen and (min-width: 768px) {
+        align-self: center;
+    }
 }
 
 .menu li:not(:last-child),
 .login-menu  li:not(:last-child) {
-    margin-right: 25px;
+    margin-bottom: 25px;
+
+    @media screen and (min-width: 768px) {
+        margin-bottom: 0;
+        margin-right: 25px;
+    }
 }
 
 .menu button,
@@ -26,6 +40,18 @@
 
 .container {
     padding: 20px;
+
+    @media screen and (min-width: 480px) {
+        width: 480px;
+    }
+
+    @media screen and (min-width: 768px) {
+        width: 768px;
+    }
+
+    @media screen and (min-width: 1024px) {
+        width: 1024px;
+    }
 }
 
 header .container {
@@ -39,4 +65,49 @@ header {
 
 header a {
     color: $text-color-light;
+}
+
+.burger-button {
+    align-self: center;
+    border-color: transparent;
+    border-radius: 5%;
+    background-color: $accent-color;
+    position: relative;
+    z-index: 6;
+
+    @media screen and (min-width: 768px) {
+        display: none;
+    }
+}
+
+.burger-button .burger-close {
+    display: none;
+}
+
+.burger-button.is-open .burger-menu {
+    display: none;
+}
+
+.burger-button.is-open .burger-close {
+    display: block;
+}
+
+.burger-button.is-open + .menu-container {
+    padding: 40px;
+    display: flex;
+    position: fixed;
+    z-index: 5;
+    background-color: $secondary-color;
+    width: 100vw;
+    height: 100vh;
+    margin-left: -20px;
+    margin-top: -20px;
+}
+
+.burger-button + .menu-container {
+    display: none;
+
+    @media screen and (min-width: 768px) {
+        display: flex;
+    }
 }

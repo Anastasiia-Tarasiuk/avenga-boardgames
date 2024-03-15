@@ -13,29 +13,42 @@
 
 .add-game {
     position: fixed;
-    bottom: 30px;
+    bottom: 20px;
     right: 110px;
+
+    @media screen and (min-width: 1024px) {
+        display: none;
+    }
 }
 
 .tooltip-text {
-    font-size: 12px;
-    visibility: hidden;
-    position: absolute;
-    background-color: #fff;
-    color: #000;
+    display: none;
+
+    @media screen and (min-width: 1024px) {
+        font-size: 12px;
+        visibility: hidden;
+        position: absolute;
+        background-color: #fff;
+        color: #000;
+        cursor: default;
+    }
 }
 
 .add-game:hover .tooltip-text {
-    visibility: visible;
-    top: 40px;
-    left: -30px;
-    width: 94px;
+    @media screen and (min-width: 1024px) {
+        visibility: visible;
+        top: 40px;
+        left: -30px;
+        width: 94px;
+    }
 }
 
 .truncate-name:hover .tooltip-text {
-    visibility: visible;
-    left: 55px;
-    font-size: inherit;
+    @media screen and (min-width: 1024px) {
+        visibility: visible;
+        left: 55px;
+        font-size: inherit;
+    }
 }
 
 .add-game img {
@@ -58,7 +71,7 @@
 
 .truncate-container {
     width: 150px;
-    margin-right: 20px;
+    overflow: hidden;
 }
 
 .truncate-name {

@@ -544,6 +544,7 @@ const googleButtonEls = document.querySelectorAll(".google-button");
 const closeLoginModalButtonEls = document.querySelectorAll(".close-login-modal");
 const body = document.querySelector("body");
 const slider = document.querySelector(".header-checkbox");
+const burgerEl = document.querySelector(".burger-button");
 if (modalOverlayEl) {
     const submitFormButtonsEl = modalOverlayEl.querySelectorAll("button[type='submit']");
     submitFormButtonsEl.forEach((btn)=>btn.addEventListener("click", (e)=>submitLoginForm(e)));
@@ -561,6 +562,7 @@ googleButtonEls.forEach((btn)=>btn.addEventListener("click", (e)=>loginWithGoogl
 });
 function showModal(e) {
     const button = e.currentTarget;
+    burgerEl.classList.remove("is-open");
     modalOverlayEl.classList.remove("hidden");
     if (button.classList.contains("signin-button")) {
         signupFormEl.style.display = "none";
@@ -2016,8 +2018,8 @@ parcelHelpers.export(exports, "validateCallback", ()=>validateCallback);
 parcelHelpers.export(exports, "validateContextObject", ()=>validateContextObject);
 parcelHelpers.export(exports, "validateIndexedDBOpenable", ()=>validateIndexedDBOpenable);
 parcelHelpers.export(exports, "validateNamespace", ()=>validateNamespace);
-var global = arguments[3];
 var process = require("process");
+var global = arguments[3];
 /**
  * @license
  * Copyright 2017 Google LLC
@@ -37348,6 +37350,7 @@ var _login = require("./login");
 const checkbox = document.querySelector(".header-checkbox");
 const themeEl = document.querySelector(".switch");
 const body = document.querySelector("body");
+const burgerEl = document.querySelector(".burger-button");
 const theme = localStorage.getItem("theme");
 if (theme) {
     if (theme === "light") {
@@ -37359,6 +37362,7 @@ if (theme) {
     }
 }
 checkbox.addEventListener("click", (e)=>setTheme(e));
+burgerEl.addEventListener("click", (e)=>showModalMenu(e));
 function setTheme(e) {
     const slider = e.currentTarget;
     if (slider.hasAttribute("checked")) {
@@ -37386,6 +37390,13 @@ async function setChangedThemeToStore(theme1) {
         localStorage.setItem("theme", `${theme1}`);
     } catch (e) {
         console.error("Error changing theme: ", e);
+    }
+}
+function showModalMenu(e) {
+    const burger = e.currentTarget;
+    if (body.clientWidth < 768) {
+        if (burger.classList.contains("is-open")) burger.classList.remove("is-open");
+        else burger.classList.add("is-open");
     }
 }
 

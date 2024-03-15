@@ -650,7 +650,7 @@ async function setScore(e) {
     }
 }
 
-},{"firebase/auth":"79vzg","./login":"47T64","notiflix/build/notiflix-notify-aio":"eXQLZ","firebase/firestore":"8A4BC","lodash.debounce":"3JP5n","./constants":"itKcQ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","spin.js":"iZQ5x"}],"3JP5n":[function(require,module,exports) {
+},{"firebase/auth":"79vzg","./login":"47T64","notiflix/build/notiflix-notify-aio":"eXQLZ","firebase/firestore":"8A4BC","lodash.debounce":"3JP5n","./constants":"itKcQ","spin.js":"iZQ5x","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"3JP5n":[function(require,module,exports) {
 var global = arguments[3];
 /**
  * lodash (Custom Build) <https://lodash.com/>

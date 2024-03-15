@@ -674,7 +674,6 @@ function showImage(url) {
     searchModalOverlay.classList.remove("hidden");
     const container = document.querySelector(".description-container");
     container.innerHTML = `<img src=${url}>`;
-// document.querySelector(".description-container").innerHTML = text;
 }
 
 },{"../images/plus.png":"bFEW6","../images/no_image.jpg":"uA0id","xml-js":"6mugM","firebase/firestore":"8A4BC","notiflix/build/notiflix-notify-aio":"eXQLZ","./constants":"itKcQ","spin.js":"iZQ5x","firebase/auth":"79vzg","./login":"47T64","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"bFEW6":[function(require,module,exports) {
@@ -4367,8 +4366,8 @@ module.exports = function inherits(ctor, superCtor) {
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 "use strict";
-var global = arguments[3];
 var process = require("process");
+var global = arguments[3];
 module.exports = Readable;
 /*<replacement>*/ var Duplex;
 /*</replacement>*/ Readable.ReadableState = ReadableState;

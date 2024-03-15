@@ -282,15 +282,33 @@ button {
 }
 
 .menu, .login-menu {
+  flex-direction: column;
+  font-size: 24px;
   display: flex;
 }
 
-.menu li, .login-menu li {
-  align-self: center;
+@media screen and (min-width: 768px) {
+  .menu, .login-menu {
+    flex-direction: row;
+    font-size: 16px;
+  }
+}
+
+@media screen and (min-width: 768px) {
+  .menu li, .login-menu li {
+    align-self: center;
+  }
 }
 
 .menu li:not(:last-child), .login-menu li:not(:last-child) {
-  margin-right: 25px;
+  margin-bottom: 25px;
+}
+
+@media screen and (min-width: 768px) {
+  .menu li:not(:last-child), .login-menu li:not(:last-child) {
+    margin-bottom: 0;
+    margin-right: 25px;
+  }
 }
 
 .menu button, .login-menu button {
@@ -301,6 +319,24 @@ button {
 
 .container {
   padding: 20px;
+}
+
+@media screen and (min-width: 480px) {
+  .container {
+    width: 480px;
+  }
+}
+
+@media screen and (min-width: 768px) {
+  .container {
+    width: 768px;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .container {
+    width: 1024px;
+  }
 }
 
 header .container {
@@ -314,6 +350,51 @@ header {
 
 header a {
   color: #000;
+}
+
+.burger-button {
+  z-index: 6;
+  background-color: #67ba04;
+  border-color: #0000;
+  border-radius: 5%;
+  align-self: center;
+  position: relative;
+}
+
+@media screen and (min-width: 768px) {
+  .burger-button {
+    display: none;
+  }
+}
+
+.burger-button .burger-close, .burger-button.is-open .burger-menu {
+  display: none;
+}
+
+.burger-button.is-open .burger-close {
+  display: block;
+}
+
+.burger-button.is-open + .menu-container {
+  z-index: 5;
+  width: 100vw;
+  height: 100vh;
+  background-color: #ccc;
+  margin-top: -20px;
+  margin-left: -20px;
+  padding: 40px;
+  display: flex;
+  position: fixed;
+}
+
+.burger-button + .menu-container {
+  display: none;
+}
+
+@media screen and (min-width: 768px) {
+  .burger-button + .menu-container {
+    display: flex;
+  }
 }
 
 .login-modal-overlay form, .add-player-modal-overlay form, .players-settings-modal-overlay form, .search-modal-overlay form {
@@ -340,9 +421,10 @@ header a {
   height: 70%;
 }
 
-.add-player-modal-overlay, .players-settings-modal-overlay, .search-modal-overlay {
+.login-modal-overlay, .add-player-modal-overlay, .players-settings-modal-overlay, .search-modal-overlay {
   width: 100%;
   height: 100vh;
+  z-index: 7;
   background-color: #00000080;
   position: fixed;
   top: 0;
@@ -487,29 +569,46 @@ form#signup-form .confirm .svg-icon {
 
 .add-game {
   position: fixed;
-  bottom: 30px;
+  bottom: 20px;
   right: 110px;
 }
 
+@media screen and (min-width: 1024px) {
+  .add-game {
+    display: none;
+  }
+}
+
 .tooltip-text {
-  visibility: hidden;
-  color: #000;
-  background-color: #fff;
-  font-size: 12px;
-  position: absolute;
+  display: none;
 }
 
-.add-game:hover .tooltip-text {
-  visibility: visible;
-  width: 94px;
-  top: 40px;
-  left: -30px;
+@media screen and (min-width: 1024px) {
+  .tooltip-text {
+    visibility: hidden;
+    color: #000;
+    cursor: default;
+    background-color: #fff;
+    font-size: 12px;
+    position: absolute;
+  }
 }
 
-.truncate-name:hover .tooltip-text {
-  visibility: visible;
-  font-size: inherit;
-  left: 55px;
+@media screen and (min-width: 1024px) {
+  .add-game:hover .tooltip-text {
+    visibility: visible;
+    width: 94px;
+    top: 40px;
+    left: -30px;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .truncate-name:hover .tooltip-text {
+    visibility: visible;
+    font-size: inherit;
+    left: 55px;
+  }
 }
 
 .add-game img {
@@ -532,7 +631,7 @@ form#signup-form .confirm .svg-icon {
 
 .truncate-container {
   width: 150px;
-  margin-right: 20px;
+  overflow: hidden;
 }
 
 .truncate-name {

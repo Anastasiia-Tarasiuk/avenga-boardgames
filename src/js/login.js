@@ -33,6 +33,7 @@ const googleButtonEls = document.querySelectorAll(".google-button");
 const closeLoginModalButtonEls = document.querySelectorAll(".close-login-modal");
 const body = document.querySelector("body");
 const slider = document.querySelector(".header-checkbox");
+const burgerEl = document.querySelector(".burger-button");
 
 if (modalOverlayEl) {
     const submitFormButtonsEl = modalOverlayEl.querySelectorAll("button[type='submit']");
@@ -49,14 +50,15 @@ googleButtonEls.forEach(btn => btn.addEventListener("click", (e) => loginWithGoo
 
 onAuthStateChanged(auth, (user) => {
     if (user) {
-      showMenu();
+        showMenu();
     } else {
-      hideMenu();
+        hideMenu();
     }
 });
 
 function showModal(e) {
     const button = e.currentTarget;
+    burgerEl.classList.remove("is-open");
     modalOverlayEl.classList.remove('hidden');
 
     if (button.classList.contains("signin-button")) {
