@@ -37292,19 +37292,20 @@ async function isGameInFavourites(id, userId) {
     if (querySnapshot.empty) return false;
     else return true;
 }
-function toggleFavourites(e, { id , name , url  }, userId) {
+function toggleFavourites(e, { id , name , url , description  }, userId) {
     const input = e.currentTarget;
-    if (input.checked) addToFavourites(id, name, url, userId);
+    if (input.checked) addToFavourites(id, name, url, description, userId);
     else removeFromFavourites(id, userId);
 }
-async function addToFavourites(id, name, url, userId) {
+async function addToFavourites(id, name, url, description, userId) {
     try {
         if (await isGameInFavourites(id)) (0, _notiflixNotifyAio.Notify).failure("The game is already in favourites");
         else {
             await (0, _firestore.addDoc)(getRefs(userId).favourites, {
                 id,
                 name,
-                url
+                url,
+                description
             });
             (0, _notiflixNotifyAio.Notify).success("The game is added to favourites");
         }

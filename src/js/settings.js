@@ -8,10 +8,8 @@ import {Spinner} from 'spin.js';
 import {opts} from "./constants";
 
 const panelEl = document.querySelector(".setting-panel");
-const favouritesButtonEl = document.querySelector(".favourites-button");
 const gamesButtonEl = document.querySelector(".games-button");
 const playersButtonEl = document.querySelector(".players-button");
-const favouritesListEl = document.querySelector("#favouritesId");
 const playersListEl = document.querySelector("#playersId");
 const gamesListEl = document.querySelector("#gamesId");
 const filterLabelEl = document.querySelector(".filter-label");
@@ -20,27 +18,23 @@ const target = document.querySelector('.container');
 const defaultTextEl = document.querySelector(".default-text");
 
 const playersData = [];
-const favoritesData = [];
 const gamesData = [];
 
 filterEl.addEventListener("keydown",  debounce(e => getActiveTab(e), 500));
-favouritesButtonEl.addEventListener("click", e => handleTabsClick(e, 'favouritesId', panelEl));
 playersButtonEl.addEventListener("click", e => handleTabsClick(e, 'playersId', panelEl));
 gamesButtonEl.addEventListener("click", e => handleTabsClick(e, 'gamesId', panelEl));
 
-favouritesButtonEl.click();
+playersButtonEl.click();
 
 const spinner = new Spinner(opts).spin(target);
 
 function getActiveTab(e) {
     const activeTab = document.querySelector(".active-tab");
 
-    if (activeTab === favouritesListEl) {
-        filterList(e, favoritesData, favouritesListEl, renderFavouritesSettings);
+    if (activeTab === gamesListEl) {
+        filterList(e, gamesData, gamesListEl, renderGamesSettings);
     } else if (activeTab === playersListEl) {
         filterList(e, playersData, playersListEl, renderPlayersSettings);
-    } else {
-
     }
 }
 
@@ -48,7 +42,6 @@ onAuthStateChanged(auth,  user => {
     if (user) {
         defaultTextEl.classList.add("hidden");
         handlePlayersSection(user.uid);
-        handleFavouritesSection(user.uid);
         handleGamesSection(user.uid);
     }
 });
@@ -58,27 +51,13 @@ async function handlePlayersSection(userId){
     const querySnapshot = await getDocs(q);
 
     if (!querySnapshot.empty) {
+        const length = querySnapshot.docs.length;
         playersListEl.innerHTML = "";
         playersListEl.classList.remove("default");
 
         querySnapshot.forEach(doc => {
             playersData.push(doc.data());
-            renderPlayersSettings(doc.data());
-        })
-    }
-}
-async function handleFavouritesSection(userId) {
-    const q = query(getRefs(userId).favourites);
-    const querySnapshot = await getDocs(q);
-
-    if (!querySnapshot.empty) {
-        const length = querySnapshot.docs.length;
-        favouritesListEl.innerHTML = "";
-        favouritesListEl.classList.remove("default");
-
-        querySnapshot.forEach(doc => {
-            favoritesData.push(doc.data());
-            renderFavouritesSettings(doc.data(), length);
+            renderPlayersSettings(doc.data(), length);
         })
     } else {
         target.removeChild(spinner.el);
@@ -97,14 +76,12 @@ async function handleGamesSection(userId) {
 
         querySnapshot.forEach(doc => {
             gamesData.push(doc.data());
-            const gamesItem = createGameTemplate(doc.data(), gamesListEl);
-            const checkbox = gamesItem.querySelector(".slider-checkbox");
-            checkbox.addEventListener("change", e => changeGameVisibility(e, gamesItem.dataset.id));
+            renderGamesSettings(doc.data());
         })
     }
 }
 
-function renderPlayersSettings(player) {
+function renderPlayersSettings(player, length) {
     const playerItem = document.createElement("li");
     playerItem.dataset.id = player.id;
     const playerName = document.createElement("p");
@@ -116,18 +93,18 @@ function renderPlayersSettings(player) {
 
     const checkbox = playerItem.querySelector(".slider-checkbox");
     checkbox.addEventListener("click", e => changePlayerVisibility(e, playerItem.dataset.id));
-}
 
-function renderFavouritesSettings(favourite, length){
-    const favouriteItem = createGameTemplate(favourite, favouritesListEl);
-    const checkbox = favouriteItem.querySelector(".slider-checkbox");
-    checkbox.addEventListener("change", e => changeFavourites(e, favouriteItem.dataset.id));
-
-    if (length === favouritesListEl.childNodes.length) {
+    if (length === playersListEl.childNodes.length) {
         target.removeChild(spinner.el);
         filterLabelEl.classList.remove("hidden");
         panelEl.classList.remove("hidden");
     }
+}
+
+function renderGamesSettings(game) {
+    const gamesItem = createGameTemplate(game, gamesListEl);
+    const checkbox = gamesItem.querySelector(".slider-checkbox");
+    checkbox.addEventListener("change", e => changeGameVisibility(e, gamesItem.dataset.id));
 }
 
 function createSwitcher(item) {
@@ -170,26 +147,6 @@ async function changePlayerVisibility(e, playerId) {
         console.error("Error adding document: ", e);
     }
 }
-
-function changeFavourites(e, favouriteId) {
-    e.stopPropagation();
-    const favouriteItem =  document.querySelector(`li[data-id = "${favouriteId}"]`)
-    const userId =  localStorage.getItem("userId");
-
-    removeFromFavourites(favouriteId, userId);
-
-    setTimeout(() => {
-        favouriteItem.remove();
-
-        if (favouritesListEl.innerHTML.length === 0) {
-            favouritesListEl.classList.add("default");
-            favouritesListEl.innerHTML = "Favourite games are going to be here";
-        }
-
-        favouritesListEl.classList.remove("default");
-    }, 500)
-}
-
 
 function createGameTemplate(data, list) {
     const item = document.createElement("li");

@@ -364,22 +364,22 @@ export async function isGameInFavourites(id, userId) {
     }
 }
 
-export function toggleFavourites(e, {id, name, url}, userId) {
+export function toggleFavourites(e, {id, name, url, description}, userId) {
     const input = e.currentTarget;
 
     if (input.checked) {
-        addToFavourites(id, name, url, userId);
+        addToFavourites(id, name, url, description, userId);
     } else {
         removeFromFavourites(id, userId);
     }
 }
 
-export async function addToFavourites(id, name, url, userId) {
+export async function addToFavourites(id, name, url, description, userId) {
     try {
         if (await isGameInFavourites(id)) {
             Notify.failure('The game is already in favourites');
         } else {
-            await addDoc(getRefs(userId).favourites, {id, name, url});
+            await addDoc(getRefs(userId).favourites, {id, name, url, description});
             Notify.success('The game is added to favourites');
         }
     } catch (e) {

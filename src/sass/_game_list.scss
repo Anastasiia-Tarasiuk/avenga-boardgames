@@ -1,9 +1,11 @@
 .played-games li:not(:last-child),
+.favourite-games li:not(:last-child),
 .players li:not(:last-child) {
     margin-bottom: 10px;
 }
 
-.played-games li{
+.played-games li,
+.favourite-games li {
     background-color: $primary-color;
 }
 
@@ -68,7 +70,6 @@
 
 .truncate-container {
     width: 150px;
-    overflow: hidden;
 }
 
 .truncate-name {
@@ -135,4 +136,8 @@
     left: 0;
     right: 0;
     bottom: 0;
+}
+
+.description-content {
+
 }

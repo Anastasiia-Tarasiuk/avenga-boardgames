@@ -566,11 +566,11 @@ form#signup-form .confirm .svg-icon {
   cursor: zoom-in;
 }
 
-.played-games li:not(:last-child), .players li:not(:last-child) {
+.played-games li:not(:last-child), .favourite-games li:not(:last-child), .players li:not(:last-child) {
   margin-bottom: 10px;
 }
 
-.played-games li {
+.played-games li, .favourite-games li {
   background-color: #eee;
 }
 
@@ -637,7 +637,6 @@ form#signup-form .confirm .svg-icon {
 
 .truncate-container {
   width: 150px;
-  overflow: hidden;
 }
 
 .truncate-name {
@@ -699,6 +698,23 @@ form#signup-form .confirm .svg-icon {
   transition: all .4s;
   position: absolute;
   inset: 0;
+}
+
+.favourite-list-item {
+  color: #000;
+  height: 138px;
+  background-color: #eee;
+  padding: 10px;
+  display: flex;
+}
+
+.favourite-list-item .truncate-container {
+  margin-right: 10px;
+}
+
+.description-content {
+  width: calc(100% - 150px);
+  overflow-y: auto;
 }
 
 .plays {

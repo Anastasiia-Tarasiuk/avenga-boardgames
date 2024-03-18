@@ -1,0 +1,16 @@
+.favourite-list-item {
+  display: flex;
+  padding: 10px;
+  background-color: $primary-color;
+  color: $text-color-light;
+  height: 138px;
+}
+
+.favourite-list-item .truncate-container {
+  margin-right: 10px;
+}
+
+.description-content {
+  width: calc(100% - 150px);
+  overflow-y: auto;
+}
