@@ -1,7 +1,7 @@
 import {onAuthStateChanged} from "firebase/auth";
-import {auth} from "./login";
+import {auth, db} from "./login";
 import {Notify} from "notiflix/build/notiflix-notify-aio";
-import {doc, getDocs, query, setDoc, where} from "firebase/firestore";
+import {doc, getDocs, query, setDoc, updateDoc, where} from "firebase/firestore";
 import debounce from 'lodash.debounce';
 import {getRefs, closeModal, opts} from "./constants";
 import {Spinner} from 'spin.js';
@@ -175,13 +175,37 @@ async function setScore(e) {
         const userId = localStorage.getItem("userId");
 
         try {
-            await setDoc(doc(getRefs(userId).plays), play);
-            Notify.success('The score is added successfully');
+            const q = query(getRefs(userId).plays, where("sessionId", "==", sessionId));
+            const querySnapshot = await getDocs(q);
+
+            if (!querySnapshot.empty) {
+                let docId = null;
+
+                querySnapshot.forEach(doc => {
+                    if (doc.data().playerId === option.id) {
+                        docId = doc.id;
+                    }
+                })
+
+                if (docId) {
+                    const playRef = doc(getRefs(userId).plays, docId);
+
+                    await updateDoc(playRef, {
+                        score
+                    });
+                    Notify.success('The score is changed successfully');
+                } else {
+                    await setDoc(doc(getRefs(userId).plays), play);
+                    Notify.success('The score is added successfully');
+                }
+            } else {
+                await setDoc(doc(getRefs(userId).plays), play);
+                Notify.success('The score is added successfully');
+            }
         } catch(e){
             console.error("Error adding score: ", e);
         }
     } else {
         Notify.failure('Add any score');
     }
-
 }

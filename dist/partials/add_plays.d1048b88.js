@@ -645,8 +645,28 @@ async function setScore(e) {
         };
         const userId = localStorage.getItem("userId");
         try {
-            await (0, _firestore.setDoc)((0, _firestore.doc)((0, _constants.getRefs)(userId).plays), play);
-            (0, _notiflixNotifyAio.Notify).success("The score is added successfully");
+            const q = (0, _firestore.query)((0, _constants.getRefs)(userId).plays, (0, _firestore.where)("sessionId", "==", sessionId));
+            const querySnapshot = await (0, _firestore.getDocs)(q);
+            //291457
+            if (!querySnapshot.empty) {
+                let docId = null;
+                querySnapshot.forEach(async (doc)=>{
+                    if (doc.data().playerId === option.id) docId = doc.id;
+                });
+                if (docId) {
+                    const playRef = (0, _firestore.doc)((0, _constants.getRefs)(userId).plays, docId);
+                    await (0, _firestore.updateDoc)(playRef, {
+                        score
+                    });
+                    (0, _notiflixNotifyAio.Notify).success("The score is changed successfully");
+                } else {
+                    await (0, _firestore.setDoc)((0, _firestore.doc)((0, _constants.getRefs)(userId).plays), play);
+                    (0, _notiflixNotifyAio.Notify).success("The score is added successfully");
+                }
+            } else {
+                await (0, _firestore.setDoc)((0, _firestore.doc)((0, _constants.getRefs)(userId).plays), play);
+                (0, _notiflixNotifyAio.Notify).success("The score is added successfully");
+            }
         } catch (e) {
             console.error("Error adding score: ", e);
         }
