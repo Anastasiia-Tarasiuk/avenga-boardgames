@@ -161,9 +161,13 @@ button {
 /* Style the tab content */
 .tabcontent {
     display: none;
-    padding: 10px 0;
+    padding: 10px 0 0;
     border: 1px solid $secondary-color;
     border-top: none;
+}
+
+.players .tabcontent {
+    overflow-y: scroll;
 }
 
 .tabcontent {
