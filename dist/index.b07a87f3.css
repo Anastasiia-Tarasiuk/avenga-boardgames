@@ -262,10 +262,9 @@ button {
 .tabcontent {
   border: 1px solid #ccc;
   border-top: none;
-  padding: 6px 12px;
+  padding: 10px 0;
   animation: fadeEffect 1s;
   display: none;
-  overflow-y: scroll;
 }
 
 @keyframes fadeEffect {
