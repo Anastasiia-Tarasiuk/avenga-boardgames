@@ -162,19 +162,26 @@ async function addPlayerToPlayers(userId, player) {
 
 async function setScore(e) {
     const option = e.target;
-    const play = {
-        date: dateEl.value,
-        playerId: option.id,
-        score: option.value,
-        gameId: id,
-        sessionId: sessionId
-    }
-    const userId = localStorage.getItem("userId");
+    const score = option.value;
 
-    try {
-        await setDoc(doc(getRefs(userId).plays), play);
-        Notify.success('The score is added successfully');
-    } catch(e){
-        console.error("Error adding score: ", e);
+    if (score.length > 0) {
+        const play = {
+            date: dateEl.value,
+            playerId: option.id,
+            score,
+            gameId: id,
+            sessionId: sessionId
+        }
+        const userId = localStorage.getItem("userId");
+
+        try {
+            await setDoc(doc(getRefs(userId).plays), play);
+            Notify.success('The score is added successfully');
+        } catch(e){
+            console.error("Error adding score: ", e);
+        }
+    } else {
+        Notify.failure('Add any score');
     }
+
 }

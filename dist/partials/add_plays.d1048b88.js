@@ -634,20 +634,23 @@ async function addPlayerToPlayers(userId, player) {
 }
 async function setScore(e) {
     const option = e.target;
-    const play = {
-        date: dateEl.value,
-        playerId: option.id,
-        score: option.value,
-        gameId: id,
-        sessionId: sessionId
-    };
-    const userId = localStorage.getItem("userId");
-    try {
-        await (0, _firestore.setDoc)((0, _firestore.doc)((0, _constants.getRefs)(userId).plays), play);
-        (0, _notiflixNotifyAio.Notify).success("The score is added successfully");
-    } catch (e2) {
-        console.error("Error adding score: ", e2);
-    }
+    const score = option.value;
+    if (score.length > 0) {
+        const play = {
+            date: dateEl.value,
+            playerId: option.id,
+            score,
+            gameId: id,
+            sessionId: sessionId
+        };
+        const userId = localStorage.getItem("userId");
+        try {
+            await (0, _firestore.setDoc)((0, _firestore.doc)((0, _constants.getRefs)(userId).plays), play);
+            (0, _notiflixNotifyAio.Notify).success("The score is added successfully");
+        } catch (e) {
+            console.error("Error adding score: ", e);
+        }
+    } else (0, _notiflixNotifyAio.Notify).failure("Add any score");
 }
 
 },{"firebase/auth":"79vzg","./login":"47T64","notiflix/build/notiflix-notify-aio":"eXQLZ","firebase/firestore":"8A4BC","lodash.debounce":"3JP5n","./constants":"itKcQ","spin.js":"iZQ5x","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"3JP5n":[function(require,module,exports) {
