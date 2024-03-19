@@ -3,7 +3,7 @@ import defaultImage from "../images/no_image.jpg";
 import convert from "xml-js";
 import {addDoc, getDocs, query, where} from "firebase/firestore";
 import {Notify} from "notiflix/build/notiflix-notify-aio";
-import {closeModal, getRefs, isGameInFavourites, toggleFavourites} from "./constants";
+import {closeModal, getRefs, isGameInFavourites, toggleFavourites, showImage} from "./constants";
 import {Spinner} from 'spin.js';
 import {opts} from "./constants";
 import {onAuthStateChanged} from "firebase/auth";
@@ -13,11 +13,11 @@ const gameListEl = document.querySelector(".game-list");
 const searchFormEl = document.querySelector(".search-form");
 const submitButtonEl = document.querySelector(".submit-button");
 const target = document.querySelector('.container');
-const searchModalOverlay = document.querySelector(".search-modal-overlay");
-const closeSearchModalButtonEl = document.querySelector(".close-search-modal");
+const showMoreModalOverlay = document.querySelector(".show-more-modal-overlay");
+const closeShowMoreModalButtonEl = document.querySelector(".close-show-more-modal");
 
 submitButtonEl.addEventListener("click", e => submitForm(e));
-closeSearchModalButtonEl.addEventListener("click", e => closeModal(searchModalOverlay));
+closeShowMoreModalButtonEl.addEventListener("click", e => closeModal(showMoreModalOverlay));
 
 const gameData = {};
 const userId = localStorage.getItem("userId");
@@ -153,7 +153,7 @@ async function renderGames(obj, length) {
     const descriptionButtonEl = gameListItem.querySelector(".description-button");
     descriptionButtonEl.addEventListener("click", e => showDescription(obj.description));
     const imageEl = gameListItem.querySelector(".thumbnail");
-    imageEl.addEventListener("click", e => showImage(obj.url));
+    imageEl.addEventListener("click", e => showImage(obj.url, showMoreModalOverlay));
     const favoriteEl = gameListItem.querySelector(".favourite-input");
 
     if (await isGameInFavourites(obj.id, userId)) {
@@ -199,12 +199,6 @@ async function handleGameData(game) {
 }
 
 function showDescription(text) {
-    searchModalOverlay.classList.remove("hidden");
-    document.querySelector(".description-container").innerHTML = text;
-}
-
-function showImage(url) {
-    searchModalOverlay.classList.remove("hidden");
-    const container = document.querySelector(".description-container")
-    container.innerHTML = `<img src=${url}>`;
+    showMoreModalOverlay.classList.remove("hidden");
+    document.querySelector(".show-more-container").innerHTML = text;
 }

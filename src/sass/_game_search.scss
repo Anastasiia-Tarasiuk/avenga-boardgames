@@ -14,6 +14,7 @@
     display: block;
     max-height: 100px;
     width: auto;
+    cursor: zoom-in;
 }
 
 .search-form {
@@ -62,15 +63,11 @@
     color: $accent-color;
 }
 
-.description-container {
+.show-more-container {
     padding: 10px;
     overflow-y: auto;
 }
 
-.description-container img {
+.show-more-container img {
     width: 100%;
-}
-
-.game-list .thumbnail {
-    cursor: zoom-in;
 }

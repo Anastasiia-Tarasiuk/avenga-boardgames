@@ -407,7 +407,7 @@ header a {
   }
 }
 
-.login-modal-overlay form, .add-player-modal-overlay form, .players-settings-modal-overlay form, .search-modal-overlay form {
+.login-modal-overlay form, .add-player-modal-overlay form, .players-settings-modal-overlay form, .show-more-modal-overlay form {
   width: 300px;
   height: 400px;
   color: #000;
@@ -426,12 +426,12 @@ header a {
   height: 170px;
 }
 
-.search-modal-overlay form {
+.show-more-modal-overlay form {
   width: 70%;
   height: 70%;
 }
 
-.login-modal-overlay, .add-player-modal-overlay, .players-settings-modal-overlay, .search-modal-overlay {
+.login-modal-overlay, .add-player-modal-overlay, .players-settings-modal-overlay, .show-more-modal-overlay {
   width: 100%;
   height: 100vh;
   z-index: 7;
@@ -450,7 +450,7 @@ header a {
   margin-bottom: 20px;
 }
 
-.close-login-modal, .close-player-modal, .close-player-settings-modal, .close-search-modal {
+.close-login-modal, .close-player-modal, .close-player-settings-modal, .close-show-more-modal {
   position: absolute;
   top: 10px;
   right: 10px;
@@ -504,6 +504,7 @@ form#signup-form .confirm .svg-icon {
 .thumbnail {
   max-height: 100px;
   width: auto;
+  cursor: zoom-in;
   display: block;
 }
 
@@ -553,17 +554,13 @@ form#signup-form .confirm .svg-icon {
   padding: 0;
 }
 
-.description-container {
+.show-more-container {
   padding: 10px;
   overflow-y: auto;
 }
 
-.description-container img {
+.show-more-container img {
   width: 100%;
-}
-
-.game-list .thumbnail {
-  cursor: zoom-in;
 }
 
 .played-games li:not(:last-child), .favourite-games li:not(:last-child), .players li:not(:last-child) {

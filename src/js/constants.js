@@ -426,3 +426,34 @@ export function handleTabsClick(e, tab, parent) {
 export function closeModal(modal) {
     modal.classList.add("hidden");
 }
+
+export async function pageRender(userId, query, list, array, func, target, spinner) {
+    const querySnapshot = await getDocs(query);
+    const length = querySnapshot.docs.length;
+    let i = 0;
+    let show = false;
+
+    if (!querySnapshot.empty) {
+        list.classList.add("hidden");
+        list.innerHTML = "";
+
+        querySnapshot.forEach(doc => {
+            i++;
+
+            if (i === length) {
+                show = true;
+            }
+
+            array.push(doc.data());
+            func(doc.data(), userId, show);
+        });
+    } else {
+        target.removeChild(spinner.el);
+    }
+}
+
+export function showImage(url, overlay) {
+    overlay.classList.remove("hidden");
+    const container = overlay.querySelector(".show-more-container")
+    container.innerHTML = `<img src=${url}>`;
+}

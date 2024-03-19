@@ -520,10 +520,10 @@ const gameListEl = document.querySelector(".game-list");
 const searchFormEl = document.querySelector(".search-form");
 const submitButtonEl = document.querySelector(".submit-button");
 const target = document.querySelector(".container");
-const searchModalOverlay = document.querySelector(".search-modal-overlay");
-const closeSearchModalButtonEl = document.querySelector(".close-search-modal");
+const showMoreModalOverlay = document.querySelector(".show-more-modal-overlay");
+const closeShowMoreModalButtonEl = document.querySelector(".close-show-more-modal");
 submitButtonEl.addEventListener("click", (e)=>submitForm(e));
-closeSearchModalButtonEl.addEventListener("click", (e)=>(0, _constants.closeModal)(searchModalOverlay));
+closeShowMoreModalButtonEl.addEventListener("click", (e)=>(0, _constants.closeModal)(showMoreModalOverlay));
 const gameData = {};
 const userId = localStorage.getItem("userId");
 let spinner = new (0, _spinJs.Spinner)((0, _constants.opts)).spin(target);
@@ -624,7 +624,7 @@ async function renderGames(obj, length) {
     const descriptionButtonEl = gameListItem.querySelector(".description-button");
     descriptionButtonEl.addEventListener("click", (e)=>showDescription(obj.description));
     const imageEl = gameListItem.querySelector(".thumbnail");
-    imageEl.addEventListener("click", (e)=>showImage(obj.url));
+    imageEl.addEventListener("click", (e)=>(0, _constants.showImage)(obj.url, showMoreModalOverlay));
     const favoriteEl = gameListItem.querySelector(".favourite-input");
     if (await (0, _constants.isGameInFavourites)(obj.id, userId)) favoriteEl.checked = true;
     favoriteEl.addEventListener("change", (e)=>(0, _constants.toggleFavourites)(e, obj, userId));
@@ -667,13 +667,8 @@ async function handleGameData(game) {
     return id;
 }
 function showDescription(text) {
-    searchModalOverlay.classList.remove("hidden");
-    document.querySelector(".description-container").innerHTML = text;
-}
-function showImage(url) {
-    searchModalOverlay.classList.remove("hidden");
-    const container = document.querySelector(".description-container");
-    container.innerHTML = `<img src=${url}>`;
+    showMoreModalOverlay.classList.remove("hidden");
+    document.querySelector(".show-more-container").innerHTML = text;
 }
 
 },{"../images/plus.png":"bFEW6","../images/no_image.jpg":"uA0id","xml-js":"6mugM","firebase/firestore":"8A4BC","notiflix/build/notiflix-notify-aio":"eXQLZ","./constants":"itKcQ","spin.js":"iZQ5x","firebase/auth":"79vzg","./login":"47T64","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"bFEW6":[function(require,module,exports) {

@@ -55,8 +55,6 @@ onAuthStateChanged(auth, async user => {
                 id: data.id.toString()
             });
             playersTemplate(data, user.uid, show);
-
-
         });
     }
 });

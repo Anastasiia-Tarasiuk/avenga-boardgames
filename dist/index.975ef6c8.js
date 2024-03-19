@@ -36952,6 +36952,8 @@ parcelHelpers.export(exports, "addToFavourites", ()=>addToFavourites);
 parcelHelpers.export(exports, "removeFromFavourites", ()=>removeFromFavourites);
 parcelHelpers.export(exports, "handleTabsClick", ()=>handleTabsClick);
 parcelHelpers.export(exports, "closeModal", ()=>closeModal);
+parcelHelpers.export(exports, "pageRender", ()=>pageRender);
+parcelHelpers.export(exports, "showImage", ()=>showImage);
 var _firestore = require("firebase/firestore");
 var _login = require("./login");
 var _notiflixNotifyAio = require("notiflix/build/notiflix-notify-aio");
@@ -37342,6 +37344,27 @@ function handleTabsClick(e, tab, parent) {
 }
 function closeModal(modal) {
     modal.classList.add("hidden");
+}
+async function pageRender(userId, query, list, array, func, target, spinner) {
+    const querySnapshot = await (0, _firestore.getDocs)(query);
+    const length = querySnapshot.docs.length;
+    let i = 0;
+    let show = false;
+    if (!querySnapshot.empty) {
+        list.classList.add("hidden");
+        list.innerHTML = "";
+        querySnapshot.forEach((doc)=>{
+            i++;
+            if (i === length) show = true;
+            array.push(doc.data());
+            func(doc.data(), userId, show);
+        });
+    } else target.removeChild(spinner.el);
+}
+function showImage(url, overlay) {
+    overlay.classList.remove("hidden");
+    const container = overlay.querySelector(".show-more-container");
+    container.innerHTML = `<img src=${url}>`;
 }
 
 },{"firebase/firestore":"8A4BC","./login":"47T64","notiflix/build/notiflix-notify-aio":"eXQLZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"bvS82":[function(require,module,exports) {
